@@ -234,3 +234,88 @@ export async function disconnectNotion(
   });
   return response.data;
 }
+
+export interface GoogleDriveIntegration {
+  id: string;
+  status: "connected" | "disconnected" | "syncing" | "error";
+  last_sync: string | null;
+  last_error: string | null;
+  connected_at: string;
+  workspace_name: string | null;
+  workspace_id: string | null;
+}
+
+export interface DriveFile {
+  id: string;
+  google_file_id: string;
+  name: string;
+  mime_type: string;
+  parent_folder: string | null;
+  file_size: number | null;
+  owner: string | null;
+  url: string | null;
+  created_time: string;
+  modified_time: string;
+  last_sync: string | null;
+  archived: boolean;
+  content: string | null;
+}
+
+export interface GoogleDriveDashboardResponse {
+  connected: boolean;
+  integration: GoogleDriveIntegration | null;
+  files: DriveFile[];
+}
+
+export async function getGoogleDriveIntegration(
+  accessToken: string,
+  projectId: string,
+): Promise<GoogleDriveDashboardResponse> {
+  const response = await apiClient.get<GoogleDriveDashboardResponse>("/integrations/google_drive", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    params: { project_id: projectId },
+  });
+  return response.data;
+}
+
+export async function connectGoogleDrive(
+  accessToken: string,
+  payload: { code: string; project_id: string; redirect_uri: string },
+): Promise<{ status: string; integration_id: string }> {
+  const response = await apiClient.post<{ status: string; integration_id: string }>(
+    "/integrations/google_drive/connect",
+    payload,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+  return response.data;
+}
+
+export async function syncGoogleDriveIntegration(
+  accessToken: string,
+  projectId: string,
+): Promise<{ status: string }> {
+  const response = await apiClient.post<{ status: string }>(
+    "/integrations/google_drive/sync",
+    { project_id: projectId },
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+  return response.data;
+}
+
+export async function disconnectGoogleDrive(
+  accessToken: string,
+  projectId: string,
+): Promise<{ status: string }> {
+  const response = await apiClient.delete<{ status: string }>(
+    "/integrations/google_drive/disconnect",
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      params: { project_id: projectId },
+    },
+  );
+  return response.data;
+}

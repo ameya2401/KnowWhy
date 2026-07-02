@@ -12,6 +12,7 @@ from app.database.base import BaseModel
 class IntegrationProvider(str, enum.Enum):
     GITHUB = "github"
     NOTION = "notion"
+    GOOGLE_DRIVE = "google_drive"
 
 
 class IntegrationStatus(str, enum.Enum):
@@ -80,6 +81,10 @@ class Integration(BaseModel):
         cascade="all, delete-orphan",
     )
     notion_pages: Mapped[list["NotionPage"]] = relationship(
+        back_populates="integration",
+        cascade="all, delete-orphan",
+    )
+    drive_files: Mapped[list["DriveFile"]] = relationship(
         back_populates="integration",
         cascade="all, delete-orphan",
     )
@@ -210,3 +215,31 @@ class NotionPage(BaseModel):
     archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     integration: Mapped[Integration] = relationship(back_populates="notion_pages")
+
+
+class DriveFile(BaseModel):
+    __tablename__ = "drive_files"
+    __table_args__ = (
+        UniqueConstraint("integration_id", "google_file_id", name="uq_drive_files_google_file_id"),
+    )
+
+    integration_id: Mapped[UUID] = mapped_column(
+        PostgresUUID(as_uuid=True),
+        ForeignKey("integrations.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    google_file_id: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    mime_type: Mapped[str] = mapped_column(Text, nullable=False)
+    parent_folder: Mapped[str | None] = mapped_column(Text, nullable=True)
+    file_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    owner: Mapped[str | None] = mapped_column(Text, nullable=True)
+    url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    modified_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_sync: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    content: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    integration: Mapped[Integration] = relationship(back_populates="drive_files")

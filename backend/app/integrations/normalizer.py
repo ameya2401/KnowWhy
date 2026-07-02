@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from app.models.integration import Commit, Issue, NotionPage, PullRequest
+from app.models.integration import Commit, DriveFile, Issue, NotionPage, PullRequest
 
 
 class BaseNormalizer:
@@ -121,4 +121,44 @@ class NotionNormalizer:
             created_time=self._parse_date(raw_data.get("created_time")),
             author=author,
             archived=raw_data.get("archived", False),
+        )
+
+
+class GoogleDriveNormalizer:
+    def _parse_date(self, date_str: str | None) -> datetime:
+        if not date_str:
+            return datetime.now(UTC)
+        try:
+            normalized_str = date_str.replace("Z", "+00:00")
+            return datetime.fromisoformat(normalized_str)
+        except Exception:
+            return datetime.now(UTC)
+
+    def normalize_file(
+        self, integration_id: UUID, raw_data: dict, content: str | None = None
+    ) -> DriveFile:
+        parents = raw_data.get("parents", [])
+        parent_folder = parents[0] if parents else None
+
+        size_raw = raw_data.get("size")
+        file_size = int(size_raw) if size_raw is not None else None
+
+        owners = raw_data.get("owners", [])
+        owner = None
+        if owners:
+            owner = owners[0].get("displayName") or owners[0].get("emailAddress")
+
+        return DriveFile(
+            integration_id=integration_id,
+            google_file_id=raw_data.get("id", ""),
+            name=raw_data.get("name", "Untitled File"),
+            mime_type=raw_data.get("mimeType", "application/octet-stream"),
+            parent_folder=parent_folder,
+            file_size=file_size,
+            owner=owner,
+            url=raw_data.get("webViewLink"),
+            created_time=self._parse_date(raw_data.get("createdTime")),
+            modified_time=self._parse_date(raw_data.get("modifiedTime")),
+            archived=raw_data.get("trashed", False),
+            content=content,
         )

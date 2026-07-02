@@ -65,3 +65,9 @@ KnowWhy currently contains:
   - Backend integration service layer with support for Notion API token exchange, page indexing, and incremental updates based on updated timestamps.
   - Frontend Notion Integration tab featuring connection status, list of synced Notion pages, sync controls, and background sync polling.
   - Frontend Notion OAuth Callback handler (`/integrations/notion/callback`) to finalize authorization.
+
+- **Milestone M09 Google Drive Integration**:
+  - `google_drive_files` table storing metadata of synced Google Drive files and directories (name, mime type, parent structure, file size, owner, url, modified timestamp).
+  - Backend integration service layer with support for Google Drive API OAuth token exchange, file/folder metadata harvesting, hierarchy reconstruction, and background sync logic.
+  - Frontend Google Drive Integration tab featuring connection status, sync controls, file size/type filters, search bar, hierarchical navigation breadcrumbs, and an interactive folder explorer.
+  - Frontend Google Drive OAuth Callback handler (`/integrations/drive/callback`) to finalize authorization.

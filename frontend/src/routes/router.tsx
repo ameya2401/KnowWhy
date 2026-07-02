@@ -13,6 +13,7 @@ import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage";
 import { GitHubCallbackPage } from "@/pages/GitHubCallbackPage";
 import { NotionCallbackPage } from "@/pages/NotionCallbackPage";
+import { GoogleDriveCallbackPage } from "@/pages/GoogleDriveCallbackPage";
 import { ActivityPage } from "@/pages/ActivityPage";
 
 export const router = createBrowserRouter([
@@ -109,6 +110,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <NotionCallbackPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/integrations/drive/callback",
+        element: (
+          <ProtectedRoute>
+            <GoogleDriveCallbackPage />
           </ProtectedRoute>
         ),
       },

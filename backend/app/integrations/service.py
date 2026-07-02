@@ -5,10 +5,12 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.integrations.github_client import GitHubAPIClient
-from app.integrations.normalizer import GitHubNormalizer, NotionNormalizer
+from app.integrations.google_drive_client import GoogleDriveAPIClient
+from app.integrations.normalizer import GitHubNormalizer, GoogleDriveNormalizer, NotionNormalizer
 from app.integrations.notion_client import NotionAPIClient
 from app.integrations.security import decrypt_credentials, encrypt_credentials
 from app.models.integration import (
+    DriveFile,
     Integration,
     IntegrationProvider,
     IntegrationRepository,
@@ -37,6 +39,7 @@ class IntegrationService:
         self.org_service = OrganizationService(session)
         self.normalizer = GitHubNormalizer()
         self.notion_normalizer = NotionNormalizer()
+        self.drive_normalizer = GoogleDriveNormalizer()
 
     async def require_project_membership(
         self, current_user: User, project_id: UUID, minimum_role: ProjectRole
@@ -381,6 +384,196 @@ class IntegrationService:
                         exists.author = normalized.author
                 else:
                     await self.sync_data.create_notion_page(normalized)
+
+            integration.status = IntegrationStatus.CONNECTED
+            integration.last_sync = datetime.now(UTC)
+            integration.last_error = None
+        except Exception as e:
+            integration.status = IntegrationStatus.ERROR
+            integration.last_error = str(e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Synchronization failed: {str(e)}",
+            ) from e
+        finally:
+            await self.session.commit()
+
+    async def connect_drive(
+        self, current_user: User, project_id: UUID, code: str, redirect_uri: str
+    ) -> Integration:
+        await self.require_project_membership(current_user, project_id, ProjectRole.MAINTAINER)
+
+        project = await self.projects.get_by_id(project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found.")
+
+        await self.org_service.require_membership(
+            current_user, project.organization_id, minimum_role=OrganizationRole.MEMBER
+        )
+
+        try:
+            oauth_data = await GoogleDriveAPIClient.exchange_code_for_token(code, redirect_uri)
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to exchange Google OAuth code: {str(e)}",
+            ) from e
+
+        access_token = oauth_data.get("access_token")
+        refresh_token = oauth_data.get("refresh_token")
+        email = oauth_data.get("email", "Google Drive Account")
+
+        credentials_data = {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "email": email,
+        }
+        encrypted_creds = encrypt_credentials(credentials_data)
+
+        existing = await self.integrations.get_by_project_and_provider(project_id, "google_drive")
+        if existing:
+            existing.status = IntegrationStatus.CONNECTED
+            existing.credentials = encrypted_creds
+            existing.workspace_id = email
+            existing.workspace_name = email
+            existing.connected_by_id = current_user.id
+            existing.connected_at = datetime.now(UTC)
+            existing.last_error = None
+            integration = existing
+        else:
+            integration = Integration(
+                organization_id=project.organization_id,
+                project_id=project_id,
+                provider=IntegrationProvider.GOOGLE_DRIVE,
+                status=IntegrationStatus.CONNECTED,
+                credentials=encrypted_creds,
+                workspace_id=email,
+                workspace_name=email,
+                connected_by_id=current_user.id,
+                connected_at=datetime.now(UTC),
+            )
+            await self.integrations.create(integration)
+
+        await self.session.commit()
+        return integration
+
+    async def disconnect_drive(self, current_user: User, project_id: UUID) -> None:
+        await self.require_project_membership(current_user, project_id, ProjectRole.MAINTAINER)
+
+        integration = await self.integrations.get_by_project_and_provider(
+            project_id, "google_drive"
+        )
+        if not integration:
+            raise HTTPException(status_code=404, detail="Integration not found.")
+
+        await self.integrations.delete(integration)
+        await self.session.commit()
+
+    async def list_drive_files(self, current_user: User, project_id: UUID) -> list[DriveFile]:
+        await self.require_project_membership(current_user, project_id, ProjectRole.VIEWER)
+
+        integration = await self.integrations.get_by_project_and_provider(
+            project_id, "google_drive"
+        )
+        if not integration:
+            return []
+
+        return await self.sync_data.list_drive_files_for_integration(integration.id)
+
+    async def list_drive_folders(self, current_user: User, project_id: UUID) -> list[dict]:
+        await self.require_project_membership(current_user, project_id, ProjectRole.VIEWER)
+
+        files = await self.list_drive_files(current_user, project_id)
+        # Extract folder structures
+        # In Google Drive, folders have mimeType 'application/vnd.google-apps.folder'
+        folders = [
+            {"id": f.google_file_id, "name": f.name, "parent_folder": f.parent_folder}
+            for f in files
+            if f.mime_type == "application/vnd.google-apps.folder"
+        ]
+        return folders
+
+    async def sync_drive(self, current_user: User, project_id: UUID) -> None:
+        await self.require_project_membership(current_user, project_id, ProjectRole.VIEWER)
+
+        integration = await self.integrations.get_by_project_and_provider(
+            project_id, "google_drive"
+        )
+        if not integration or not integration.credentials:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Google Drive integration not connected for this project.",
+            )
+
+        integration.status = IntegrationStatus.SYNCING
+        await self.session.commit()
+
+        creds = decrypt_credentials(integration.credentials)
+        token = creds.get("access_token")
+        client = GoogleDriveAPIClient(token)
+
+        try:
+            # Query all files that are not trashed
+            results = await client.list_files(q="trashed = false")
+            for raw_file in results:
+                file_id = raw_file.get("id")
+                mime_type = raw_file.get("mimeType", "")
+
+                # Fetch content only if it's supported and has changed (incremental check)
+                is_supported = (
+                    mime_type
+                    in (
+                        "application/vnd.google-apps.document",
+                        "application/vnd.google-apps.spreadsheet",
+                        "application/vnd.google-apps.presentation",
+                        "application/pdf",
+                    )
+                    or "text/" in mime_type
+                    or "markdown" in mime_type
+                )
+
+                content = None
+                exists = await self.sync_data.get_drive_file_by_google_id(integration.id, file_id)
+
+                # Parse date helper
+                modified_time_str = raw_file.get("modifiedTime")
+                modified_time = self.drive_normalizer._parse_date(modified_time_str)
+
+                # Skip folders for content fetching
+                is_folder = mime_type == "application/vnd.google-apps.folder"
+
+                should_fetch_content = (
+                    is_supported
+                    and not is_folder
+                    and (not exists or exists.modified_time < modified_time)
+                )
+
+                if should_fetch_content:
+                    try:
+                        content = await client.get_file_content(file_id, mime_type)
+                    except Exception:
+                        # Fallback to metadata only if download fails
+                        content = "[Content sync failed]"
+
+                normalized = self.drive_normalizer.normalize_file(integration.id, raw_file, content)
+
+                if exists:
+                    # Compare and update
+                    if exists.modified_time < normalized.modified_time or should_fetch_content:
+                        exists.name = normalized.name
+                        exists.mime_type = normalized.mime_type
+                        exists.parent_folder = normalized.parent_folder
+                        exists.file_size = normalized.file_size
+                        exists.owner = normalized.owner
+                        exists.url = normalized.url
+                        exists.modified_time = normalized.modified_time
+                        exists.archived = normalized.archived
+                        if content is not None:
+                            exists.content = content
+                        exists.last_sync = datetime.now(UTC)
+                else:
+                    normalized.last_sync = datetime.now(UTC)
+                    await self.sync_data.create_drive_file(normalized)
 
             integration.status = IntegrationStatus.CONNECTED
             integration.last_sync = datetime.now(UTC)

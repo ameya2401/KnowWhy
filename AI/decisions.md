@@ -121,4 +121,18 @@ Reason: Protects workspace documentation metadata, reduces indexing overhead via
 
 Files affected: `backend/app/models/integration.py`, `backend/app/integrations/`, `backend/app/api/routes/notion.py`, `frontend/src/components/ProjectIntegrations.tsx`
 
+## DEC-011: Google Drive Integration Architecture and Interactive Folder Explorer
+
+Context: M09 requires synchronizing Google Drive documents (spreadsheets, text documents, folders, and PDFs) securely per project context, while handling hierarchical navigation of files in the frontend.
+
+Decision:
+1. Store file and directory metadata locally in a dedicated `google_drive_files` table, establishing unique constraint on `(integration_id, google_file_id)` to handle update-upserts cleanly.
+2. Implement backend sync logic harvesting Google Drive API metadata (parents, size, webViewLink, etc.) and storing tokens securely encrypted.
+3. Design a hierarchical navigation interface in the React frontend: calculate parent paths dynamically via breadcrumb traversal in local state, filter by mime type presets, and support folder clicking to drill down.
+4. Establish `/integrations/drive/callback` OAuth callback handling, storing securely encrypted tokens.
+
+Reason: Reduces page indexing and harvesting overhead, keeps navigation snappy via browser-side folder hierarchies, and maintains full tenant isolation.
+
+Files affected: `backend/app/models/integration.py`, `backend/app/integrations/`, `backend/app/api/routes/google_drive.py`, `frontend/src/components/ProjectIntegrations.tsx`
+
 
