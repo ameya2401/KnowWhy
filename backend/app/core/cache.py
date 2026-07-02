@@ -1,6 +1,7 @@
 from redis.asyncio import Redis
 
 from app.core.config import settings
+from app.database.health import check_redis_connection
 
 
 def create_redis_client() -> Redis:
@@ -8,8 +9,4 @@ def create_redis_client() -> Redis:
 
 
 async def verify_redis_connection() -> bool:
-    client = create_redis_client()
-    try:
-        return bool(await client.ping())
-    finally:
-        await client.aclose()
+    return await check_redis_connection()
