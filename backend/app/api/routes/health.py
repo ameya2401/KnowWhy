@@ -24,8 +24,7 @@ async def health_check() -> HealthResponse | JSONResponse:
 
     if response.status != "ok":
         return JSONResponse(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content=response.model_dump(),
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content=response.model_dump()
         )
 
     return response

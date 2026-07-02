@@ -1,7 +1,6 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: knowwhy-postgres
     environment:
       POSTGRES_USER: knowwhy
       POSTGRES_PASSWORD: knowwhy
@@ -18,7 +17,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: knowwhy-redis
     command: ["redis-server", "--appendonly", "yes"]
     ports:
       - "6379:6379"
@@ -33,14 +31,11 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: knowwhy-backend
     env_file:
       - .env.example
     environment:
       DATABASE_URL: postgresql+asyncpg://knowwhy:knowwhy@postgres:5432/knowwhy
       REDIS_URL: redis://redis:6379/0
-      ENVIRONMENT: development
       VALIDATE_EXTERNAL_SERVICES_ON_STARTUP: "true"
     ports:
       - "8000:8000"
@@ -53,8 +48,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: knowwhy-frontend
     environment:
       VITE_API_BASE_URL: http://localhost:8000
     ports:

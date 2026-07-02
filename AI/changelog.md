@@ -1,95 +1,61 @@
 # KnowWhy Changelog
 
-## 2026-07-02 - M02 Database Foundation
+## 2026-07-02 - M05 Projects
 
 ### Features Added
 
-- Added dedicated async database package.
-- Added SQLAlchemy Declarative Base.
-- Added reusable abstract BaseModel with UUID primary key and automatic timestamps.
-- Added async SQLAlchemy engine and async session factory.
-- Added FastAPI database session dependency.
-- Added PostgreSQL health check utility.
-- Added Redis health check utility.
-- Added configurable startup validation for external services.
-- Updated `/health` to report API, database, and Redis status.
-- Configured Alembic for async migrations and Base metadata autogeneration.
-- Added initial Alembic database foundation migration.
-- Added migration and dependency-check commands to README.
-- Added M02 settings to `.env.example` and Docker Compose.
+- Added projects model with visibility (`public`, `private`) and status (`active`, `archived`) fields.
+- Added project members model with roles (`owner`, `maintainer`, `contributor`, `viewer`).
+- Added backend project API routes for listing, creating, retrieving, updating, and deleting projects.
+- Added project archiving and membership invitation API endpoints.
+- Added project-level permissions checks for settings access, invites, role updates, and deletions.
+- Added frontend projects dashboard page with search and visibility/status filters.
+- Added frontend Create Project page.
+- Added frontend Project Detail page with Overview and Members tabs.
+- Added frontend Project Settings page with Danger Zone configuration (slug validation for delete).
+- Added frontend navigation sidebar link to Projects page.
+- Added frontend Vitest coverage and backend pytest test suite for projects.
 
 ### Files Added
 
-- `backend/app/database/__init__.py`
-- `backend/app/database/base.py`
-- `backend/app/database/health.py`
-- `backend/app/database/session.py`
-- `backend/app/database/startup.py`
-- `backend/alembic/versions/20260702_0001_database_foundation.py`
-- `frontend/.prettierignore`
-
-### Files Modified
-
-- `.env.example`
-- `README.md`
-- `docker-compose.yml`
-- `backend/alembic/env.py`
-- `backend/app/api/routes/health.py`
-- `backend/app/core/cache.py`
-- `backend/app/core/config.py`
-- `backend/app/core/database.py`
-- `backend/app/main.py`
-- `backend/app/schemas/health.py`
-- `backend/scripts/check_dependencies.py`
-- `backend/tests/test_health.py`
-- `AI/context.md`
-- `AI/progress.md`
-- `AI/decisions.md`
-- `AI/changelog.md`
+- Backend: `app/projects/router.py`, `app/projects/schemas.py`, `app/projects/service.py`, `app/repositories/projects.py`, `app/models/project.py`.
+- Frontend: `src/pages/ProjectsPage.tsx`, `src/pages/ProjectsPage.test.tsx`, `src/pages/CreateProjectPage.tsx`, `src/pages/CreateProjectPage.test.tsx`, `src/pages/ProjectDetailPage.tsx`, `src/pages/ProjectSettingsPage.tsx`, `src/projects/projectApi.ts`, `src/projects/types.ts`.
 
 ### Bug Fixes
 
-- Prevented dependency health failures from surfacing as unstructured 500 responses.
-- Excluded generated frontend build output from Prettier checks.
+- Fixed card sub-element imports and added missing `destructive` button variant in frontend primitives.
+- Fixed TypeScript compiler errors, implicit `any` assignments, and unused variables.
 
-### Breaking Changes
-
-- `/health` response shape changed from `{"status":"ok"}` to include `database` and `redis` fields.
-
-## 2026-07-02 - M01 Project Foundation
+## 2026-07-02 - M04 Multi-Tenant Workspaces
 
 ### Features Added
 
-- Initialized React + TypeScript + Vite frontend.
-- Configured Tailwind CSS and shadcn/ui-style component primitives.
-- Added React Router with a professional dashboard placeholder page.
-- Added TanStack Query client setup.
-- Added Axios API client setup.
-- Initialized FastAPI backend.
-- Added `GET /health` endpoint returning `{"status":"ok"}`.
-- Added PostgreSQL connection configuration through SQLAlchemy async engine.
-- Added Redis connection configuration through async Redis client.
-- Added Alembic foundation without application tables.
-- Added Dockerfiles for frontend and backend.
-- Added Docker Compose services for frontend, backend, PostgreSQL, and Redis.
-- Added GitHub Actions CI for frontend and backend validation.
-- Added root `.env.example`.
-- Added professional README with overview, architecture, setup, Docker commands, and workflow.
+- Added organization model for tenant workspaces.
+- Added organization memberships model with owner/admin/member roles.
+- Added workspace selection, creation, and invite routing on frontend and backend.
+
+## 2026-07-02 - M03 Authentication & Identity
+
+### Features Added
+
+- Added OAuth-first user identity model.
+- Added user session model for hashed refresh tokens.
+- Added Google provider-token verification.
+- Added GitHub provider-token verification.
+- Added JWT access and refresh token service.
+- Added HTTP-only refresh cookie helpers.
+- Added login, refresh, logout, and current-user API routes.
+- Added reusable protected-route dependency for backend endpoints.
+- Added frontend login page for Google and GitHub.
+- Added frontend protected route wrapper.
+- Added frontend auth context with refresh-session restoration.
+- Added Alembic migration for `users` and `user_sessions`.
 
 ### Files Added
 
-- `.github/workflows/ci.yml`
-- `.env.example`
-- `.gitignore`
-- `README.md`
-- `docker-compose.yml`
-- `backend/`
-- `frontend/`
-- `database/.gitkeep`
-- `docker/.gitkeep`
-- `docs/.gitkeep`
-- `scripts/.gitkeep`
-- `tests/.gitkeep`
+- Backend auth, users, dependencies, models, repositories, tests, and migrations.
+- Frontend auth context, protected route, login page, dashboard shell, tests, and app configuration.
+- Root Docker, README, environment example, and CI source files.
 
 ### Files Modified
 
@@ -100,10 +66,10 @@
 
 ### Bug Fixes
 
-- Resolved frontend TypeScript configuration issues for Vite and Vitest.
-- Resolved backend Ruff import-order issue.
-- Upgraded audited frontend packages to remove npm vulnerabilities.
+- Restored missing source files from prior foundation milestones.
+- Avoided persistent browser storage for access tokens.
+- Ensured dependency health failures return structured responses.
 
 ### Breaking Changes
 
-- None.
+- `/health` includes `database` and `redis` fields.

@@ -1,21 +1,33 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { RouterProvider, createMemoryRouter } from "react-router-dom";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AuthProvider } from "@/auth/AuthProvider";
+import { OrganizationProvider } from "@/organizations/OrganizationProvider";
 import { DashboardPage } from "@/pages/DashboardPage";
+import { apiClient } from "@/services/apiClient";
+
+beforeEach(() => {
+  vi.spyOn(apiClient, "post").mockRejectedValue(new Error("No refresh session."));
+});
 
 function renderDashboard() {
   const router = createMemoryRouter([{ path: "/", element: <DashboardPage /> }]);
-  render(<RouterProvider router={router} />);
+  render(
+    <AuthProvider>
+      <OrganizationProvider>
+        <RouterProvider router={router} />
+      </OrganizationProvider>
+    </AuthProvider>,
+  );
 }
 
 describe("DashboardPage", () => {
-  it("renders the foundation dashboard", () => {
+  it("renders the authenticated dashboard shell", async () => {
     renderDashboard();
 
-    expect(screen.getByText("KnowWhy")).toBeInTheDocument();
-    expect(screen.getByText("Milestone M01")).toBeInTheDocument();
-    expect(screen.getByText("FastAPI")).toBeInTheDocument();
-    expect(screen.getByText("PostgreSQL")).toBeInTheDocument();
+    expect(screen.getByText("Milestone M04")).toBeInTheDocument();
+    expect(screen.getByText("JWT")).toBeInTheDocument();
+    await waitFor(() => expect(apiClient.post).toHaveBeenCalledWith("/auth/refresh", {}));
   });
 });

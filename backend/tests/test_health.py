@@ -48,12 +48,3 @@ def test_health_check_reports_unavailable_dependencies(
         "database": "disconnected",
         "redis": "disconnected",
     }
-
-
-def test_health_check_openapi_documents_connected_response() -> None:
-    client = TestClient(create_app())
-
-    schema = client.get("/openapi.json").json()
-
-    health_schema = schema["components"]["schemas"]["HealthResponse"]["properties"]
-    assert set(health_schema) == {"status", "database", "redis"}

@@ -22,5 +22,5 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Build artifacts
+# Logs
 *.log

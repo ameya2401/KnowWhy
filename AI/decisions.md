@@ -1,109 +1,81 @@
 # KnowWhy Architectural Decisions
 
-## DEC-006: Add Dedicated Async Database Package
+## DEC-001: Use React SPA Foundation
 
-Context: M02 requires a production-ready database foundation using modern SQLAlchemy 2.x patterns.
+Context: KnowWhy needs a frontend foundation that can support authenticated application screens without server rendering complexity.
 
-Decision: Added `backend/app/database/` with Declarative Base, abstract BaseModel, async engine, async session factory, FastAPI session dependency, health checks, and startup validation.
+Decision: Use React, TypeScript, Vite, Tailwind CSS, shadcn/ui-style primitives, React Router, TanStack Query, and Axios.
 
-Reason: Keeping database infrastructure in its own package gives future repositories and services one consistent place to depend on SQLAlchemy primitives.
+Reason: This matches the documented stack and keeps the MVP frontend simple and maintainable.
 
-Tradeoffs: The existing `app/core/database.py` remains as a compatibility facade to avoid unnecessary churn from M01.
-
-Files affected: `backend/app/database/`, `backend/app/core/database.py`
-
-## DEC-007: Use UUID and Timestamp Fields in Abstract BaseModel Only
-
-Context: M02 requires a reusable BaseModel but forbids application business models.
-
-Decision: Implemented an abstract `BaseModel` with UUID `id`, timezone-aware `created_at`, and timezone-aware `updated_at`, but did not create any concrete domain tables.
-
-Reason: Future domain models can inherit common fields without M02 prematurely introducing users, organizations, or other business entities.
-
-Tradeoffs: The initial Alembic migration is intentionally a no-op except versioning because no concrete tables exist yet.
-
-Files affected: `backend/app/database/base.py`, `backend/alembic/versions/20260702_0001_database_foundation.py`
-
-## DEC-008: Make External Service Startup Validation Configurable
-
-Context: M02 requires startup validation while local tests and source builds should not require live PostgreSQL and Redis processes.
-
-Decision: Added `VALIDATE_EXTERNAL_SERVICES_ON_STARTUP`, disabled by default and enabled in Docker Compose.
-
-Reason: Docker and production-like environments can fail fast when PostgreSQL or Redis are unavailable, while unit tests and local source checks remain deterministic.
-
-Tradeoffs: Developers running the backend outside Docker must opt into startup validation explicitly if they want fail-fast behavior.
-
-Files affected: `backend/app/core/config.py`, `backend/app/main.py`, `docker-compose.yml`, `.env.example`
-
-## DEC-009: Return Structured Degraded Health Responses
-
-Context: M02 requires `/health` to report database and Redis connectivity.
-
-Decision: `/health` returns `200` with connected statuses when dependencies are reachable and `503` with `degraded` statuses when one or both dependencies are unavailable.
-
-Reason: A dependency outage should be machine-readable without exposing internal exceptions or returning an unstructured server error.
-
-Tradeoffs: Local environments without PostgreSQL or Redis receive `503` until services are started.
-
-Files affected: `backend/app/api/routes/health.py`, `backend/app/schemas/health.py`, `backend/app/database/health.py`
-
-## DEC-001: Initialize Frontend as React SPA
-
-Context: M01 requires a frontend foundation using React, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router, TanStack Query, and Axios.
-
-Decision: Implemented the frontend as a Vite-powered React SPA with TypeScript, React Router, TanStack Query, Axios, Tailwind CSS, and local shadcn/ui-style primitives.
-
-Reason: This matches the documented MVP stack while keeping the foundation simple and replaceable.
-
-Tradeoffs: The dashboard is intentionally a shell, so no real product workflows exist yet. This avoids implementing future milestone behavior early.
+Tradeoffs: No SSR is provided, which is acceptable for the MVP application shell.
 
 Files affected: `frontend/`
 
-## DEC-002: Initialize Backend as FastAPI Modular Monolith
+## DEC-002: Use FastAPI Modular Backend
 
-Context: M01 requires FastAPI with clean folder boundaries and a health endpoint.
+Context: KnowWhy needs a backend foundation that can grow into service and repository layers.
 
-Decision: Implemented a FastAPI application with `api`, `core`, `models`, `schemas`, `repositories`, and `services` packages and a minimal `GET /health` endpoint.
+Decision: Use FastAPI with separate API, auth, database, model, repository, service, dependency, and user packages.
 
-Reason: The structure supports clean architecture and future service/repository boundaries without introducing premature business logic.
+Reason: This supports clean architecture without introducing microservice complexity.
 
-Tradeoffs: Some folders are intentionally empty except package markers because M01 does not define domain models or services yet.
+Tradeoffs: Some package boundaries are intentionally light until future milestones add domain behavior.
 
 Files affected: `backend/app/`
 
-## DEC-003: Configure PostgreSQL and Redis Without Application Tables
+## DEC-003: Use Async SQLAlchemy and Alembic
 
-Context: M01 requires PostgreSQL and Redis connectivity but explicitly forbids application tables and business logic.
+Context: M02 requires production-ready database infrastructure.
 
-Decision: Added SQLAlchemy async engine setup, Redis async client setup, and a dependency check script without creating application models or migrations.
+Decision: Use SQLAlchemy 2.x async engine/session patterns and async Alembic migrations.
 
-Reason: Connectivity is verifiable while respecting the milestone boundary.
+Reason: This keeps the backend ready for non-blocking FastAPI request handling.
 
-Tradeoffs: Runtime dependency checks require PostgreSQL and Redis services to be running, typically through Docker Compose.
+Tradeoffs: Async database code is slightly more verbose than synchronous SQLAlchemy.
 
-Files affected: `backend/app/core/database.py`, `backend/app/core/cache.py`, `backend/scripts/check_dependencies.py`, `backend/alembic/`
+Files affected: `backend/app/database/`, `backend/alembic/`
 
-## DEC-004: Use Docker Compose for the Local Foundation Stack
+## DEC-004: Use OAuth-First Authentication
 
-Context: M01 requires frontend, backend, PostgreSQL, and Redis services to start together.
+Context: M03 explicitly forbids username/password authentication and requires Google/GitHub OAuth.
 
-Decision: Added service Dockerfiles and a root `docker-compose.yml` with health checks for PostgreSQL and Redis.
+Decision: Accept provider OAuth access tokens from the frontend, verify them against Google/GitHub user-info APIs, then issue KnowWhy JWTs.
 
-Reason: Docker Compose provides a repeatable local environment for the MVP foundation.
+Reason: Provider verification keeps password handling out of KnowWhy while still giving the backend authoritative user identity records.
 
-Tradeoffs: Docker could not be executed in the current environment because the Docker CLI is unavailable.
+Tradeoffs: Local testing requires a real provider token or mocked provider verification.
 
-Files affected: `docker-compose.yml`, `frontend/Dockerfile`, `backend/Dockerfile`
+Files affected: `backend/app/auth/`, `frontend/src/pages/LoginPage.tsx`
 
-## DEC-005: Add CI Validation Before Deployment Exists
+## DEC-005: Store Refresh Tokens as Hashed Sessions
 
-Context: M01 requires GitHub Actions that install dependencies, build frontend/backend, and run tests with no deployment.
+Context: M03 requires session management, logout, refresh tokens, and secure token handling.
 
-Decision: Added a CI workflow with separate frontend and backend jobs for linting, formatting checks, tests, and builds/compile checks.
+Decision: Store only SHA-256 refresh token hashes in `user_sessions`, send refresh tokens through HTTP-only cookies, and keep access tokens in frontend memory.
 
-Reason: This keeps milestone verification repeatable and prevents deployment concerns from entering M01.
+Reason: A database leak should not expose usable refresh tokens, and persistent browser storage is avoided for access tokens.
 
-Tradeoffs: CI assumes lockfiles and dependency manifests remain current.
+Tradeoffs: Refresh-token rotation requires database writes during refresh.
 
-Files affected: `.github/workflows/ci.yml`
+Files affected: `backend/app/models/user_session.py`, `backend/app/auth/`, `frontend/src/auth/`
+
+## DEC-006: Organization/Workspace Isolation
+
+Context: Multi-tenant workspace requirements in M04.
+
+Decision: Create an `organizations` table representing tenant workspaces and `organization_memberships` managing user access roles (`owner`, `admin`, `member`). Every workspace is isolated and users can select their active workspace context in the frontend.
+
+Reason: Simplifies tenant management and ensures data isolation using standard Postgres relational integrity.
+
+Files affected: `backend/app/models/organization.py`, `frontend/src/organizations/`
+
+## DEC-007: Project Scoping and Project-Level Permissions
+
+Context: M05 requires projects to be associated with organizations and have customizable user permission roles.
+
+Decision: Link projects to organizations and create a `project_members` mapping with custom roles (`owner`, `maintainer`, `contributor`, `viewer`). Ensure visibility settings and project archiving operate under owner-only roles.
+
+Reason: Provides fine-grained control over project settings, member invites, and data security at the project-level.
+
+Files affected: `backend/app/models/project.py`, `backend/app/projects/`, `frontend/src/projects/`, `frontend/src/pages/`
