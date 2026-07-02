@@ -141,26 +141,37 @@ class SyncDataRepository:
         if not repo_ids:
             return {"total_commits": 0, "pull_requests": 0, "open_issues": 0, "contributors": 0}
 
-        commits_count = await self.session.scalar(
-            select(func.count(Commit.id)).where(Commit.repository_id.in_(repo_ids))
-        ) or 0
-
-        prs_count = await self.session.scalar(
-            select(func.count(PullRequest.id)).where(PullRequest.repository_id.in_(repo_ids))
-        ) or 0
-
-        open_issues_count = await self.session.scalar(
-            select(func.count(Issue.id)).where(
-                Issue.repository_id.in_(repo_ids),
-                Issue.state == "open"
+        commits_count = (
+            await self.session.scalar(
+                select(func.count(Commit.id)).where(Commit.repository_id.in_(repo_ids))
             )
-        ) or 0
+            or 0
+        )
 
-        contributors_count = await self.session.scalar(
-            select(func.count(func.distinct(Commit.author_email))).where(
-                Commit.repository_id.in_(repo_ids)
+        prs_count = (
+            await self.session.scalar(
+                select(func.count(PullRequest.id)).where(PullRequest.repository_id.in_(repo_ids))
             )
-        ) or 0
+            or 0
+        )
+
+        open_issues_count = (
+            await self.session.scalar(
+                select(func.count(Issue.id)).where(
+                    Issue.repository_id.in_(repo_ids), Issue.state == "open"
+                )
+            )
+            or 0
+        )
+
+        contributors_count = (
+            await self.session.scalar(
+                select(func.count(func.distinct(Commit.author_email))).where(
+                    Commit.repository_id.in_(repo_ids)
+                )
+            )
+            or 0
+        )
 
         return {
             "total_commits": commits_count,
@@ -205,34 +216,40 @@ class SyncDataRepository:
 
         activity = []
         for c in commits:
-            activity.append({
-                "id": str(c.id),
-                "type": "commit",
-                "title": c.message.split("\n")[0] if c.message else "Commit",
-                "author": c.author_name,
-                "timestamp": c.commit_date.isoformat(),
-                "repository": f"{c.repository.owner}/{c.repository.name}",
-            })
+            activity.append(
+                {
+                    "id": str(c.id),
+                    "type": "commit",
+                    "title": c.message.split("\n")[0] if c.message else "Commit",
+                    "author": c.author_name,
+                    "timestamp": c.commit_date.isoformat(),
+                    "repository": f"{c.repository.owner}/{c.repository.name}",
+                }
+            )
 
         for p in prs:
-            activity.append({
-                "id": str(p.id),
-                "type": "pull_request",
-                "title": f"#{p.number} {p.title}",
-                "author": p.author,
-                "timestamp": p.created_at_meta.isoformat(),
-                "repository": f"{p.repository.owner}/{p.repository.name}",
-            })
+            activity.append(
+                {
+                    "id": str(p.id),
+                    "type": "pull_request",
+                    "title": f"#{p.number} {p.title}",
+                    "author": p.author,
+                    "timestamp": p.created_at_meta.isoformat(),
+                    "repository": f"{p.repository.owner}/{p.repository.name}",
+                }
+            )
 
         for i in issues:
-            activity.append({
-                "id": str(i.id),
-                "type": "issue",
-                "title": f"#{i.number} {i.title}",
-                "author": i.author,
-                "timestamp": i.created_at_meta.isoformat(),
-                "repository": f"{i.repository.owner}/{i.repository.name}",
-            })
+            activity.append(
+                {
+                    "id": str(i.id),
+                    "type": "issue",
+                    "title": f"#{i.number} {i.title}",
+                    "author": i.author,
+                    "timestamp": i.created_at_meta.isoformat(),
+                    "repository": f"{i.repository.owner}/{i.repository.name}",
+                }
+            )
 
         # Sort by timestamp desc
         activity.sort(key=lambda x: x["timestamp"], reverse=True)

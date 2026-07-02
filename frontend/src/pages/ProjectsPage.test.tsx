@@ -16,8 +16,13 @@ vi.mock("@/auth/AuthContext", () => ({
 
 vi.mock("@/organizations/OrganizationContext", () => ({
   useOrganizations: () => ({
-    organizations: [{ organization: { id: "org_1", name: "Test Org", slug: "test-org" }, role: "owner" }],
-    activeOrganization: { organization: { id: "org_1", name: "Test Org", slug: "test-org" }, role: "owner" },
+    organizations: [
+      { organization: { id: "org_1", name: "Test Org", slug: "test-org" }, role: "owner" },
+    ],
+    activeOrganization: {
+      organization: { id: "org_1", name: "Test Org", slug: "test-org" },
+      role: "owner",
+    },
     isLoading: false,
     refreshOrganizations: vi.fn(),
     createWorkspace: vi.fn(),
