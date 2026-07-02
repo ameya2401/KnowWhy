@@ -8,6 +8,7 @@ from app.models.integration import (
     Commit,
     Integration,
     Issue,
+    NotionPage,
     PullRequest,
 )
 from app.models.integration import (
@@ -254,3 +255,27 @@ class SyncDataRepository:
         # Sort by timestamp desc
         activity.sort(key=lambda x: x["timestamp"], reverse=True)
         return activity[:limit]
+
+    async def create_notion_page(self, page: NotionPage) -> NotionPage:
+        self.session.add(page)
+        await self.session.flush()
+        return page
+
+    async def get_notion_page_by_notion_id(
+        self, integration_id: UUID, notion_page_id: str
+    ) -> NotionPage | None:
+        result = await self.session.execute(
+            select(NotionPage).where(
+                NotionPage.integration_id == integration_id,
+                NotionPage.notion_page_id == notion_page_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def list_notion_pages_for_integration(self, integration_id: UUID) -> list[NotionPage]:
+        result = await self.session.execute(
+            select(NotionPage)
+            .where(NotionPage.integration_id == integration_id)
+            .order_by(NotionPage.last_edited.desc())
+        )
+        return list(result.scalars().all())

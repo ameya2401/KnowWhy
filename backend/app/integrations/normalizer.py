@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
-from app.models.integration import Commit, Issue, PullRequest
+from app.models.integration import Commit, Issue, NotionPage, PullRequest
 
 
 class BaseNormalizer:
@@ -69,4 +69,56 @@ class GitHubNormalizer(BaseNormalizer):
             author=user_data.get("login", "unknown"),
             created_at_meta=self._parse_date(raw_data.get("created_at")),
             closed_at=self._parse_date(closed_at_str) if closed_at_str else None,
+        )
+
+
+class NotionNormalizer:
+    def _parse_date(self, date_str: str | None) -> datetime:
+        if not date_str:
+            return datetime.now(UTC)
+        try:
+            normalized_str = date_str.replace("Z", "+00:00")
+            return datetime.fromisoformat(normalized_str)
+        except Exception:
+            return datetime.now(UTC)
+
+    def normalize_page(self, integration_id: UUID, raw_data: dict) -> NotionPage:
+        title = "Untitled Page"
+        obj_type = raw_data.get("object", "page")
+
+        if obj_type == "database":
+            title_list = raw_data.get("title", [])
+            if title_list:
+                title = "".join(t.get("plain_text", "") for t in title_list)
+        else:
+            properties = raw_data.get("properties", {})
+            for prop in properties.values():
+                if prop.get("type") == "title":
+                    title_list = prop.get("title", [])
+                    if title_list:
+                        title = "".join(t.get("plain_text", "") for t in title_list)
+                    break
+
+        parent = raw_data.get("parent", {})
+        parent_id = None
+        if parent.get("type") == "page_id":
+            parent_id = parent.get("page_id")
+        elif parent.get("type") == "database_id":
+            parent_id = parent.get("database_id")
+
+        last_edited_by = raw_data.get("last_edited_by", {})
+        author = last_edited_by.get("id", "unknown")
+        if last_edited_by.get("object") == "user" and last_edited_by.get("name"):
+            author = last_edited_by.get("name")
+
+        return NotionPage(
+            integration_id=integration_id,
+            notion_page_id=raw_data.get("id", ""),
+            parent_id=parent_id,
+            title=title or "Untitled Page",
+            url=raw_data.get("url"),
+            last_edited=self._parse_date(raw_data.get("last_edited_time")),
+            created_time=self._parse_date(raw_data.get("created_time")),
+            author=author,
+            archived=raw_data.get("archived", False),
         )

@@ -1,5 +1,19 @@
 # KnowWhy Changelog
 
+## 2026-07-02 - M08 Notion Integration
+
+### Features Added
+
+- Added `notion_pages` table mapping to local database schema for Notion integration.
+- Added backend `NotionAPIClient` supporting workspace searches and access token exchange.
+- Added `NotionNormalizer` utility to map raw API responses to consistent title, author, and last-edited records.
+- Added backend Notion routes: `GET /integrations/notion`, `POST /integrations/notion/connect`, `POST /integrations/notion/sync`, `DELETE /integrations/notion/disconnect`.
+- Added mock Notion OAuth token and search API routes for offline integration testing.
+- Added backend unit tests (25 passing total) covering credential encryption, item normalizer, workspace crawls, and incremental sync.
+- Added frontend integration services (`getNotionIntegration`, `connectNotion`, `syncNotionIntegration`, `disconnectNotion`).
+- Added frontend Notion tab within `ProjectIntegrations.tsx` layout with connection status, synced pages table list, manual sync control, and mock input forms.
+- Added frontend Notion Callback page (`NotionCallbackPage.tsx`) and registered routing configuration.
+
 ## 2026-07-02 - M07 Workspace Dashboard
 
 ### Features Added

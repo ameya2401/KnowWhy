@@ -2,7 +2,7 @@ import enum
 from datetime import UTC, datetime
 from uuid import UUID
 
-from sqlalchemy import DateTime, Enum, ForeignKey, Integer, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -11,6 +11,7 @@ from app.database.base import BaseModel
 
 class IntegrationProvider(str, enum.Enum):
     GITHUB = "github"
+    NOTION = "notion"
 
 
 class IntegrationStatus(str, enum.Enum):
@@ -70,8 +71,15 @@ class Integration(BaseModel):
     )
     last_sync: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    workspace_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    workspace_name: Mapped[str | None] = mapped_column(Text, nullable=True)
+    workspace_icon: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     repositories: Mapped[list["IntegrationRepository"]] = relationship(
+        back_populates="integration",
+        cascade="all, delete-orphan",
+    )
+    notion_pages: Mapped[list["NotionPage"]] = relationship(
         back_populates="integration",
         cascade="all, delete-orphan",
     )
@@ -178,3 +186,27 @@ class Issue(BaseModel):
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     repository: Mapped[IntegrationRepository] = relationship(back_populates="issues")
+
+
+class NotionPage(BaseModel):
+    __tablename__ = "notion_pages"
+    __table_args__ = (
+        UniqueConstraint("integration_id", "notion_page_id", name="uq_notion_pages_notion_id"),
+    )
+
+    integration_id: Mapped[UUID] = mapped_column(
+        PostgresUUID(as_uuid=True),
+        ForeignKey("integrations.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    notion_page_id: Mapped[str] = mapped_column(Text, nullable=False)
+    parent_id: Mapped[str | None] = mapped_column(Text, nullable=True)
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    last_edited: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    author: Mapped[str | None] = mapped_column(Text, nullable=True)
+    archived: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    integration: Mapped[Integration] = relationship(back_populates="notion_pages")

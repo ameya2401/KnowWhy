@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     github_client_secret: str = Field(default="", alias="GITHUB_CLIENT_SECRET")
     google_client_id: str = Field(default="", alias="GOOGLE_CLIENT_ID")
     google_client_secret: str = Field(default="", alias="GOOGLE_CLIENT_SECRET")
+    notion_client_id: str = Field(default="", alias="NOTION_CLIENT_ID")
+    notion_client_secret: str = Field(default="", alias="NOTION_CLIENT_SECRET")
     cors_origins: list[str] = ["http://localhost:5173"]
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
