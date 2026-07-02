@@ -40,6 +40,8 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://knowwhy:knowwhy@postgres:5432/knowwhy
       REDIS_URL: redis://redis:6379/0
+      ENVIRONMENT: development
+      VALIDATE_EXTERNAL_SERVICES_ON_STARTUP: "true"
     ports:
       - "8000:8000"
     depends_on:

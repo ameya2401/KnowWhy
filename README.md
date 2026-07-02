@@ -2,7 +2,7 @@
 
 KnowWhy is a production-grade Organizational Intelligence Platform. It is designed to become an intelligence layer across engineering and workplace tools, preserving organizational context and helping teams answer why decisions were made.
 
-This repository currently contains the Milestone M01 foundation only: frontend shell, backend health API, PostgreSQL and Redis connectivity, Docker orchestration, CI, and development tooling. Authentication, integrations, AI, search, RAG, and business workflows are intentionally not implemented yet.
+This repository currently contains the Milestone M02 foundation: frontend shell, backend health API, async database foundation, PostgreSQL and Redis connectivity, Docker orchestration, CI, and development tooling. Authentication, integrations, AI, search, RAG, and business workflows are intentionally not implemented yet.
 
 ## Architecture
 
@@ -21,11 +21,13 @@ Backend code follows a layered structure:
 API -> Services -> Repositories -> Database
 ```
 
-The M01 backend exposes only `GET /health`, returning:
+The backend exposes `GET /health`, returning this response when PostgreSQL and Redis are reachable:
 
 ```json
 {
-  "status": "ok"
+  "status": "ok",
+  "database": "connected",
+  "redis": "connected"
 }
 ```
 
@@ -79,6 +81,18 @@ Run the backend:
 
 ```bash
 uvicorn app.main:app --reload
+```
+
+Run database migrations when PostgreSQL is available:
+
+```bash
+alembic upgrade head
+```
+
+Verify PostgreSQL and Redis connectivity:
+
+```bash
+python scripts/check_dependencies.py
 ```
 
 Install frontend dependencies:
@@ -139,4 +153,11 @@ With Docker installed, verify the service stack:
 ```bash
 docker compose up --build
 curl http://localhost:8000/health
+```
+
+Inspect Alembic migration state:
+
+```bash
+docker compose exec backend alembic current
+docker compose exec postgres psql -U knowwhy -d knowwhy -c "\dt"
 ```

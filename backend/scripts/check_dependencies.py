@@ -1,12 +1,11 @@
 import asyncio
 
-from app.core.cache import verify_redis_connection
-from app.core.database import verify_database_connection
+from app.database.health import check_database_connection, check_redis_connection
 
 
 async def main() -> None:
-    database_ok = await verify_database_connection()
-    redis_ok = await verify_redis_connection()
+    database_ok = await check_database_connection()
+    redis_ok = await check_redis_connection()
 
     if not database_ok:
         raise RuntimeError("PostgreSQL connection check failed.")

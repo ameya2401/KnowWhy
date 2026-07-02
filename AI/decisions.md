@@ -1,5 +1,53 @@
 # KnowWhy Architectural Decisions
 
+## DEC-006: Add Dedicated Async Database Package
+
+Context: M02 requires a production-ready database foundation using modern SQLAlchemy 2.x patterns.
+
+Decision: Added `backend/app/database/` with Declarative Base, abstract BaseModel, async engine, async session factory, FastAPI session dependency, health checks, and startup validation.
+
+Reason: Keeping database infrastructure in its own package gives future repositories and services one consistent place to depend on SQLAlchemy primitives.
+
+Tradeoffs: The existing `app/core/database.py` remains as a compatibility facade to avoid unnecessary churn from M01.
+
+Files affected: `backend/app/database/`, `backend/app/core/database.py`
+
+## DEC-007: Use UUID and Timestamp Fields in Abstract BaseModel Only
+
+Context: M02 requires a reusable BaseModel but forbids application business models.
+
+Decision: Implemented an abstract `BaseModel` with UUID `id`, timezone-aware `created_at`, and timezone-aware `updated_at`, but did not create any concrete domain tables.
+
+Reason: Future domain models can inherit common fields without M02 prematurely introducing users, organizations, or other business entities.
+
+Tradeoffs: The initial Alembic migration is intentionally a no-op except versioning because no concrete tables exist yet.
+
+Files affected: `backend/app/database/base.py`, `backend/alembic/versions/20260702_0001_database_foundation.py`
+
+## DEC-008: Make External Service Startup Validation Configurable
+
+Context: M02 requires startup validation while local tests and source builds should not require live PostgreSQL and Redis processes.
+
+Decision: Added `VALIDATE_EXTERNAL_SERVICES_ON_STARTUP`, disabled by default and enabled in Docker Compose.
+
+Reason: Docker and production-like environments can fail fast when PostgreSQL or Redis are unavailable, while unit tests and local source checks remain deterministic.
+
+Tradeoffs: Developers running the backend outside Docker must opt into startup validation explicitly if they want fail-fast behavior.
+
+Files affected: `backend/app/core/config.py`, `backend/app/main.py`, `docker-compose.yml`, `.env.example`
+
+## DEC-009: Return Structured Degraded Health Responses
+
+Context: M02 requires `/health` to report database and Redis connectivity.
+
+Decision: `/health` returns `200` with connected statuses when dependencies are reachable and `503` with `degraded` statuses when one or both dependencies are unavailable.
+
+Reason: A dependency outage should be machine-readable without exposing internal exceptions or returning an unstructured server error.
+
+Tradeoffs: Local environments without PostgreSQL or Redis receive `503` until services are started.
+
+Files affected: `backend/app/api/routes/health.py`, `backend/app/schemas/health.py`, `backend/app/database/health.py`
+
 ## DEC-001: Initialize Frontend as React SPA
 
 Context: M01 requires a frontend foundation using React, TypeScript, Vite, Tailwind CSS, shadcn/ui, React Router, TanStack Query, and Axios.
