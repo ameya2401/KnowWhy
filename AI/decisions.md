@@ -107,3 +107,18 @@ Reason: Keeps dashboard routing decoupled from path prefixes while preserving a 
 
 Files affected: `frontend/src/projects/ProjectContext.ts`, `frontend/src/projects/ProjectProvider.tsx`, `frontend/src/layouts/DashboardLayout.tsx`
 
+## DEC-010: Notion Integration Architecture and Workspace Indexing
+
+Context: M08 requires synchronizing Notion workspace documentation, databases, and subpages securely per project context, while handling incremental indexing based on updated timestamps.
+
+Decision:
+1. Store page metadata locally in a dedicated `notion_pages` table, establishing unique constraint on `(integration_id, notion_page_id)` to handle update-upserts cleanly.
+2. Implement incremental syncing: check database for existing records, comparing the incoming Notion page `last_edited_time` against the local record. Only write to DB if the incoming edit is newer.
+3. Design a normalized parsing structure (`NotionNormalizer`) mapping rich/nested titles, author data, and URL layouts safely.
+4. Establish `/integrations/notion/callback` OAuth callback handling, storing securely encrypted tokens.
+
+Reason: Protects workspace documentation metadata, reduces indexing overhead via timestamps, and maintains full tenant isolation.
+
+Files affected: `backend/app/models/integration.py`, `backend/app/integrations/`, `backend/app/api/routes/notion.py`, `frontend/src/components/ProjectIntegrations.tsx`
+
+

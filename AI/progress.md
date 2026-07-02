@@ -2,6 +2,23 @@
 
 ## Completed Milestones
 
+### M08 Notion Integration
+
+- Status: Completed
+- Completion Date: 2026-07-02
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend Notion OAuth integration, OAuth token exchange, database storage, and incremental synchronization logic.
+- Backend tests passing with Pytest (25 passed).
+- Frontend Notion Callback page (`NotionCallbackPage.tsx`) processing the OAuth code and project ID redirect.
+- Frontend Notion tab switcher, active status display, manual/mock connection forms, and paginated table listing all synced Notion pages.
+- Zero TypeScript compiler errors or warnings.
+- ESLint and Prettier formatting passing cleanly.
+
 ### M07 Workspace Dashboard
 
 - Status: Completed

@@ -5,6 +5,7 @@ from app.models.integration import (
     IntegrationRepository,
     IntegrationStatus,
     Issue,
+    NotionPage,
     PullRequest,
 )
 from app.models.organization import (
@@ -35,6 +36,7 @@ __all__ = [
     "Commit",
     "PullRequest",
     "Issue",
+    "NotionPage",
     "IntegrationProvider",
     "IntegrationStatus",
 ]

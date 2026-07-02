@@ -60,4 +60,8 @@ KnowWhy currently contains:
   - Dedicated Activity Page with dropdown filtering by activity type.
   - Dynamic empty states for disconnected repositories and unconfigured projects.
   - Full TypeScript type-safety across components and mocks, and defensive organization-chaining lookups.
-
+- **Milestone M08 Notion Integration**:
+  - `notion_pages` table storing metadata of synced Notion workspace pages (title, author, parent structure, etc.).
+  - Backend integration service layer with support for Notion API token exchange, page indexing, and incremental updates based on updated timestamps.
+  - Frontend Notion Integration tab featuring connection status, list of synced Notion pages, sync controls, and background sync polling.
+  - Frontend Notion OAuth Callback handler (`/integrations/notion/callback`) to finalize authorization.

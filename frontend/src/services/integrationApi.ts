@@ -153,3 +153,84 @@ export async function getGitHubDashboard(
   });
   return response.data;
 }
+
+export interface NotionIntegration {
+  id: string;
+  status: "connected" | "disconnected" | "syncing" | "error";
+  last_sync: string | null;
+  last_error: string | null;
+  connected_at: string;
+  workspace_name: string | null;
+  workspace_icon: string | null;
+}
+
+export interface NotionPage {
+  id: string;
+  notion_page_id: string;
+  parent_id: string | null;
+  title: string;
+  url: string;
+  author: string | null;
+  last_edited_time: string;
+  archived: boolean;
+}
+
+export interface NotionDashboardResponse {
+  connected: boolean;
+  integration: NotionIntegration | null;
+  pages: NotionPage[];
+  stats: {
+    total_pages: number;
+    recent_updates: number;
+  };
+}
+
+export async function getNotionIntegration(
+  accessToken: string,
+  projectId: string,
+): Promise<NotionDashboardResponse> {
+  const response = await apiClient.get<NotionDashboardResponse>("/integrations/notion", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    params: { project_id: projectId },
+  });
+  return response.data;
+}
+
+export async function connectNotion(
+  accessToken: string,
+  payload: { code: string; project_id: string },
+): Promise<{ status: string; integration_id: string }> {
+  const response = await apiClient.post<{ status: string; integration_id: string }>(
+    "/integrations/notion/connect",
+    payload,
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+  return response.data;
+}
+
+export async function syncNotionIntegration(
+  accessToken: string,
+  projectId: string,
+): Promise<{ status: string }> {
+  const response = await apiClient.post<{ status: string }>(
+    "/integrations/notion/sync",
+    { project_id: projectId },
+    {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  );
+  return response.data;
+}
+
+export async function disconnectNotion(
+  accessToken: string,
+  projectId: string,
+): Promise<{ status: string }> {
+  const response = await apiClient.delete<{ status: string }>("/integrations/notion/disconnect", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    params: { project_id: projectId },
+  });
+  return response.data;
+}

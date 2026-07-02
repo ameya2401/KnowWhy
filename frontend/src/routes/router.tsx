@@ -12,6 +12,7 @@ import { CreateProjectPage } from "@/pages/CreateProjectPage";
 import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage";
 import { GitHubCallbackPage } from "@/pages/GitHubCallbackPage";
+import { NotionCallbackPage } from "@/pages/NotionCallbackPage";
 import { ActivityPage } from "@/pages/ActivityPage";
 
 export const router = createBrowserRouter([
@@ -100,6 +101,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <GitHubCallbackPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/integrations/notion/callback",
+        element: (
+          <ProtectedRoute>
+            <NotionCallbackPage />
           </ProtectedRoute>
         ),
       },
