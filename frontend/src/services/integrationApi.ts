@@ -116,12 +116,9 @@ export async function disconnectGitHub(
   accessToken: string,
   projectId: string,
 ): Promise<{ status: string }> {
-  const response = await apiClient.delete<{ status: string }>(
-    "/integrations/github/disconnect",
-    {
-      headers: { Authorization: `Bearer ${accessToken}` },
-      params: { project_id: projectId },
-    },
-  );
+  const response = await apiClient.delete<{ status: string }>("/integrations/github/disconnect", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    params: { project_id: projectId },
+  });
   return response.data;
 }

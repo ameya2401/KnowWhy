@@ -118,9 +118,7 @@ class IntegrationRepository(BaseModel):
 
 class Commit(BaseModel):
     __tablename__ = "integration_commits"
-    __table_args__ = (
-        UniqueConstraint("repository_id", "sha", name="uq_commits_repo_sha"),
-    )
+    __table_args__ = (UniqueConstraint("repository_id", "sha", name="uq_commits_repo_sha"),)
 
     repository_id: Mapped[UUID] = mapped_column(
         PostgresUUID(as_uuid=True),
@@ -139,9 +137,7 @@ class Commit(BaseModel):
 
 class PullRequest(BaseModel):
     __tablename__ = "integration_pull_requests"
-    __table_args__ = (
-        UniqueConstraint("repository_id", "github_pr_id", name="uq_prs_repo_pr_id"),
-    )
+    __table_args__ = (UniqueConstraint("repository_id", "github_pr_id", name="uq_prs_repo_pr_id"),)
 
     repository_id: Mapped[UUID] = mapped_column(
         PostgresUUID(as_uuid=True),

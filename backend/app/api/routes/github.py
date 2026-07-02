@@ -48,11 +48,11 @@ async def get_integration(
 ):
     service = IntegrationService(db)
     await service.require_project_membership(current_user, project_id, ProjectRole.VIEWER)
-    
+
     integration = await service.integrations.get_by_project_and_provider(project_id, "github")
     if not integration:
         return {"connected": False, "integration": None, "repositories": []}
-        
+
     repos = await service.repos.list_for_integration(integration.id)
     return {
         "connected": True,
@@ -111,7 +111,7 @@ async def connect_repository(
     # Verify path id matches payload id to prevent mismatches
     if github_repo_id != payload.github_repo_id:
         raise HTTPException(status_code=400, detail="Repository ID mismatch between path and body.")
-        
+
     service = IntegrationService(db)
     repo = await service.connect_repository(
         current_user,
@@ -155,23 +155,26 @@ async def handle_webhook(
     x_hub_signature_256: str | None = Header(None, alias="X-Hub-Signature-256"),
 ):
     body = await request.body()
-    
+
     # Optional signature verification using github client secret as webhook secret
     if settings.github_client_secret and x_hub_signature_256:
-        signature = "sha256=" + hmac.new(
-            settings.github_client_secret.encode("utf-8"),
-            body,
-            hashlib.sha256,
-        ).hexdigest()
+        signature = (
+            "sha256="
+            + hmac.new(
+                settings.github_client_secret.encode("utf-8"),
+                body,
+                hashlib.sha256,
+            ).hexdigest()
+        )
         if not hmac.compare_digest(signature, x_hub_signature_256):
             raise HTTPException(status_code=401, detail="Invalid webhook signature")
-            
+
     # Parse event type from header
     event_type = request.headers.get("X-GitHub-Event", "ping")
-    
+
     # Webhook handling placeholder: print or log the webhook details.
     # Supported events: ping, push, pull_request, issues
     print(f"Received GitHub webhook event: {event_type}")
-    
+
     # Return 200 OK
     return Response(status_code=status.HTTP_200_OK)

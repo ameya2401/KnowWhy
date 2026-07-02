@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Settings, Users, Info, Archive, UserPlus, Trash2, Shield, Link2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Settings,
+  Users,
+  Info,
+  Archive,
+  UserPlus,
+  Trash2,
+  Shield,
+  Link2,
+} from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
 import { Button } from "@/components/ui/button";

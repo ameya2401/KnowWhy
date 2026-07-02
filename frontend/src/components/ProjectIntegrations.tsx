@@ -139,7 +139,11 @@ export function ProjectIntegrations({
   };
 
   const handleDisconnect = async () => {
-    if (!confirm("Are you sure you want to disconnect GitHub? All repository connections will be lost.")) {
+    if (
+      !confirm(
+        "Are you sure you want to disconnect GitHub? All repository connections will be lost.",
+      )
+    ) {
       return;
     }
     setLoading(true);
@@ -267,7 +271,8 @@ export function ProjectIntegrations({
             </div>
             <CardTitle className="mt-4">Connect GitHub Integration</CardTitle>
             <CardDescription className="max-w-md mx-auto">
-              Link GitHub repositories to import commits, pull requests, and issues. Connected repositories sync automatically.
+              Link GitHub repositories to import commits, pull requests, and issues. Connected
+              repositories sync automatically.
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center gap-4">
@@ -286,7 +291,10 @@ export function ProjectIntegrations({
                 </button>
 
                 {showMockForm && (
-                  <form onSubmit={handleMockConnect} className="w-full max-w-sm mt-4 p-4 border rounded-md bg-muted/40 space-y-3">
+                  <form
+                    onSubmit={handleMockConnect}
+                    className="w-full max-w-sm mt-4 p-4 border rounded-md bg-muted/40 space-y-3"
+                  >
                     <p className="text-xs text-muted-foreground">
                       Paste a GitHub Personal Access Token or OAuth code to connect:
                     </p>
@@ -323,7 +331,10 @@ export function ProjectIntegrations({
                     <Github className="size-5" /> GitHub Connection
                   </CardTitle>
                   <CardDescription>
-                    Connected at {integration?.connected_at ? new Date(integration.connected_at).toLocaleString() : ""}
+                    Connected at{" "}
+                    {integration?.connected_at
+                      ? new Date(integration.connected_at).toLocaleString()
+                      : ""}
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
@@ -354,7 +365,9 @@ export function ProjectIntegrations({
                   <div>
                     <span className="text-muted-foreground block text-xs">Last Synced</span>
                     <span className="font-semibold mt-0.5 block">
-                      {integration?.last_sync ? new Date(integration.last_sync).toLocaleString() : "Never"}
+                      {integration?.last_sync
+                        ? new Date(integration.last_sync).toLocaleString()
+                        : "Never"}
                     </span>
                   </div>
                 </div>
@@ -415,7 +428,10 @@ export function ProjectIntegrations({
               ) : (
                 <div className="divide-y border rounded-md">
                   {linkedRepos.map((repo) => (
-                    <div key={repo.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-2">
+                    <div
+                      key={repo.id}
+                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-2"
+                    >
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-sm">
@@ -517,7 +533,9 @@ export function ProjectIntegrations({
                               </div>
                             </div>
                             {isAlreadyLinked ? (
-                              <span className="text-xs text-muted-foreground italic mr-2">Linked</span>
+                              <span className="text-xs text-muted-foreground italic mr-2">
+                                Linked
+                              </span>
                             ) : null}
                           </div>
                         );
