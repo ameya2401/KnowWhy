@@ -11,6 +11,7 @@ import { ProjectsPage } from "@/pages/ProjectsPage";
 import { CreateProjectPage } from "@/pages/CreateProjectPage";
 import { ProjectDetailPage } from "@/pages/ProjectDetailPage";
 import { ProjectSettingsPage } from "@/pages/ProjectSettingsPage";
+import { GitHubCallbackPage } from "@/pages/GitHubCallbackPage";
 
 export const router = createBrowserRouter([
   {
@@ -82,6 +83,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ProjectSettingsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/integrations/github/callback",
+        element: (
+          <ProtectedRoute>
+            <GitHubCallbackPage />
           </ProtectedRoute>
         ),
       },

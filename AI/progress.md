@@ -2,6 +2,24 @@
 
 ## Completed Milestones
 
+### M06 External Integrations
+
+- Status: Completed
+- Completion Date: 2026-07-02
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend GitHub OAuth, connection, repository linking, sync and disconnect routes fully implemented.
+- Backend encryption & decryption of integration credentials using AES-GCM.
+- Backend tests passed with Pytest (18 passed).
+- Frontend Integrations tab inside Project Details page, featuring connection status, repository selector, sync controls, and background polling.
+- Frontend callback page for handling redirect query parameters from GitHub.
+- Frontend typescript typecheck passed cleanly.
+- Frontend linting and formatting passed with ESLint.
+
 ### M05 Projects
 
 - Status: Completed
