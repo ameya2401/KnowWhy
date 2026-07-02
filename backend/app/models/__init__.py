@@ -1,3 +1,12 @@
+from app.models.integration import (
+    Commit,
+    Integration,
+    IntegrationProvider,
+    IntegrationRepository,
+    IntegrationStatus,
+    Issue,
+    PullRequest,
+)
 from app.models.organization import (
     Organization,
     OrganizationInvitation,
@@ -21,4 +30,11 @@ __all__ = [
     "ProjectVisibility",
     "User",
     "UserSession",
+    "Integration",
+    "IntegrationRepository",
+    "Commit",
+    "PullRequest",
+    "Issue",
+    "IntegrationProvider",
+    "IntegrationStatus",
 ]

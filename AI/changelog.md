@@ -1,5 +1,29 @@
 # KnowWhy Changelog
 
+## 2026-07-02 - M06 External Integrations
+
+### Features Added
+
+- Added `integrations` table with AES-GCM credential encryption/decryption.
+- Added `integration_repositories` table to map linked repos.
+- Added `integration_commits`, `integration_pull_requests`, and `integration_issues` to store metadata of repository contents.
+- Added backend GitHub OAuth connection routes: `GET /integrations/github`, `POST /integrations/github/connect`, `GET /integrations/github/repositories`, `POST /integrations/github/repositories/{github_repo_id}/connect`, `POST /integrations/github/sync`, `DELETE /integrations/github/disconnect`.
+- Added mock external API endpoints in testing module to mock GitHub OAuth code exchange and repository listings.
+- Added frontend Integrations tab in Project Details Page.
+- Added frontend repository selection modal with search, select and multi-select capability.
+- Added frontend sync dashboard with background sync polling and last synced metadata.
+- Added frontend disconnect capability.
+- Added frontend GitHub callback route (`/integrations/github/callback`) for OAuth flow processing.
+
+### Files Added
+
+- Frontend: `src/services/integrationApi.ts`, `src/components/ProjectIntegrations.tsx`, `src/pages/GitHubCallbackPage.tsx`.
+
+### Files Modified
+
+- Frontend: `src/pages/ProjectDetailPage.tsx`, `src/routes/router.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
 ## 2026-07-02 - M05 Projects
 
 ### Features Added

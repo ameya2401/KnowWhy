@@ -79,3 +79,18 @@ Decision: Link projects to organizations and create a `project_members` mapping 
 Reason: Provides fine-grained control over project settings, member invites, and data security at the project-level.
 
 Files affected: `backend/app/models/project.py`, `backend/app/projects/`, `frontend/src/projects/`, `frontend/src/pages/`
+
+## DEC-008: External Integrations Scoping and Credentials Encryption
+
+Context: M06 requires integrating projects with third-party service providers (specifically GitHub) and storing sensitive OAuth credentials securely.
+
+Decision:
+1. Scope integrations and linked repositories directly to projects to ensure tenant isolation.
+2. Encrypt integration credentials using AES-GCM with a 256-bit key derived from a backend secret key.
+3. Decrypt credentials on demand during background synchronization tasks.
+4. Support mock/manual token configuration in the frontend to facilitate testing without requiring live OAuth flows.
+
+Reason: Protects sensitive API credentials in the database while giving users flexible access control per project and enabling seamless testability.
+
+Files affected: `backend/app/integrations/`, `frontend/src/services/integrationApi.ts`, `frontend/src/components/ProjectIntegrations.tsx`
+

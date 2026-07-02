@@ -42,3 +42,13 @@ KnowWhy currently contains:
   - Backend Project API routes for list, create, details, settings, archive, member invite, role updates, and member removal.
   - Frontend Projects list dashboard with search, visibility & status filters.
   - Frontend Create Project page, Project Detail page with overview/members tabs, and Project Settings page with Danger Zone.
+
+- **Milestone M06 External Integrations**:
+  - `integrations` table linking external providers (e.g. `github`) to projects, with credentials encryption and status tracking (`connected`, `syncing`, `error`).
+  - `integration_repositories` table storing metadata of linked repositories.
+  - `integration_commits`, `integration_pull_requests`, and `integration_issues` tables to capture repository content metadata.
+  - Backend integration service layer with secure AES-GCM credential encryption/decryption.
+  - Mocked external APIs for GitHub OAuth and Repo listing to support reliable testing.
+  - Frontend Integrations tab in Project Details Page showing connection status, repository selection modal (with search & multi-select), and sync controls.
+  - Frontend GitHub OAuth Callback handler (`/integrations/github/callback`) to finalize authorization.
+
