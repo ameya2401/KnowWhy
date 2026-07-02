@@ -122,3 +122,34 @@ export async function disconnectGitHub(
   });
   return response.data;
 }
+
+export interface GitHubDashboardResponse {
+  connected: boolean;
+  integration: GitHubIntegration | null;
+  repositories: GitHubRepo[];
+  stats: {
+    total_commits: number;
+    pull_requests: number;
+    open_issues: number;
+    contributors: number;
+  };
+  activity: {
+    id: string;
+    type: "commit" | "pull_request" | "issue" | "repo_update";
+    title: string;
+    author: string;
+    timestamp: string;
+    repository: string;
+  }[];
+}
+
+export async function getGitHubDashboard(
+  accessToken: string,
+  projectId: string,
+): Promise<GitHubDashboardResponse> {
+  const response = await apiClient.get<GitHubDashboardResponse>("/integrations/github/dashboard", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+    params: { project_id: projectId },
+  });
+  return response.data;
+}

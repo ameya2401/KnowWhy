@@ -148,6 +148,58 @@ async def disconnect_github(
     return {"status": "success"}
 
 
+@router.get("/dashboard")
+async def get_github_dashboard(
+    project_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_database_session)],
+):
+    service = IntegrationService(db)
+    await service.require_project_membership(current_user, project_id, ProjectRole.VIEWER)
+
+    integration = await service.integrations.get_by_project_and_provider(project_id, "github")
+    if not integration:
+        return {
+            "connected": False,
+            "integration": None,
+            "repositories": [],
+            "stats": {"total_commits": 0, "pull_requests": 0, "open_issues": 0, "contributors": 0},
+            "activity": [],
+        }
+
+    repos = await service.repos.list_for_integration(integration.id)
+    repo_ids = [r.id for r in repos]
+
+    stats = await service.sync_data.get_stats(repo_ids)
+    activity = await service.sync_data.get_recent_activity(repo_ids)
+
+    return {
+        "connected": True,
+        "integration": {
+            "id": integration.id,
+            "status": integration.status.value,
+            "last_sync": integration.last_sync.isoformat() if integration.last_sync else None,
+            "last_error": integration.last_error,
+            "connected_at": integration.connected_at.isoformat(),
+        },
+        "repositories": [
+            {
+                "id": r.id,
+                "github_repo_id": r.github_repo_id,
+                "name": r.name,
+                "owner": r.owner,
+                "default_branch": r.default_branch,
+                "visibility": r.visibility,
+                "clone_url": r.clone_url,
+                "last_sync": r.last_sync.isoformat() if r.last_sync else None,
+            }
+            for r in repos
+        ],
+        "stats": stats,
+        "activity": activity,
+    }
+
+
 @router.post("/webhook")
 async def handle_webhook(
     request: Request,
