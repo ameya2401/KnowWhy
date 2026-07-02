@@ -2,6 +2,26 @@
 
 ## Completed Milestones
 
+### M07 Workspace Dashboard
+
+- Status: Completed
+- Completion Date: 2026-07-02
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend dashboard endpoints `/integrations/github/dashboard` returning aggregate statistics and recent chronological activities.
+- Backend tests passing with Pytest (18 passed).
+- Frontend global selection context provider with `localStorage` state persistence.
+- Collapsible sidebar drawer layout with workspace & project switcher dropdowns.
+- Dashboard Overview page with manual sync triggers, repository status, and dynamic metrics cards (commits, PRs, issues, contributors).
+- Chronological Recent Activity feed and dedicated, filterable Activity Log page.
+- Beautiful empty states for newly created projects or disconnected integrations.
+- Zero TypeScript compile-time errors or warnings.
+- ESLint and Prettier formatting passing cleanly.
+
 ### M06 External Integrations
 
 - Status: Completed

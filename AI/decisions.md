@@ -94,3 +94,16 @@ Reason: Protects sensitive API credentials in the database while giving users fl
 
 Files affected: `backend/app/integrations/`, `frontend/src/services/integrationApi.ts`, `frontend/src/components/ProjectIntegrations.tsx`
 
+## DEC-009: Global Project Selection Context and Persistent Workspace State
+
+Context: M07 requires a cohesive navigation experience across projects and workspaces, where selecting a project updates all dashboard views (overview stats, recent activity, integration detail).
+
+Decision:
+1. Implement a global `ProjectProvider` and `ProjectContext` wrapping the workspace application shell.
+2. Persist the active project selection inside browser `localStorage` under a workspace-scoped key, so reloading the page or switching tabs retains the user's active focus.
+3. Apply defensive, optional-chaining lookups (`activeOrganization?.organization?.id`) inside sidebar components to prevent rendering and hydration crash cycles if organizations load asynchronously.
+
+Reason: Keeps dashboard routing decoupled from path prefixes while preserving a seamless user workspace state across sessions.
+
+Files affected: `frontend/src/projects/ProjectContext.ts`, `frontend/src/projects/ProjectProvider.tsx`, `frontend/src/layouts/DashboardLayout.tsx`
+

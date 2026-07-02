@@ -1,5 +1,26 @@
 # KnowWhy Changelog
 
+## 2026-07-02 - M07 Workspace Dashboard
+
+### Features Added
+
+- Added backend `/integrations/github/dashboard` route returning sync data stats and chronological activity list.
+- Added frontend `ProjectContext` and `ProjectProvider` to manage global active project selection, with persistence stored via `localStorage`.
+- Added collapsible sidebar drawer layout featuring workspace & project switcher dropdown selects and a theme toggle.
+- Added Dashboard Overview page (`DashboardPage.tsx`) displaying git integration status, sync triggers, metrics cards (commits, PRs, issues, contributors), recent activity list, quick actions, and empty states.
+- Added dedicated Activity Page (`ActivityPage.tsx`) to display filterable recent workspace activity events.
+- Fixed TypeScript declaration/mock interface mismatch across test files (`ProjectsPage.test.tsx`, `CreateProjectPage.test.tsx`, `DashboardPage.test.tsx`).
+- Added robust, defensive optional-chaining lookups inside sidebar organization selectors to prevent runtime layout crash states.
+
+### Files Added
+
+- Frontend: `src/pages/ActivityPage.tsx`.
+
+### Files Modified
+
+- Frontend: `src/layouts/DashboardLayout.tsx`, `src/pages/DashboardPage.tsx`, `src/pages/DashboardPage.test.tsx`, `src/pages/ProjectsPage.test.tsx`, `src/pages/CreateProjectPage.test.tsx`, `src/routes/router.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
 ## 2026-07-02 - M06 External Integrations
 
 ### Features Added

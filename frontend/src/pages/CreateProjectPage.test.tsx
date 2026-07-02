@@ -15,6 +15,54 @@ vi.mock("@/auth/AuthContext", () => ({
   }),
 }));
 
+vi.mock("@/organizations/OrganizationContext", () => ({
+  useOrganizations: () => ({
+    organizations: [
+      { organization: { id: "org_1", name: "Test Org", slug: "test-org" }, role: "owner" },
+    ],
+    activeOrganization: {
+      organization: { id: "org_1", name: "Test Org", slug: "test-org" },
+      role: "owner",
+    },
+    isLoading: false,
+    refreshOrganizations: vi.fn(),
+    createWorkspace: vi.fn(),
+    switchWorkspace: vi.fn(),
+  }),
+}));
+
+vi.mock("@/projects/ProjectContext", () => ({
+  useProjects: () => ({
+    projects: [
+      {
+        id: "proj_1",
+        name: "Test Project One",
+        slug: "test-project-one",
+        description: "First test project",
+        visibility: "public",
+        status: "active",
+        color: "#6366f1",
+        created_at: "2026-07-02T12:00:00Z",
+        updated_at: "2026-07-02T12:00:00Z",
+      },
+    ],
+    activeProject: {
+      id: "proj_1",
+      name: "Test Project One",
+      slug: "test-project-one",
+      description: "First test project",
+      visibility: "public",
+      status: "active",
+      color: "#6366f1",
+      created_at: "2026-07-02T12:00:00Z",
+      updated_at: "2026-07-02T12:00:00Z",
+    },
+    isLoading: false,
+    refreshProjects: vi.fn(),
+    switchProject: vi.fn(),
+  }),
+}));
+
 function renderCreateProject() {
   const router = createMemoryRouter([{ path: "/projects/new", element: <CreateProjectPage /> }], {
     initialEntries: ["/projects/new"],

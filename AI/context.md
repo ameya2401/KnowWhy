@@ -52,3 +52,12 @@ KnowWhy currently contains:
   - Frontend Integrations tab in Project Details Page showing connection status, repository selection modal (with search & multi-select), and sync controls.
   - Frontend GitHub OAuth Callback handler (`/integrations/github/callback`) to finalize authorization.
 
+- **Milestone M07 Workspace Dashboard**:
+  - Persistent frontend global selection context (`ProjectContext` and `ProjectProvider`) via `localStorage` to preserve selection state.
+  - Collapsible sidebar drawer with nested navigations, theme toggler, and workspace switcher dropdowns.
+  - Dashboard overview page displaying connected repository status, manual sync controls, and real Git integration details (aggregate metrics cards).
+  - Chronological Recent Activity feed showing latest commits, pull requests, and issues.
+  - Dedicated Activity Page with dropdown filtering by activity type.
+  - Dynamic empty states for disconnected repositories and unconfigured projects.
+  - Full TypeScript type-safety across components and mocks, and defensive organization-chaining lookups.
+
