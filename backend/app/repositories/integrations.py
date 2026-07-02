@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload, selectinload
 
 from app.models.integration import (
     Commit,
+    DriveFile,
     Integration,
     Issue,
     NotionPage,
@@ -277,5 +278,29 @@ class SyncDataRepository:
             select(NotionPage)
             .where(NotionPage.integration_id == integration_id)
             .order_by(NotionPage.last_edited.desc())
+        )
+        return list(result.scalars().all())
+
+    async def create_drive_file(self, file: DriveFile) -> DriveFile:
+        self.session.add(file)
+        await self.session.flush()
+        return file
+
+    async def get_drive_file_by_google_id(
+        self, integration_id: UUID, google_file_id: str
+    ) -> DriveFile | None:
+        result = await self.session.execute(
+            select(DriveFile).where(
+                DriveFile.integration_id == integration_id,
+                DriveFile.google_file_id == google_file_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def list_drive_files_for_integration(self, integration_id: UUID) -> list[DriveFile]:
+        result = await self.session.execute(
+            select(DriveFile)
+            .where(DriveFile.integration_id == integration_id)
+            .order_by(DriveFile.modified_time.desc())
         )
         return list(result.scalars().all())

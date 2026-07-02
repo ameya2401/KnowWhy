@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.routes.drive import router as drive_router
 from app.api.routes.github import router as github_router
 from app.api.routes.health import router as health_router
 from app.api.routes.notion import router as notion_router
@@ -16,3 +17,4 @@ api_router.include_router(projects_router)
 api_router.include_router(users_router)
 api_router.include_router(github_router)
 api_router.include_router(notion_router)
+api_router.include_router(drive_router)

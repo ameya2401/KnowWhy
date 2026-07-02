@@ -11,6 +11,11 @@ import {
   FileText,
   ExternalLink,
   Layers,
+  Folder,
+  Home,
+  ChevronRight,
+  File,
+  Cloud,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,6 +33,11 @@ import {
   syncNotionIntegration,
   disconnectNotion,
   type NotionDashboardResponse,
+  getGoogleDriveIntegration,
+  connectGoogleDrive,
+  syncGoogleDriveIntegration,
+  disconnectGoogleDrive,
+  type GoogleDriveDashboardResponse,
 } from "@/services/integrationApi";
 
 interface ProjectIntegrationsProps {
@@ -58,7 +68,7 @@ export function ProjectIntegrations({
   accessToken,
   isMaintainer,
 }: ProjectIntegrationsProps) {
-  const [activeTab, setActiveTab] = useState<"github" | "notion">("github");
+  const [activeTab, setActiveTab] = useState<"github" | "notion" | "google_drive">("github");
 
   // GitHub States
   const [githubData, setGithubData] = useState<GetIntegrationResponse | null>(null);
@@ -82,6 +92,20 @@ export function ProjectIntegrations({
   const [isNotionSyncing, setIsNotionSyncing] = useState(false);
   const [showNotionMockForm, setShowNotionMockForm] = useState(false);
   const [notionMockCode, setNotionMockCode] = useState("");
+
+  // Google Drive States
+  const [driveData, setDriveData] = useState<GoogleDriveDashboardResponse | null>(null);
+  const [driveLoading, setDriveLoading] = useState(true);
+  const [driveError, setDriveError] = useState<string | null>(null);
+  const [driveSuccess, setDriveSuccess] = useState<string | null>(null);
+  const [isDriveSyncing, setIsDriveSyncing] = useState(false);
+  const [showDriveMockForm, setShowDriveMockForm] = useState(false);
+  const [driveMockCode, setDriveMockCode] = useState("");
+
+  // Folder Explorer & filter states
+  const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mimeTypeFilter, setMimeTypeFilter] = useState("all");
 
   // Fetch GitHub Status
   const fetchGithubStatus = useCallback(async () => {
@@ -119,10 +143,29 @@ export function ProjectIntegrations({
     }
   }, [accessToken, projectId]);
 
+  // Fetch Google Drive Status
+  const fetchDriveStatus = useCallback(async () => {
+    try {
+      const res = await getGoogleDriveIntegration(accessToken, projectId);
+      setDriveData(res);
+      if (res.integration?.status === "syncing") {
+        setIsDriveSyncing(true);
+      } else {
+        setIsDriveSyncing(false);
+      }
+    } catch (err) {
+      console.error("Failed to load Google Drive integration", err);
+      setDriveError("Failed to load Google Drive integration status.");
+    } finally {
+      setDriveLoading(false);
+    }
+  }, [accessToken, projectId]);
+
   useEffect(() => {
     void fetchGithubStatus();
     void fetchNotionStatus();
-  }, [fetchGithubStatus, fetchNotionStatus]);
+    void fetchDriveStatus();
+  }, [fetchGithubStatus, fetchNotionStatus, fetchDriveStatus]);
 
   // Polling during GitHub sync
   useEffect(() => {
@@ -136,6 +179,19 @@ export function ProjectIntegrations({
       if (intervalId) clearInterval(intervalId);
     };
   }, [isGithubSyncing, fetchGithubStatus]);
+
+  // Polling during Google Drive sync
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout | null = null;
+    if (isDriveSyncing) {
+      intervalId = setInterval(() => {
+        void fetchDriveStatus();
+      }, 4000);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isDriveSyncing, fetchDriveStatus]);
 
   // Polling during Notion sync
   useEffect(() => {
@@ -347,6 +403,154 @@ export function ProjectIntegrations({
     }
   };
 
+  // Google Drive Actions
+  const handleDriveRedirect = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+    if (!clientId) {
+      setDriveError("Google Client ID is not configured in the environment.");
+      setShowDriveMockForm(true);
+      return;
+    }
+    const redirectUri = `${window.location.origin}/integrations/drive/callback`;
+    const state = projectId;
+    const scope =
+      "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/userinfo.email";
+
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+      redirectUri,
+    )}&response_type=code&scope=${encodeURIComponent(scope)}&state=${state}&access_type=offline&prompt=consent`;
+  };
+
+  const handleDriveMockConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!driveMockCode.trim()) return;
+    setDriveLoading(true);
+    setDriveError(null);
+    setDriveSuccess(null);
+    try {
+      const redirectUri = `${window.location.origin}/integrations/drive/callback`;
+      await connectGoogleDrive(accessToken, {
+        code: driveMockCode.trim(),
+        project_id: projectId,
+        redirect_uri: redirectUri,
+      });
+      setDriveSuccess("Successfully connected Google Drive integration (mock token).");
+      setDriveMockCode("");
+      setShowDriveMockForm(false);
+      await fetchDriveStatus();
+    } catch (err) {
+      const apiErr = err as ApiError;
+      setDriveError(apiErr.response?.data?.detail ?? "Failed to connect using mock token.");
+    } finally {
+      setDriveLoading(false);
+    }
+  };
+
+  const handleDriveDisconnect = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to disconnect Google Drive? All synced file records will be deleted.",
+      )
+    ) {
+      return;
+    }
+    setDriveLoading(true);
+    setDriveError(null);
+    setDriveSuccess(null);
+    try {
+      await disconnectGoogleDrive(accessToken, projectId);
+      setDriveSuccess("Google Drive integration disconnected successfully.");
+      await fetchDriveStatus();
+      setCurrentFolderId(null);
+    } catch (err) {
+      const apiErr = err as ApiError;
+      setDriveError(apiErr.response?.data?.detail ?? "Failed to disconnect integration.");
+    } finally {
+      setDriveLoading(false);
+    }
+  };
+
+  const handleDriveSyncNow = async () => {
+    setIsDriveSyncing(true);
+    setDriveError(null);
+    setDriveSuccess(null);
+    try {
+      await syncGoogleDriveIntegration(accessToken, projectId);
+      setDriveSuccess("Google Drive sync request triggered. Fetching files in background...");
+      await fetchDriveStatus();
+    } catch (err) {
+      const apiErr = err as ApiError;
+      setDriveError(apiErr.response?.data?.detail ?? "Failed to sync Google Drive metadata.");
+      setIsDriveSyncing(false);
+    }
+  };
+
+  // Hierarchy/Breadcrumbs functions
+  const getBreadcrumbs = () => {
+    if (!driveData || !driveData.files || !currentFolderId) return [];
+    const crumbs = [];
+    let currentId: string | null = currentFolderId;
+    const visited = new Set<string>();
+
+    while (currentId) {
+      if (visited.has(currentId)) break;
+      visited.add(currentId);
+      const folder = driveData.files.find((f) => f.google_file_id === currentId);
+      if (folder) {
+        crumbs.unshift(folder);
+        currentId = folder.parent_folder;
+      } else {
+        break;
+      }
+    }
+    return crumbs;
+  };
+
+  const getVisibleFiles = () => {
+    if (!driveData || !driveData.files) return [];
+
+    let filtered = driveData.files;
+    if (currentFolderId === null) {
+      const folderIds = new Set(
+        driveData.files
+          .filter((f) => f.mime_type === "application/vnd.google-apps.folder")
+          .map((f) => f.google_file_id),
+      );
+      filtered = driveData.files.filter((f) => !f.parent_folder || !folderIds.has(f.parent_folder));
+    } else {
+      filtered = driveData.files.filter((f) => f.parent_folder === currentFolderId);
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((f) => f.name.toLowerCase().includes(q));
+    }
+
+    if (mimeTypeFilter !== "all") {
+      filtered = filtered.filter((f) => {
+        if (mimeTypeFilter === "folders") {
+          return f.mime_type === "application/vnd.google-apps.folder";
+        }
+        if (mimeTypeFilter === "documents") {
+          return (
+            f.mime_type.includes("document") ||
+            f.mime_type.includes("text") ||
+            f.mime_type.includes("markdown")
+          );
+        }
+        if (mimeTypeFilter === "spreadsheets") {
+          return f.mime_type.includes("spreadsheet") || f.mime_type.includes("csv");
+        }
+        if (mimeTypeFilter === "pdfs") {
+          return f.mime_type.includes("pdf");
+        }
+        return true;
+      });
+    }
+
+    return filtered;
+  };
+
   return (
     <div className="space-y-6">
       {/* Tabs Header */}
@@ -372,6 +576,17 @@ export function ProjectIntegrations({
         >
           <Layers className="size-4" />
           Notion
+        </button>
+        <button
+          onClick={() => setActiveTab("google_drive")}
+          className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-all ${
+            activeTab === "google_drive"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Cloud className="size-4 text-emerald-500" />
+          Google Drive
         </button>
       </div>
 
@@ -948,6 +1163,370 @@ export function ProjectIntegrations({
                               </td>
                             </tr>
                           ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      )}
+
+      {activeTab === "google_drive" && (
+        <div className="space-y-6">
+          {driveError && (
+            <div className="flex items-start gap-3 rounded-md bg-red-50 p-4 text-sm text-red-700 ring-1 ring-red-700/10">
+              <AlertCircle className="size-5 shrink-0 text-red-600" />
+              <div>{driveError}</div>
+            </div>
+          )}
+
+          {driveSuccess && (
+            <div className="flex items-start gap-3 rounded-md bg-emerald-50 p-4 text-sm text-emerald-700 ring-1 ring-emerald-700/10">
+              <CheckCircle2 className="size-5 shrink-0 text-emerald-600" />
+              <div>{driveSuccess}</div>
+            </div>
+          )}
+
+          {driveLoading && !driveData ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <RefreshCw className="size-8 animate-spin text-primary mb-4" />
+              <p className="text-sm text-muted-foreground">
+                Loading Google Drive integration details...
+              </p>
+            </div>
+          ) : !driveData?.integration ? (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                    <Cloud className="size-6" />
+                  </div>
+                  <div>
+                    <CardTitle>Connect Google Drive</CardTitle>
+                    <CardDescription>
+                      Sync files, PDFs, spreadsheets, and documents from your Google Drive into
+                      KnowWhy.
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-sm text-muted-foreground space-y-2">
+                  <p>
+                    By connecting your Google Drive account, KnowWhy will periodically scan and
+                    index permitted documents. This enables full semantic search and
+                    cross-referencing capabilities across your design specs, sheets, and research.
+                  </p>
+                  <ul className="list-disc pl-5 space-y-1">
+                    <li>Supports Google Docs, Sheets, Slides, PDFs, and Plain Text.</li>
+                    <li>Read-only access: We never modify or delete your files.</li>
+                    <li>Instant search: Keep your knowledge base in sync automatically.</li>
+                  </ul>
+                </div>
+
+                <div className="pt-4 flex flex-col gap-4">
+                  {isMaintainer ? (
+                    <>
+                      <Button
+                        onClick={handleDriveRedirect}
+                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
+                      >
+                        <Cloud className="size-4" />
+                        Connect Google Drive Account
+                      </Button>
+
+                      <div className="relative flex py-2 items-center">
+                        <div className="flex-grow border-t border-muted"></div>
+                        <span className="flex-shrink mx-4 text-muted-foreground text-xs">
+                          Or use manual/mock token
+                        </span>
+                        <div className="flex-grow border-t border-muted"></div>
+                      </div>
+
+                      {showDriveMockForm ? (
+                        <form
+                          onSubmit={handleDriveMockConnect}
+                          className="space-y-3 p-4 border rounded-lg bg-muted/30"
+                        >
+                          <h4 className="text-xs font-semibold">
+                            Enter Google OAuth Callback Code / Token
+                          </h4>
+                          <input
+                            type="text"
+                            placeholder="Enter mock oauth code or token string"
+                            className="w-full p-2 border rounded text-xs bg-background text-foreground"
+                            value={driveMockCode}
+                            onChange={(e) => setDriveMockCode(e.target.value)}
+                            required
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              type="submit"
+                              size="sm"
+                              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                            >
+                              Connect Mock
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowDriveMockForm(false)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </form>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowDriveMockForm(true)}
+                          className="w-full"
+                        >
+                          Manual Mock Connection (Local Testing)
+                        </Button>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-xs text-amber-600 bg-amber-50 p-3 rounded border border-amber-200">
+                      Only project Maintainers or Owners can connect external integrations.
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {/* Connected Header Panels */}
+              <div className="grid md:grid-cols-3 gap-6">
+                <Card className="md:col-span-2">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Cloud className="size-5 text-emerald-500" /> Google Drive Connection
+                      </CardTitle>
+                      <CardDescription>
+                        Connected to Google Account:{" "}
+                        <span className="font-semibold text-foreground">
+                          {driveData.integration?.workspace_name || "Google Account"}
+                        </span>{" "}
+                        at{" "}
+                        {driveData.integration?.connected_at
+                          ? new Date(driveData.integration.connected_at).toLocaleString()
+                          : ""}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      {isMaintainer && (
+                        <Button variant="outline" size="sm" onClick={handleDriveDisconnect}>
+                          Disconnect
+                        </Button>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 pt-2 border-t text-sm">
+                      <div>
+                        <span className="text-muted-foreground block text-xs">Status</span>
+                        <span className="font-semibold capitalize flex items-center gap-1.5 mt-0.5">
+                          {driveData.integration?.status === "syncing" && (
+                            <RefreshCw className="size-3.5 animate-spin text-emerald-500" />
+                          )}
+                          {driveData.integration?.status === "connected" && (
+                            <span className="size-2 rounded-full bg-emerald-500" />
+                          )}
+                          {driveData.integration?.status === "error" && (
+                            <span className="size-2 rounded-full bg-red-500" />
+                          )}
+                          {driveData.integration?.status}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground block text-xs">Last Synced</span>
+                        <span className="font-semibold mt-0.5 block">
+                          {driveData.integration?.last_sync
+                            ? new Date(driveData.integration.last_sync).toLocaleString()
+                            : "Never"}
+                        </span>
+                      </div>
+                    </div>
+                    {driveData.integration?.last_error && (
+                      <div className="rounded-md bg-red-50 p-3 text-xs text-red-800 border border-red-200">
+                        <span className="font-semibold">Last error:</span>{" "}
+                        {driveData.integration.last_error}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium">Sync Controls</CardTitle>
+                    <CardDescription>Scan Drive items for updates</CardDescription>
+                  </CardHeader>
+                  <CardContent className="flex flex-col gap-3">
+                    <div className="text-xs text-muted-foreground flex items-center gap-2">
+                      <File className="size-4 shrink-0 text-emerald-500" />
+                      <span>Synced Files: {driveData.files?.length || 0}</span>
+                    </div>
+                    <Button
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                      disabled={isDriveSyncing}
+                      onClick={handleDriveSyncNow}
+                    >
+                      <RefreshCw
+                        className={`mr-2 size-4 ${isDriveSyncing ? "animate-spin" : ""}`}
+                      />
+                      {isDriveSyncing ? "Scanning..." : "Sync Drive"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Synced Drive Folder / Files Explorer */}
+              <Card>
+                <CardHeader>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <CardTitle>File Explorer</CardTitle>
+                      <CardDescription>
+                        Explore folders and files synced from Google Drive.
+                      </CardDescription>
+                    </div>
+
+                    {/* Search & Filter controls */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
+                        <input
+                          type="text"
+                          placeholder="Search files..."
+                          className="pl-8 pr-3 py-1.5 text-xs rounded border bg-background text-foreground w-[160px] md:w-[200px]"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                      </div>
+                      <select
+                        className="py-1.5 px-2 text-xs rounded border bg-background text-foreground"
+                        value={mimeTypeFilter}
+                        onChange={(e) => setMimeTypeFilter(e.target.value)}
+                      >
+                        <option value="all">All Types</option>
+                        <option value="folders">Folders Only</option>
+                        <option value="documents">Docs & Text</option>
+                        <option value="spreadsheets">Spreadsheets</option>
+                        <option value="pdfs">PDFs Only</option>
+                      </select>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Breadcrumbs */}
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted/30 p-2 rounded-md border flex-wrap">
+                    <button
+                      onClick={() => setCurrentFolderId(null)}
+                      className={`flex items-center gap-1 hover:text-foreground font-medium ${
+                        currentFolderId === null ? "text-foreground font-semibold" : ""
+                      }`}
+                    >
+                      <Home className="size-3.5" />
+                      <span>Root</span>
+                    </button>
+
+                    {getBreadcrumbs().map((crumb) => (
+                      <div key={crumb.id} className="flex items-center gap-1.5">
+                        <ChevronRight className="size-3" />
+                        <button
+                          onClick={() => setCurrentFolderId(crumb.google_file_id)}
+                          className={`hover:text-foreground font-medium ${
+                            currentFolderId === crumb.google_file_id
+                              ? "text-foreground font-semibold"
+                              : ""
+                          }`}
+                        >
+                          {crumb.name}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {getVisibleFiles().length === 0 ? (
+                    <div className="text-center py-12 text-muted-foreground text-sm border rounded-lg bg-muted/10">
+                      No files found in this folder.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto border rounded-md">
+                      <table className="w-full text-left border-collapse text-sm">
+                        <thead>
+                          <tr className="bg-muted/40 border-b">
+                            <th className="p-3 font-medium text-xs text-muted-foreground">Name</th>
+                            <th className="p-3 font-medium text-xs text-muted-foreground">Type</th>
+                            <th className="p-3 font-medium text-xs text-muted-foreground">Size</th>
+                            <th className="p-3 font-medium text-xs text-muted-foreground">
+                              Last Modified
+                            </th>
+                            <th className="p-3 font-medium text-xs text-muted-foreground text-right">
+                              Link
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y">
+                          {getVisibleFiles().map((file) => {
+                            const isFolder =
+                              file.mime_type === "application/vnd.google-apps.folder";
+                            return (
+                              <tr key={file.id} className="hover:bg-muted/20">
+                                <td className="p-3">
+                                  {isFolder ? (
+                                    <button
+                                      onClick={() => setCurrentFolderId(file.google_file_id)}
+                                      className="font-semibold text-emerald-600 hover:text-emerald-900 flex items-center gap-2 text-left"
+                                    >
+                                      <Folder className="size-4 text-emerald-500 shrink-0 fill-emerald-500/10" />
+                                      <span>{file.name}</span>
+                                    </button>
+                                  ) : (
+                                    <div className="font-semibold text-foreground flex items-center gap-2">
+                                      <File className="size-4 text-muted-foreground shrink-0" />
+                                      <span>{file.name}</span>
+                                    </div>
+                                  )}
+                                </td>
+                                <td className="p-3 text-muted-foreground text-xs max-w-[150px] truncate">
+                                  {isFolder
+                                    ? "Folder"
+                                    : file.mime_type.split(".").pop() || file.mime_type}
+                                </td>
+                                <td className="p-3 text-muted-foreground text-xs">
+                                  {isFolder
+                                    ? "—"
+                                    : file.file_size
+                                      ? `${Math.round(file.file_size / 1024)} KB`
+                                      : "0 KB"}
+                                </td>
+                                <td className="p-3 text-muted-foreground text-xs">
+                                  {new Date(file.modified_time).toLocaleString()}
+                                </td>
+                                <td className="p-3 text-right">
+                                  {file.url && (
+                                    <a
+                                      href={file.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-900 font-medium"
+                                    >
+                                      Open
+                                      <ExternalLink className="size-3" />
+                                    </a>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

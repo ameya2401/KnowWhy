@@ -1,5 +1,29 @@
 # KnowWhy Changelog
 
+## 2026-07-02 - M09 Google Drive Integration
+
+### Features Added
+
+- Added `google_drive_files` table mapping to local database schema for Google Drive integration.
+- Added backend `GoogleDriveAPIClient` supporting folder harvesting, hierarchy metadata crawls, and OAuth token exchange.
+- Added backend Google Drive routes: `GET /integrations/google_drive`, `POST /integrations/google_drive/connect`, `POST /integrations/google_drive/sync`, `DELETE /integrations/google_drive/disconnect`.
+- Added mock Google Drive OAuth token, directory indexing, and list API routes for offline integration testing.
+- Added backend unit tests (30 passing total) covering credential encryption, folder indexing, file crawling, and metadata parsing.
+- Added frontend integration services (`getGoogleDriveIntegration`, `connectGoogleDrive`, `syncGoogleDriveIntegration`, `disconnectGoogleDrive`).
+- Added frontend Google Drive tab within `ProjectIntegrations.tsx` layout with connection status card, active status display, manual/mock connection form, sync control, search & mime-type filters, hierarchical breadcrumbs, and an interactive Folder Explorer.
+- Added frontend Google Drive Callback page (`GoogleDriveCallbackPage.tsx`) and registered routing configuration.
+
+### Files Added
+
+- Backend: `app/api/routes/google_drive.py`, `app/integrations/google_drive.py`.
+- Frontend: `src/pages/GoogleDriveCallbackPage.tsx`.
+
+### Files Modified
+
+- Backend: `app/models/integration.py`, `app/api/router.py`, `app/database/base.py`.
+- Frontend: `src/services/integrationApi.ts`, `src/components/ProjectIntegrations.tsx`, `src/App.tsx`, `src/routes/router.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
 ## 2026-07-02 - M08 Notion Integration
 
 ### Features Added
