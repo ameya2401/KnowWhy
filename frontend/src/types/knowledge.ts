@@ -14,7 +14,7 @@ export interface KnowledgeItem {
   updated_time: string;
   tags: string[] | null;
   status: string;
-  metadata_json?: Record<string, any> | null;
+  metadata_json?: Record<string, unknown> | null;
 }
 
 export interface KnowledgeRelationship {

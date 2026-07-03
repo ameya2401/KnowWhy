@@ -84,7 +84,7 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
       });
       setItems(res.items);
       setTotalItems(res.total);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setItemsError("Failed to fetch knowledge items.");
     } finally {
@@ -99,7 +99,7 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
     try {
       const res = await getKnowledgeTimeline(accessToken, projectId, 50, 0);
       setTimelineItems(res);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setTimelineError("Failed to fetch knowledge timeline.");
     } finally {
@@ -156,10 +156,11 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
           }
         }, 2000);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setSyncStatus("error");
-      setSyncError(err.response?.data?.detail || "Failed to trigger synchronization.");
+      const axiosError = err as { response?: { data?: { detail?: string } } };
+      setSyncError(axiosError.response?.data?.detail || "Failed to trigger synchronization.");
     }
   };
 
@@ -180,7 +181,7 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
         ]);
         setSelectedItem(itemData);
         setRelationships(relData);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
         setDetailError("Failed to load details.");
       } finally {
