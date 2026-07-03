@@ -2,6 +2,23 @@
 
 ## Completed Milestones
 
+### M10 KnowWhy Knowledge Engine
+
+- Status: Completed
+- Completion Date: 2026-07-03
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend Knowledge Store database tables, entity normalization engine, parent-child Notion/Google Drive relationship mappings, and GitHub commit/PR references mappings.
+- Backend API endpoints under `/api/knowledge` supporting pagination, timelines, relationships, detail lookup, and sync triggering.
+- Backend pytest test suite (32 tests total) covering normalization mapping, service-level syncing, and relationship generation.
+- Frontend TypeScript type definitions and API client wrapping.
+- Frontend interactive Knowledge Base browser tab with dual list/timeline views, filter capabilities, sync polling, and interactive side drawer detailing metadata and relationship link navigation.
+- Zero TypeScript compile-time errors or warnings and clean Prettier/Ruff checks.
+
 ### M09 Google Drive Integration
 
 - Status: Completed

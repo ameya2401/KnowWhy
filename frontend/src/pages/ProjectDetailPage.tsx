@@ -10,6 +10,7 @@ import {
   Trash2,
   Shield,
   Link2,
+  Database,
 } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
@@ -26,6 +27,7 @@ import {
 } from "@/projects/projectApi";
 import type { Project, ProjectMember, ProjectRole } from "@/projects/types";
 import { ProjectIntegrations } from "@/components/ProjectIntegrations";
+import { KnowledgeBrowser } from "@/components/KnowledgeBrowser";
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -33,7 +35,9 @@ export function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "members" | "integrations">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "members" | "integrations" | "knowledge">(
+    "overview",
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -240,6 +244,16 @@ export function ProjectDetailPage() {
           >
             <Link2 className="size-4" /> Integrations
           </button>
+          <button
+            onClick={() => setActiveTab("knowledge")}
+            className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === "knowledge"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Database className="size-4" /> Knowledge Base
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -439,6 +453,10 @@ export function ProjectDetailPage() {
             accessToken={accessToken}
             isMaintainer={isMaintainer}
           />
+        )}
+
+        {activeTab === "knowledge" && projectId && accessToken && (
+          <KnowledgeBrowser projectId={projectId} accessToken={accessToken} />
         )}
       </div>
     </DashboardLayout>
