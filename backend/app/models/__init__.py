@@ -1,5 +1,6 @@
 from app.models.integration import (
     Commit,
+    DriveFile,
     Integration,
     IntegrationProvider,
     IntegrationRepository,
@@ -8,6 +9,7 @@ from app.models.integration import (
     NotionPage,
     PullRequest,
 )
+from app.models.knowledge import KnowledgeItem, KnowledgeRelationship, KnowledgeSyncLog
 from app.models.organization import (
     Organization,
     OrganizationInvitation,
@@ -37,6 +39,10 @@ __all__ = [
     "PullRequest",
     "Issue",
     "NotionPage",
+    "DriveFile",
     "IntegrationProvider",
     "IntegrationStatus",
+    "KnowledgeItem",
+    "KnowledgeRelationship",
+    "KnowledgeSyncLog",
 ]

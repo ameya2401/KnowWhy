@@ -135,4 +135,19 @@ Reason: Reduces page indexing and harvesting overhead, keeps navigation snappy v
 
 Files affected: `backend/app/models/integration.py`, `backend/app/integrations/`, `backend/app/api/routes/google_drive.py`, `frontend/src/components/ProjectIntegrations.tsx`
 
+## DEC-012: Unified Knowledge Engine, Graph Relationships and Knowledge Base UI
+
+Context: M10 requires a central, source-agnostic knowledge storage format to unify and index data from all connected integrations, auto-generating relationship edges (Notion hierarchy, Google Drive folders, GitHub issue references) and exposing these inside an interactive browse UI.
+
+Decision:
+1. Create a `knowledge_items` table representing unified resources, an indexable `uq_knowledge_items_project_source_entity` constraint for idempotent updates, a `knowledge_relationships` table for directional relationship edges, and `knowledge_sync_logs` for audit metrics.
+2. Normalize structures on the fly with a modular `NormalizationEngine` converting provider-specific models (commits, PRs, issues, Notion pages, Google Drive files/directories) into unified knowledge items.
+3. Generate relationship mappings dynamically: parse Notion/Google Drive parent folders, scan commit logs for issue numbers (`#\d+`), and scan pull request descriptions for closing target tags (`#\d+`).
+4. Build a comprehensive "Knowledge Base" UI tab containing a search input, status/source filters, a timeline view feed, and a detailed sidebar/drawer permitting cross-navigation through the relationship links.
+
+Reason: Decouples the application's search and AI layers from integration-specific models, minimizes synchronization overhead via idempotent database upserts, and improves navigate-ability through relational link crawling.
+
+Files affected: `backend/app/models/knowledge.py`, `backend/app/repositories/knowledge.py`, `backend/app/services/knowledge.py`, `backend/app/api/routes/knowledge.py`, `frontend/src/types/knowledge.ts`, `frontend/src/services/knowledgeApi.ts`, `frontend/src/components/KnowledgeBrowser.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`
+
+
 

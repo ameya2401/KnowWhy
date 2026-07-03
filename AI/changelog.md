@@ -1,5 +1,30 @@
 # KnowWhy Changelog
 
+## 2026-07-03 - M10 KnowWhy Knowledge Engine
+
+### Features Added
+
+- Created `knowledge_items`, `knowledge_relationships`, and `knowledge_sync_logs` database tables with index and constraints.
+- Added backend service layers `NormalizationEngine` and `KnowledgeService` converting raw GitHub, Notion, and Google Drive models to unified schema entities.
+- Implemented automatic parent-child relationship generators (Notion parent links and Google Drive folder containment structure).
+- Implemented regular expression hashtag matching (`#\d+`) to capture relationships from GitHub commits and pull requests referencing/fixing issues.
+- Added API endpoints (`GET /api/knowledge`, `GET /api/knowledge/{id}`, `GET /api/knowledge/relationships/{id}`, `GET /api/knowledge/timeline`, and `POST /api/knowledge/sync`) to retrieve paginated stores, timelines, relationships, and trigger sync routines under role-based project protection.
+- Added frontend TypeScript type definitions representing the knowledge items, relationships, and sync logs.
+- Added frontend api methods (`listKnowledgeItems`, `getKnowledgeItem`, `getKnowledgeItemRelationships`, `getKnowledgeTimeline`, `syncKnowledge`) inside a dedicated API wrapper.
+- Integrated a comprehensive "Knowledge Base" UI tab in `ProjectDetailPage.tsx` offering a searchable list view, source/type/status filtering, a vertical chronological timeline feed, manual sync controls, and an interactive side detail drawer/navigable relationship crawler.
+- Fixed backend unit tests (32 passing total) validating the engine normalization mapping, relationship mappings, and API endpoints.
+
+### Files Added
+
+- Backend: `alembic/versions/20260703_0008_create_knowledge_tables.py`, `app/repositories/knowledge.py`, `app/services/knowledge.py`, `app/schemas/knowledge.py`, `app/api/routes/knowledge.py`, `tests/test_knowledge_engine.py`.
+- Frontend: `src/types/knowledge.ts`, `src/services/knowledgeApi.ts`, `src/components/KnowledgeBrowser.tsx`.
+
+### Files Modified
+
+- Backend: `app/api/router.py`, `app/database/base.py`.
+- Frontend: `src/pages/ProjectDetailPage.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
 ## 2026-07-02 - M09 Google Drive Integration
 
 ### Features Added

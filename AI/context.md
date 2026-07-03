@@ -71,3 +71,13 @@ KnowWhy currently contains:
   - Backend integration service layer with support for Google Drive API OAuth token exchange, file/folder metadata harvesting, hierarchy reconstruction, and background sync logic.
   - Frontend Google Drive Integration tab featuring connection status, sync controls, file size/type filters, search bar, hierarchical navigation breadcrumbs, and an interactive folder explorer.
   - Frontend Google Drive OAuth Callback handler (`/integrations/drive/callback`) to finalize authorization.
+
+- **Milestone M10 KnowWhy Knowledge Engine**:
+  - `knowledge_items`, `knowledge_relationships`, and `knowledge_sync_logs` tables in database schema.
+  - Unified entity normalization engine (`NormalizationEngine` and `KnowledgeService`) supporting mapping, deduplication (upserts), and metadata parsing.
+  - Automatic relationship mapping rules connecting Notion pages (parent hierarchy), Google Drive files (folder containment), and GitHub commits/PRs (issue reference parsing).
+  - Backend Knowledge APIs supporting pagination, details retrieval, relationship fetching, and sync triggering with role-based project protection.
+  - Backend pytest suite validating normalization, ingestion, and relationship synthesis.
+  - Frontend TypeScript definitions and API client wrapper (`knowledgeApi.ts`).
+  - Frontend "Knowledge Base" tab in Project Details Page providing list/timeline toggle views, status filtering, search bar, and an interactive side drawer for entity details and relationship navigation.
+
