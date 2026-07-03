@@ -39,7 +39,7 @@ interface KnowledgeBrowserProps {
 
 export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserProps) {
   const [viewMode, setViewMode] = useState<"list" | "timeline">("list");
-  
+
   // List Filters & Pagination
   const [items, setItems] = useState<KnowledgeItem[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -142,9 +142,9 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
         const interval = setInterval(async () => {
           attempts++;
           try {
-            // Note: Since we don't have a direct get_latest_sync_log endpoint, 
-            // calling sync again on same project will just trigger normal engine run 
-            // but we can poll by calling listKnowledgeItems to see if items list updates, 
+            // Note: Since we don't have a direct get_latest_sync_log endpoint,
+            // calling sync again on same project will just trigger normal engine run
+            // but we can poll by calling listKnowledgeItems to see if items list updates,
             // or simply wait a moment. For robust UI, we poll the list items after 3 seconds.
             if (attempts > 5) {
               clearInterval(interval);
@@ -266,7 +266,8 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
             )}
             {syncStatus === "success" && syncLog && (
               <span className="text-xs text-green-600 flex items-center gap-1.5">
-                <CheckCircle className="size-3" /> Normalized {syncLog.items_synced} items, {syncLog.relationships_created} relationships
+                <CheckCircle className="size-3" /> Normalized {syncLog.items_synced} items,{" "}
+                {syncLog.relationships_created} relationships
               </span>
             )}
             {syncStatus === "error" && (
@@ -286,7 +287,8 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
             <CardHeader className="pb-3">
               <CardTitle>Knowledge Store</CardTitle>
               <CardDescription>
-                Search and explore aggregated knowledge items normalized from connected integrations.
+                Search and explore aggregated knowledge items normalized from connected
+                integrations.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -363,7 +365,9 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
               ) : items.length === 0 ? (
                 <div className="flex h-48 flex-col items-center justify-center gap-2 border border-dashed rounded-md">
                   <Database className="size-8 text-muted-foreground" />
-                  <p className="text-sm font-medium text-muted-foreground">No knowledge items found.</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    No knowledge items found.
+                  </p>
                   <p className="text-xs text-muted-foreground">Try triggering a sync above.</p>
                 </div>
               ) : (
@@ -385,13 +389,13 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
                         </div>
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${getSourceBadgeColor(
-                            item.source
+                            item.source,
                           )}`}
                         >
                           {item.source}
                         </span>
                       </div>
-                      
+
                       <p className="text-xs text-muted-foreground line-clamp-2">
                         {item.description || "No description provided."}
                       </p>
@@ -403,12 +407,16 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
                           </span>
                         )}
                         <span className="flex items-center gap-1">
-                          <Calendar className="size-3" /> {new Date(item.updated_time).toLocaleDateString()}
+                          <Calendar className="size-3" />{" "}
+                          {new Date(item.updated_time).toLocaleDateString()}
                         </span>
                         {item.tags && item.tags.length > 0 && (
                           <div className="flex gap-1.5">
                             {item.tags.slice(0, 3).map((t) => (
-                              <span key={t} className="inline-flex items-center gap-0.5 rounded bg-secondary px-1 py-0.5 text-[10px] text-secondary-foreground font-medium">
+                              <span
+                                key={t}
+                                className="inline-flex items-center gap-0.5 rounded bg-secondary px-1 py-0.5 text-[10px] text-secondary-foreground font-medium"
+                              >
                                 <Tag className="size-2" /> {t}
                               </span>
                             ))}
@@ -424,13 +432,24 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
               {totalItems > limit && (
                 <div className="flex items-center justify-between pt-2">
                   <p className="text-xs text-muted-foreground">
-                    Showing {offset + 1} to {Math.min(offset + limit, totalItems)} of {totalItems} items
+                    Showing {offset + 1} to {Math.min(offset + limit, totalItems)} of {totalItems}{" "}
+                    items
                   </p>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={handlePrevPage} disabled={offset === 0}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevPage}
+                      disabled={offset === 0}
+                    >
                       <ChevronLeft className="size-4 mr-1" /> Previous
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleNextPage} disabled={offset + limit >= totalItems}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNextPage}
+                      disabled={offset + limit >= totalItems}
+                    >
                       Next <ChevronRight className="size-4 ml-1" />
                     </Button>
                   </div>
@@ -458,12 +477,18 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
               ) : timelineItems.length === 0 ? (
                 <div className="flex h-48 flex-col items-center justify-center gap-2 border border-dashed rounded-md">
                   <Clock className="size-8 text-muted-foreground" />
-                  <p className="text-sm font-medium text-muted-foreground">No chronological events found.</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    No chronological events found.
+                  </p>
                 </div>
               ) : (
                 <div className="relative border-l border-border pl-6 ml-3 space-y-6">
                   {timelineItems.map((item) => (
-                    <div key={item.id} className="relative group cursor-pointer" onClick={() => setSelectedItemId(item.id)}>
+                    <div
+                      key={item.id}
+                      className="relative group cursor-pointer"
+                      onClick={() => setSelectedItemId(item.id)}
+                    >
                       {/* Timeline marker */}
                       <span className="absolute -left-9 top-1.5 flex size-6 items-center justify-center rounded-full bg-background border border-border ring-4 ring-background">
                         {getSourceIcon(item.source, item.entity_type)}
@@ -471,7 +496,8 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
 
                       <div>
                         <span className="text-xs text-muted-foreground flex items-center gap-1 mb-1">
-                          <Calendar className="size-3" /> {new Date(item.updated_time).toLocaleString()}
+                          <Calendar className="size-3" />{" "}
+                          {new Date(item.updated_time).toLocaleString()}
                         </span>
                         <h4 className="font-semibold text-foreground group-hover:text-primary transition-colors">
                           {item.title}
@@ -480,11 +506,15 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
                           {item.description || "No description provided."}
                         </p>
                         <div className="flex gap-2 items-center mt-2 text-xs">
-                          <span className={`rounded-full px-1.5 py-0.5 font-medium ${getSourceBadgeColor(item.source)}`}>
+                          <span
+                            className={`rounded-full px-1.5 py-0.5 font-medium ${getSourceBadgeColor(item.source)}`}
+                          >
                             {item.source}
                           </span>
                           <span className="text-muted-foreground">•</span>
-                          <span className="text-muted-foreground capitalize">{item.entity_type}</span>
+                          <span className="text-muted-foreground capitalize">
+                            {item.entity_type}
+                          </span>
                           {item.author && (
                             <>
                               <span className="text-muted-foreground">•</span>
@@ -516,7 +546,9 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
               <div className="flex h-64 flex-col items-center justify-center gap-2 text-center text-muted-foreground">
                 <Database className="size-8" />
                 <p className="text-sm font-medium">No entity selected.</p>
-                <p className="text-xs">Click on any item in the list or timeline to view details.</p>
+                <p className="text-xs">
+                  Click on any item in the list or timeline to view details.
+                </p>
               </div>
             ) : isDetailLoading ? (
               <div className="flex h-64 items-center justify-center">
@@ -530,14 +562,18 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
               <div className="space-y-6">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getSourceBadgeColor(selectedItem.source)}`}>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${getSourceBadgeColor(selectedItem.source)}`}
+                    >
                       {selectedItem.source}
                     </span>
                     <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-800 text-[10px] font-medium px-2 py-0.5 capitalize">
                       {selectedItem.entity_type}
                     </span>
                   </div>
-                  <h3 className="font-semibold text-foreground text-base leading-snug">{selectedItem.title}</h3>
+                  <h3 className="font-semibold text-foreground text-base leading-snug">
+                    {selectedItem.title}
+                  </h3>
                   {selectedItem.url && (
                     <a
                       href={selectedItem.url}
@@ -551,7 +587,9 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
                 </div>
 
                 <div className="space-y-3 pt-4 border-t border-border">
-                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Properties</h4>
+                  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Properties
+                  </h4>
                   <div className="space-y-2 text-xs">
                     {selectedItem.author && (
                       <div className="flex justify-between">
@@ -573,14 +611,18 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Status:</span>
-                      <span className="font-medium text-foreground capitalize">{selectedItem.status}</span>
+                      <span className="font-medium text-foreground capitalize">
+                        {selectedItem.status}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {selectedItem.description && (
                   <div className="space-y-2 pt-4 border-t border-border">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Description</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Description
+                    </h4>
                     <p className="text-xs text-foreground bg-muted p-2 rounded leading-relaxed whitespace-pre-wrap">
                       {selectedItem.description}
                     </p>
@@ -589,7 +631,9 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
 
                 {selectedItem.content && (
                   <div className="space-y-2 pt-4 border-t border-border">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Content</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Content
+                    </h4>
                     <div className="max-h-48 overflow-y-auto text-xs text-foreground bg-muted p-2.5 rounded font-mono leading-relaxed whitespace-pre-wrap">
                       {selectedItem.content}
                     </div>
@@ -602,7 +646,9 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
                     <Link2 className="size-3" /> Graph Relationships ({relationships.length})
                   </h4>
                   {relationships.length === 0 ? (
-                    <p className="text-xs text-muted-foreground italic">No relationships mapped for this item.</p>
+                    <p className="text-xs text-muted-foreground italic">
+                      No relationships mapped for this item.
+                    </p>
                   ) : (
                     <div className="space-y-2">
                       {relationships.map((rel) => {
@@ -650,14 +696,17 @@ export function KnowledgeBrowser({ projectId, accessToken }: KnowledgeBrowserPro
                   )}
                 </div>
 
-                {selectedItem.metadata_json && Object.keys(selectedItem.metadata_json).length > 0 && (
-                  <div className="space-y-2 pt-4 border-t border-border">
-                    <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Raw Metadata</h4>
-                    <pre className="max-h-40 overflow-auto text-[10px] text-muted-foreground bg-muted p-2 rounded leading-tight">
-                      {JSON.stringify(selectedItem.metadata_json, null, 2)}
-                    </pre>
-                  </div>
-                )}
+                {selectedItem.metadata_json &&
+                  Object.keys(selectedItem.metadata_json).length > 0 && (
+                    <div className="space-y-2 pt-4 border-t border-border">
+                      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Raw Metadata
+                      </h4>
+                      <pre className="max-h-40 overflow-auto text-[10px] text-muted-foreground bg-muted p-2 rounded leading-tight">
+                        {JSON.stringify(selectedItem.metadata_json, null, 2)}
+                      </pre>
+                    </div>
+                  )}
               </div>
             )}
           </CardContent>

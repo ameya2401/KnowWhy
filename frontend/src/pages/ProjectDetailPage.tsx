@@ -35,7 +35,9 @@ export function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "members" | "integrations" | "knowledge">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "members" | "integrations" | "knowledge">(
+    "overview",
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -454,10 +456,7 @@ export function ProjectDetailPage() {
         )}
 
         {activeTab === "knowledge" && projectId && accessToken && (
-          <KnowledgeBrowser
-            projectId={projectId}
-            accessToken={accessToken}
-          />
+          <KnowledgeBrowser projectId={projectId} accessToken={accessToken} />
         )}
       </div>
     </DashboardLayout>
