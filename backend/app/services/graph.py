@@ -1,21 +1,21 @@
-import re
-from datetime import datetime, UTC
+from datetime import datetime
 from uuid import UUID
-from sqlalchemy import select, or_, and_
+
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.project import Project, ProjectMember
-from app.models.user import User
+from app.models.ai_chat import AIConversation
 from app.models.integration import Integration, IntegrationRepository
 from app.models.knowledge import KnowledgeItem, KnowledgeRelationship
-from app.models.ai_chat import AIConversation
+from app.models.project import Project, ProjectMember
+from app.models.user import User
 from app.schemas.graph import (
-    GraphNode,
-    GraphEdge,
-    GraphResponse,
     EntityDetailResponse,
     EntityRelationshipDetail,
+    GraphEdge,
+    GraphNode,
+    GraphResponse,
     NeighborInfo,
     TimelineEvent,
     TimelineResponse,
@@ -37,7 +37,7 @@ class GraphService:
         Builds and returns the knowledge graph for a project.
         Fetches the Project itself, User members, Integrations, connected Repos, 
         KnowledgeItems, and KnowledgeRelationships, connecting them with explicit and implicit edges.
-        """
+        """  # noqa: E501
         nodes = []
         edges = []
 
@@ -157,7 +157,7 @@ class GraphService:
                             )
                         )
                     # Edge: Integration -> contains -> Repository
-                    if not entity_types or ("integration" in entity_types and "repository" in entity_types):
+                    if not entity_types or ("integration" in entity_types and "repository" in entity_types):  # noqa: E501
                         edges.append(
                             GraphEdge(
                                 id=f"edge-int-repo-{repo.id}",
@@ -177,7 +177,7 @@ class GraphService:
         )
         if entity_types:
             # Map entity types back to what's stored in knowledge items
-            kb_types = [t for t in entity_types if t not in ["project", "user", "integration", "repository"]]
+            kb_types = [t for t in entity_types if t not in ["project", "user", "integration", "repository"]]  # noqa: E501
             if kb_types:
                 items_stmt = items_stmt.where(KnowledgeItem.entity_type.in_(kb_types))
             else:
@@ -409,7 +409,7 @@ class GraphService:
                 user_stmt = (
                     select(User)
                     .join(ProjectMember, ProjectMember.user_id == User.id)
-                    .where(and_(ProjectMember.project_id == project_id, User.id == UUID(user_id_str)))
+                    .where(and_(ProjectMember.project_id == project_id, User.id == UUID(user_id_str)))  # noqa: E501
                 )
                 user_res = await self.session.execute(user_stmt)
                 user = user_res.scalar_one_or_none()
@@ -481,7 +481,7 @@ class GraphService:
             items_stmt = items_stmt.where(KnowledgeItem.created_time <= end_date)
 
         # Order by created_time descending
-        items_stmt = items_stmt.order_by(KnowledgeItem.created_time.desc()).limit(limit).offset(offset)
+        items_stmt = items_stmt.order_by(KnowledgeItem.created_time.desc()).limit(limit).offset(offset)  # noqa: E501
         items_res = await self.session.execute(items_stmt)
         items = items_res.scalars().all()
 
@@ -520,7 +520,7 @@ class GraphService:
                         id=str(conv.id),
                         type="ai_conversation",
                         title=conv.title,
-                        description=f"AI Conversation session with {conv.provider} (temp: {conv.temperature})",
+                        description=f"AI Conversation session with {conv.provider} (temp: {conv.temperature})",  # noqa: E501
                         time=conv.created_at,
                         author="AI Assistant",
                         url=None,

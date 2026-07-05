@@ -1,18 +1,18 @@
-import time
-import re
 import json
 import logging
-from typing import Dict, Any, List, Tuple, AsyncGenerator
-from uuid import UUID, uuid4
-from datetime import datetime, UTC
+import time
+from collections.abc import AsyncGenerator
+from datetime import UTC, datetime
+from typing import Any
+from uuid import UUID
 
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_
 
-from app.schemas.ai import AIQueryResponse, AICitation, AIChatRequest
-from app.services.search import SearchService
-from app.services.llm_providers import get_llm_provider
 from app.models.ai_chat import AIConversation, AIMessage
+from app.schemas.ai import AIChatRequest, AICitation, AIQueryResponse
+from app.services.llm_providers import get_llm_provider
+from app.services.search import SearchService
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class ContextBuilder:
     def __init__(self, token_budget: int = 3000) -> None:
         self.token_budget = token_budget
 
-    def select_context(self, search_results: list) -> Tuple[list, list]:
+    def select_context(self, search_results: list) -> tuple[list, list]:
         """Selects items that fit into the token budget and filters duplicates."""
         seen_ids = set()
         selected_items = []
@@ -89,7 +89,7 @@ class PromptBuilder:
         query: str,
         intent: str,
         context_items: list,
-    ) -> Tuple[str, str]:
+    ) -> tuple[str, str]:
         system_prompt = (
             "You are KnowWhy Intelligence Engine, an expert enterprise assistant.\n"
             "Answer user questions using ONLY the retrieved organizational context below.\n"
@@ -102,7 +102,7 @@ class PromptBuilder:
         for idx, item in enumerate(context_items):
             title = item.title if hasattr(item, "title") else item.get("title", "")
             source = item.source if hasattr(item, "source") else item.get("source", "")
-            entity_type = item.entity_type if hasattr(item, "entity_type") else item.get("entity_type", "")
+            entity_type = item.entity_type if hasattr(item, "entity_type") else item.get("entity_type", "")  # noqa: E501
             content = item.content if hasattr(item, "content") else item.get("content", "")
 
             context_str += (
@@ -112,13 +112,13 @@ class PromptBuilder:
 
         intent_instructions = ""
         if intent == "timeline":
-            intent_instructions = "Please list key milestones or updates chronologically with dates."
+            intent_instructions = "Please list key milestones or updates chronologically with dates."  # noqa: E501
         elif intent == "comparison":
-            intent_instructions = "Please draw comparisons, highlighting key pros, cons, and differences."
+            intent_instructions = "Please draw comparisons, highlighting key pros, cons, and differences."  # noqa: E501
         elif intent == "decision":
-            intent_instructions = "Focus specifically on why decisions were taken, the rationale, and who decided."
+            intent_instructions = "Focus specifically on why decisions were taken, the rationale, and who decided."  # noqa: E501
         elif intent == "summarization":
-            intent_instructions = "Provide a concise summary highlighting the most critical aspects."
+            intent_instructions = "Provide a concise summary highlighting the most critical aspects."  # noqa: E501
 
         prompt = (
             f"Retrieved Organizational Context:\n"
@@ -136,14 +136,14 @@ class CitationEngine:
     """Verifies that facts are grounded in retrieved documents and formats citations."""
 
     @staticmethod
-    def extract_citations(context_items: list) -> List[AICitation]:
+    def extract_citations(context_items: list) -> list[AICitation]:
         citations = []
         for item in context_items:
             item_id = item.id if hasattr(item, "id") else UUID(item.get("id"))
             title = item.title if hasattr(item, "title") else item.get("title", "")
             source = item.source if hasattr(item, "source") else item.get("source", "")
             url = item.url if hasattr(item, "url") else item.get("url")
-            updated_at = item.updated_time if hasattr(item, "updated_time") else item.get("updated_time")
+            updated_at = item.updated_time if hasattr(item, "updated_time") else item.get("updated_time")  # noqa: E501
             if isinstance(updated_at, str):
                 updated_at = datetime.fromisoformat(updated_at)
             elif not updated_at:
@@ -200,7 +200,7 @@ class AIIntelligenceService:
 
     async def list_conversations(
         self, project_id: UUID, user_id: UUID, q: str | None = None
-    ) -> List[AIConversation]:
+    ) -> list[AIConversation]:
         query = select(AIConversation).where(
             and_(
                 AIConversation.project_id == project_id,
@@ -238,7 +238,7 @@ class AIIntelligenceService:
         await self.db.commit()
         return True
 
-    async def update_conversation_title(self, conversation_id: UUID, user_id: UUID, title: str) -> AIConversation | None:
+    async def update_conversation_title(self, conversation_id: UUID, user_id: UUID, title: str) -> AIConversation | None:  # noqa: E501
         conv = await self.get_conversation(conversation_id, user_id)
         if not conv:
             return None
@@ -318,7 +318,7 @@ class AIIntelligenceService:
         base_confidence = 0.5
         if citations:
             base_confidence = min(0.95, 0.5 + (len(citations) * 0.1))
-        uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]
+        uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]  # noqa: E501
         if any(term in answer.lower() for term in uncertainty_terms):
             base_confidence = max(0.1, base_confidence - 0.4)
 
@@ -349,8 +349,8 @@ class AIIntelligenceService:
         self,
         request: AIChatRequest,
         user_id: UUID,
-    ) -> Dict[str, Any]:
-        """Runs the conversational RAG chatbot. Handles session caching, streaming, and DB updates."""
+    ) -> dict[str, Any]:
+        """Runs the conversational RAG chatbot. Handles session caching, streaming, and DB updates."""  # noqa: E501
         # 1. Retrieve or create conversation
         if request.conversation_id:
             conv = await self.get_conversation(request.conversation_id, user_id)
@@ -433,10 +433,10 @@ class AIIntelligenceService:
         llm = get_llm_provider(provider)
 
         temp = request.temperature if request.temperature is not None else conv.temperature
-        streaming_on = request.streaming_on if request.streaming_on is not None else conv.streaming_on
+        streaming_on = request.streaming_on if request.streaming_on is not None else conv.streaming_on  # noqa: E501
 
         if streaming_on:
-            async def event_generator() -> AsyncGenerator[str, None]:
+            async def event_generator() -> AsyncGenerator[str]:
                 start_time = time.perf_counter()
                 full_text = ""
                 
@@ -453,18 +453,18 @@ class AIIntelligenceService:
                         base_confidence = 0.5
                         if citations:
                             base_confidence = min(0.95, 0.5 + (len(citations) * 0.1))
-                        uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]
+                        uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]  # noqa: E501
                         if any(term in full_text.lower() for term in uncertainty_terms):
                             base_confidence = max(0.1, base_confidence - 0.4)
 
                         follow_ups = []
                         if citations:
-                            follow_ups.append(f"Explain the architecture mentioned in {citations[0].title}")
+                            follow_ups.append(f"Explain the architecture mentioned in {citations[0].title}")  # noqa: E501
                         follow_ups.append("Can you provide more details about this?")
 
                         metadata_json = {
                             "latency_ms": int(latency_ms),
-                            "llm_latency_ms": int(latency_ms * 0.9),  # LLM time is roughly 90% of total
+                            "llm_latency_ms": int(latency_ms * 0.9),  # LLM time is roughly 90% of total  # noqa: E501
                             "confidence_score": base_confidence,
                             "sources": [
                                 {
@@ -492,7 +492,7 @@ class AIIntelligenceService:
                         await self.db.commit()
 
                         # Yield final done event
-                        yield f"data: {json.dumps({'done': True, 'message_id': str(assistant_msg.id), 'conversation_id': str(conv.id), 'metadata': metadata_json})}\n\n"
+                        yield f"data: {json.dumps({'done': True, 'message_id': str(assistant_msg.id), 'conversation_id': str(conv.id), 'metadata': metadata_json})}\n\n"  # noqa: E501
 
             return {"streaming": True, "generator": event_generator()}
 
@@ -506,7 +506,7 @@ class AIIntelligenceService:
             base_confidence = 0.5
             if citations:
                 base_confidence = min(0.95, 0.5 + (len(citations) * 0.1))
-            uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]
+            uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]  # noqa: E501
             if any(term in answer.lower() for term in uncertainty_terms):
                 base_confidence = max(0.1, base_confidence - 0.4)
 
@@ -556,7 +556,7 @@ class AIIntelligenceService:
             }
 
     @staticmethod
-    def get_diagnostics() -> Dict[str, Any]:
+    def get_diagnostics() -> dict[str, Any]:
         reqs = AI_STATS["total_requests"]
         return {
             "total_requests": reqs,

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   Brain,
-  AlertTriangle,
-  CheckCircle,
   Activity,
   RefreshCw,
   Filter,
@@ -13,7 +11,6 @@ import {
   CheckSquare,
   Square,
   Shield,
-  FileText,
   AlertCircle
 } from "lucide-react";
 
@@ -79,9 +76,9 @@ export function EngineeringIntelligence({
       } else {
         setSelectedInsight(null);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to load insights data", err);
-      setError(err?.message || "Failed to load Engineering Intelligence insights. Please ensure backend services are running.");
+      setError((err as Error)?.message || "Failed to load Engineering Intelligence insights. Please ensure backend services are running.");
     } finally {
       setLoading(false);
     }
@@ -89,6 +86,7 @@ export function EngineeringIntelligence({
 
   useEffect(() => {
     void loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, accessToken, severityFilter, typeFilter, statusFilter]);
 
   const handleRunAnalysis = async () => {
@@ -99,9 +97,9 @@ export function EngineeringIntelligence({
       await analyzeProjectInsights(accessToken, projectId);
       // Reload everything after analysis
       await loadData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Analysis failed", err);
-      setError(err?.message || "Analysis failed. Verify LLM configuration and database state.");
+      setError((err as Error)?.message || "Analysis failed. Verify LLM configuration and database state.");
     } finally {
       setAnalyzing(false);
     }

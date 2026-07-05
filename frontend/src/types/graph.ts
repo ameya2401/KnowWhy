@@ -5,7 +5,7 @@ export interface GraphNode {
   subtitle?: string;
   url?: string | null;
   author?: string | null;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface GraphEdge {
@@ -14,7 +14,7 @@ export interface GraphEdge {
   target: string;
   type: string;
   confidence: number;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface GraphResponse {
@@ -33,7 +33,7 @@ export interface EntityRelationshipDetail {
   edge_type: string;
   direction: "incoming" | "outgoing";
   confidence: number;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface EntityDetailResponse {
@@ -49,7 +49,7 @@ export interface TimelineEvent {
   time: string;
   author?: string | null;
   url?: string | null;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface TimelineResponse {

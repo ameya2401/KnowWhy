@@ -158,7 +158,7 @@ export async function deleteConversation(
 export async function* chatStream(
   accessToken: string,
   request: AIChatRequest
-): AsyncGenerator<{ token?: string; done?: boolean; conversation_id?: string; metadata?: any; error?: string }, void, unknown> {
+): AsyncGenerator<{ token?: string; done?: boolean; conversation_id?: string; metadata?: Record<string, unknown>; error?: string }, void, unknown> {
   const response = await fetch(`${API_BASE}/ai/chat`, {
     method: "POST",
     headers: {
@@ -202,7 +202,7 @@ export async function* chatStream(
         }
       }
     }
-  } catch (err: any) {
-    yield { error: err.message || "Streaming error" };
+  } catch (err: unknown) {
+    yield { error: (err as Error).message || "Streaming error" };
   }
 }

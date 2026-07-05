@@ -1,26 +1,26 @@
-from datetime import datetime, UTC, timedelta
-from uuid import uuid4, UUID
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock
+from uuid import UUID, uuid4
+
 import pytest
-from fastapi import HTTPException
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, MagicMock
 
 import app.api.routes.insight as insight_router
 from app.database.session import get_database_session
 from app.dependencies.auth import get_current_user
-from app.models.user import AuthProvider, User
-from app.models.knowledge import KnowledgeItem
-from app.models.insight import EngineeringInsight
 from app.main import create_app
-from app.services.insight_rules import (
-    DocumentationGapRule,
-    StaleKnowledgeRule,
-    ArchitectureDriftRule,
-    DuplicateKnowledgeRule,
-    ProjectHealthRule,
-    KnowledgeCoverageRule,
-)
+from app.models.insight import EngineeringInsight
+from app.models.knowledge import KnowledgeItem
+from app.models.user import AuthProvider, User
 from app.services.insight import InsightService
+from app.services.insight_rules import (
+    ArchitectureDriftRule,
+    DocumentationGapRule,
+    DuplicateKnowledgeRule,
+    KnowledgeCoverageRule,
+    ProjectHealthRule,
+    StaleKnowledgeRule,
+)
 
 
 # Mock DB Execute Result

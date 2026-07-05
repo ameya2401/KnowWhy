@@ -1,17 +1,18 @@
+from datetime import datetime
 from typing import Annotated
 from uuid import UUID
-from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.routes.knowledge import require_project_membership
 from app.database.session import get_database_session
 from app.dependencies.auth import get_current_user
-from app.models.user import User
 from app.models.project import ProjectRole
-from app.api.routes.knowledge import require_project_membership
+from app.models.user import User
 from app.schemas.graph import (
-    GraphResponse,
     EntityDetailResponse,
+    GraphResponse,
     TimelineResponse,
 )
 from app.schemas.knowledge import KnowledgeRelationshipRead
@@ -27,7 +28,7 @@ async def get_graph(
     db: Annotated[AsyncSession, Depends(get_database_session)],
     limit: int = Query(default=500, ge=1, le=2000),
     offset: int = Query(default=0, ge=0),
-    entity_type: list[str] | None = Query(default=None),
+    entity_type: list[str] | None = Query(default=None),  # noqa: B008
 ):
     """
     Retrieves the Knowledge Graph (nodes and edges) for a project.
@@ -59,7 +60,7 @@ async def get_entity_detail(
     try:
         return await service.get_entity_detail(entity_id=id, project_id=project_id)
     except ValueError as e:
-        raise HTTPException(
+        raise HTTPException(  # noqa: B904
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
         )

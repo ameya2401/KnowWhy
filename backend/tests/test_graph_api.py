@@ -1,14 +1,24 @@
-from datetime import datetime, UTC
-from uuid import uuid4, UUID
+from datetime import UTC, datetime
+from uuid import UUID, uuid4
+
 import pytest
 from fastapi.testclient import TestClient
 
 import app.api.routes.graph as graph_router
 from app.database.session import get_database_session
 from app.dependencies.auth import get_current_user
-from app.models.user import AuthProvider, User
 from app.main import create_app
-from app.schemas.graph import GraphResponse, GraphNode, GraphEdge, EntityDetailResponse, NeighborInfo, EntityRelationshipDetail, TimelineResponse, TimelineEvent
+from app.models.user import AuthProvider, User
+from app.schemas.graph import (
+    EntityDetailResponse,
+    EntityRelationshipDetail,
+    GraphEdge,
+    GraphNode,
+    GraphResponse,
+    NeighborInfo,
+    TimelineEvent,
+    TimelineResponse,
+)
 from app.schemas.knowledge import KnowledgeRelationshipRead
 from app.services.graph import GraphService
 

@@ -10,7 +10,6 @@ import {
   BookOpen,
   Info,
   CheckCircle,
-  HelpCircle,
   Clock,
   ExternalLink,
   ChevronDown,
@@ -18,7 +17,6 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import {
   getAIModels,
   getConversations,
@@ -31,7 +29,6 @@ import {
   AIMessage,
   AIModelInfo,
   AIChatRequest,
-  AICitation,
 } from "@/types/ai";
 
 interface AIChatAssistantProps {
@@ -43,7 +40,6 @@ interface AIChatAssistantProps {
 export function AIChatAssistant({
   projectId,
   accessToken,
-  isMaintainer,
 }: AIChatAssistantProps) {
   // Conversations list & active chat
   const [conversations, setConversations] = useState<AIConversation[]>([]);
@@ -64,11 +60,9 @@ export function AIChatAssistant({
   const [inputMessage, setInputMessage] = useState("");
   const [streamingResponseText, setStreamingResponseText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [activeStreamingMessageId, setActiveStreamingMessageId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   // Panel state
-  const [selectedCitation, setSelectedCitation] = useState<AICitation | null>(null);
   const [expandedCitationMessageId, setExpandedCitationMessageId] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -95,6 +89,7 @@ export function AIChatAssistant({
   useEffect(() => {
     void loadConversations();
     void loadModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, accessToken]);
 
   // Handle keyword searching inside conversation logs
@@ -103,6 +98,7 @@ export function AIChatAssistant({
       void loadConversations(conversationsSearch || undefined);
     }, 300);
     return () => clearTimeout(delayDebounce);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationsSearch]);
 
   // Scroll to bottom
@@ -127,7 +123,7 @@ export function AIChatAssistant({
       setMaxTokens(fullConv.max_tokens);
       setCitationMode(fullConv.citation_mode);
       setStreamingOn(fullConv.streaming_on);
-    } catch (err) {
+    } catch {
       setError("Failed to load conversation details");
     }
   };
@@ -153,7 +149,7 @@ export function AIChatAssistant({
         }
         void loadConversations(conversationsSearch || undefined);
       }
-    } catch (err) {
+    } catch {
       alert("Failed to delete conversation");
     }
   };
@@ -264,8 +260,8 @@ export function AIChatAssistant({
         const fullConv = await getConversation(accessToken, data.conversation_id);
         setActiveConversation(fullConv);
       }
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please check your connection.");
+    } catch (err: unknown) {
+      setError((err as Error).message || "Something went wrong. Please check your connection.");
       // Rollback optimistic messages
       if (activeConversation?.id === "temp") {
         setActiveConversation(null);

@@ -6,7 +6,6 @@ import {
   AlertCircle,
   FileText,
   Clock,
-  Key,
   Flame,
   Send,
   Zap,
@@ -35,7 +34,6 @@ interface AIDebugDashboardProps {
 export function AIDebugDashboard({
   projectId,
   accessToken,
-  isMaintainer,
 }: AIDebugDashboardProps) {
   const [providers, setProviders] = useState<LLMProviderInfo[]>([]);
   const [activeProvider, setActiveProvider] = useState<string>("openai");
@@ -51,7 +49,6 @@ export function AIDebugDashboard({
   // Response states
   const [aiResponse, setAiResponse] = useState<AIQueryResponse | null>(null);
   const [responseTimeMs, setResponseTimeMs] = useState<number | null>(null);
-  const [lastQuery, setLastQuery] = useState("");
 
   const loadData = async () => {
     try {
@@ -72,6 +69,7 @@ export function AIDebugDashboard({
 
   useEffect(() => {
     void loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, projectId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,10 +89,9 @@ export function AIDebugDashboard({
       const duration = performance.now() - start;
       setResponseTimeMs(Math.round(duration));
       setAiResponse(res);
-      setLastQuery(queryText);
       void loadData(); // Reload statistics
-    } catch (err: any) {
-      setError(err.message || "An error occurred during AI execution.");
+    } catch (err: unknown) {
+      setError((err as Error).message || "An error occurred during AI execution.");
       setAiResponse(null);
     } finally {
       setIsLoading(false);

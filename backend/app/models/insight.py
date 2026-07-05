@@ -1,7 +1,9 @@
 from uuid import UUID
-from sqlalchemy import Text, ForeignKey, JSON, Float
+
+from sqlalchemy import JSON, Float, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.database.base import BaseModel
 
 
@@ -23,7 +25,7 @@ class EngineeringInsight(BaseModel):
     title: Mapped[str] = mapped_column(Text, nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False)
     insight_type: Mapped[str] = mapped_column(Text, index=True, nullable=False)
-    # "documentation_gap", "stale_knowledge", "architecture_drift", "duplicate_knowledge", "project_health", "knowledge_coverage"
+    # "documentation_gap", "stale_knowledge", "architecture_drift", "duplicate_knowledge", "project_health", "knowledge_coverage"  # noqa: E501
     severity: Mapped[str] = mapped_column(Text, index=True, nullable=False)
     # "critical", "warning", "suggestion"
     confidence: Mapped[float] = mapped_column(Float, nullable=False)
@@ -34,5 +36,5 @@ class EngineeringInsight(BaseModel):
     # "active", "resolved", "dismissed"
     metadata_json: Mapped[dict | None] = mapped_column(JSON, name="metadata", nullable=True)
 
-    project: Mapped["Project"] = relationship("Project", lazy="raise")
-    organization: Mapped["Organization"] = relationship("Organization", lazy="raise")
+    project: Mapped["Project"] = relationship("Project", lazy="raise")  # noqa: F821
+    organization: Mapped["Organization"] = relationship("Organization", lazy="raise")  # noqa: F821

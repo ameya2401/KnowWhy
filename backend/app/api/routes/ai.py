@@ -1,24 +1,25 @@
-from typing import Annotated, List
+from typing import Annotated
 from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.knowledge import require_project_membership
+from app.core.config import settings
 from app.database.session import get_database_session
 from app.dependencies.auth import get_current_user
 from app.models.user import User
-from app.core.config import settings
 from app.schemas.ai import (
-    AIQueryRequest,
-    AIExplainRequest,
-    AIQueryResponse,
-    AIProvidersResponse,
-    AIStatisticsResponse,
-    LLMProviderInfo,
     AIChatRequest,
     AIConversationResponse,
+    AIExplainRequest,
     AIModelInfo,
+    AIProvidersResponse,
+    AIQueryRequest,
+    AIQueryResponse,
+    AIStatisticsResponse,
+    LLMProviderInfo,
 )
 from app.services.ai import AIIntelligenceService
 
@@ -52,7 +53,7 @@ async def explain_concept(
     """Executes the explanation extraction RAG sub-pipeline."""
     await require_project_membership(current_user, request.project_id, db)
     service = AIIntelligenceService(db)
-    query = f"Explain the concept of '{request.concept}' and detail its components, dependencies, and implementation context."
+    query = f"Explain the concept of '{request.concept}' and detail its components, dependencies, and implementation context."  # noqa: E501
     return await service.execute_rag(
         project_id=request.project_id,
         user_id=current_user.id,
@@ -130,7 +131,7 @@ async def chat_with_assistant(
     return result
 
 
-@router.get("/conversations", response_model=List[AIConversationResponse])
+@router.get("/conversations", response_model=list[AIConversationResponse])
 async def get_conversations(
     project_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -175,17 +176,17 @@ async def delete_conversation_by_id(
     return {"success": success}
 
 
-@router.get("/models", response_model=List[AIModelInfo])
+@router.get("/models", response_model=list[AIModelInfo])
 async def list_models(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     """Lists supported model versions and token configurations for settings customization."""
     return [
-        AIModelInfo(provider="openai", model_id="gpt-4o-mini", name="GPT-4o Mini", max_tokens=128000),
+        AIModelInfo(provider="openai", model_id="gpt-4o-mini", name="GPT-4o Mini", max_tokens=128000),  # noqa: E501
         AIModelInfo(provider="openai", model_id="gpt-4o", name="GPT-4o", max_tokens=128000),
-        AIModelInfo(provider="anthropic", model_id="claude-3-5-sonnet-20241022", name="Claude 3.5 Sonnet", max_tokens=200000),
-        AIModelInfo(provider="anthropic", model_id="claude-3-5-haiku-20241022", name="Claude 3.5 Haiku", max_tokens=200000),
-        AIModelInfo(provider="gemini", model_id="gemini-1.5-flash", name="Gemini 1.5 Flash", max_tokens=1000000),
-        AIModelInfo(provider="gemini", model_id="gemini-1.5-pro", name="Gemini 1.5 Pro", max_tokens=2000000),
+        AIModelInfo(provider="anthropic", model_id="claude-3-5-sonnet-20241022", name="Claude 3.5 Sonnet", max_tokens=200000),  # noqa: E501
+        AIModelInfo(provider="anthropic", model_id="claude-3-5-haiku-20241022", name="Claude 3.5 Haiku", max_tokens=200000),  # noqa: E501
+        AIModelInfo(provider="gemini", model_id="gemini-1.5-flash", name="Gemini 1.5 Flash", max_tokens=1000000),  # noqa: E501
+        AIModelInfo(provider="gemini", model_id="gemini-1.5-pro", name="Gemini 1.5 Pro", max_tokens=2000000),  # noqa: E501
         AIModelInfo(provider="mock", model_id="mock", name="Simulated Mock Model", max_tokens=4000),
     ]

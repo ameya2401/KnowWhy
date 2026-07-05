@@ -1,3 +1,5 @@
+from app.models.ai_chat import AIConversation, AIMessage
+from app.models.insight import EngineeringInsight
 from app.models.integration import (
     Commit,
     DriveFile,
@@ -24,9 +26,6 @@ from app.models.organization import (
 from app.models.project import Project, ProjectMember, ProjectRole, ProjectStatus, ProjectVisibility
 from app.models.user import AuthProvider, User
 from app.models.user_session import UserSession
-
-from app.models.ai_chat import AIConversation, AIMessage
-from app.models.insight import EngineeringInsight
 
 __all__ = [
     "AuthProvider",

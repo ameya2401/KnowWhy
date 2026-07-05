@@ -1,13 +1,13 @@
-import logging
 import json
+import logging
+from datetime import UTC, datetime
+from typing import Any
 from uuid import UUID
-from datetime import datetime, UTC
-from typing import List, Dict, Any, Optional
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 
 from app.models.insight import EngineeringInsight
-from app.models.knowledge import KnowledgeItem
 from app.services.insight_rules import ALL_RULES
 from app.services.llm_providers import get_llm_provider
 
@@ -19,8 +19,8 @@ class InsightService:
 
     @staticmethod
     async def analyze_project_insights(
-        db: AsyncSession, project_id: UUID, organization_id: UUID, provider_override: Optional[str] = None
-    ) -> List[EngineeringInsight]:
+        db: AsyncSession, project_id: UUID, organization_id: UUID, provider_override: str | None = None  # noqa: E501
+    ) -> list[EngineeringInsight]:
         """Triggers proactive analysis, runs all rules, refines with LLM, and persists results."""
         logger.info(f"Starting engineering intelligence analysis for project {project_id}")
 
@@ -31,12 +31,12 @@ class InsightService:
                 findings = await rule.analyze(db, project_id, organization_id)
                 candidates.extend(findings)
             except Exception as e:
-                logger.error(f"Rule {rule.__class__.__name__} failed during analysis: {e}", exc_info=True)
+                logger.error(f"Rule {rule.__class__.__name__} failed during analysis: {e}", exc_info=True)  # noqa: E501
 
         # 2. Get LLM provider for refinement
         llm = get_llm_provider(provider_override)
 
-        processed_insights: List[EngineeringInsight] = []
+        processed_insights: list[EngineeringInsight] = []
 
         # 3. Process each candidate
         for candidate in candidates:
@@ -50,7 +50,7 @@ class InsightService:
                     "entity_type": item.entity_type,
                     "url": item.url
                 })
-                evidence_context_str += f"- [{item.entity_type.upper()}] {item.title}: {item.content or item.description or ''}\n"
+                evidence_context_str += f"- [{item.entity_type.upper()}] {item.title}: {item.content or item.description or ''}\n"  # noqa: E501
 
             # Use LLM to refine the candidate title/description/suggested actions
             prompt = (
@@ -64,7 +64,7 @@ class InsightService:
                 f"Refine this into a high-quality, actionable, and accurate engineering insight.\n"
                 f"Provide your response in JSON format containing the following keys:\n"
                 f"- 'title': Refined user-friendly title\n"
-                f"- 'description': Clear explanation of the risk, why it matters, and why it was flagged.\n"
+                f"- 'description': Clear explanation of the risk, why it matters, and why it was flagged.\n"  # noqa: E501
                 f"- 'severity': 'critical', 'warning', or 'suggestion'\n"
                 f"- 'confidence': Float value between 0.0 and 1.0 representing your confidence.\n"
                 f"- 'suggested_actions': A list of specific, concrete steps to resolve the issue.\n"
@@ -74,7 +74,7 @@ class InsightService:
             try:
                 response = await llm.generate_response(
                     prompt=prompt,
-                    system_prompt="You are a professional engineering manager and software architect advisor.",
+                    system_prompt="You are a professional engineering manager and software architect advisor.",  # noqa: E501
                     temperature=0.2
                 )
                 text = response.get("text", "")
@@ -102,7 +102,7 @@ class InsightService:
             description = refined_data.get("description") or candidate["description"]
             severity = refined_data.get("severity") or candidate["severity"]
             confidence = refined_data.get("confidence") or candidate["confidence"]
-            suggested_actions = refined_data.get("suggested_actions") or candidate["suggested_actions"]
+            suggested_actions = refined_data.get("suggested_actions") or candidate["suggested_actions"]  # noqa: E501
 
             if severity not in ["critical", "warning", "suggestion"]:
                 severity = candidate["severity"]
@@ -166,10 +166,10 @@ class InsightService:
         db: AsyncSession,
         project_id: UUID,
         organization_id: UUID,
-        status: Optional[str] = None,
-        severity: Optional[str] = None,
-        insight_type: Optional[str] = None
-    ) -> List[EngineeringInsight]:
+        status: str | None = None,
+        severity: str | None = None,
+        insight_type: str | None = None
+    ) -> list[EngineeringInsight]:
         """Lists engineering insights for a project with optional filters."""
         stmt = select(EngineeringInsight).where(
             EngineeringInsight.project_id == project_id,
@@ -183,10 +183,10 @@ class InsightService:
         if insight_type:
             stmt = stmt.where(EngineeringInsight.insight_type == insight_type)
 
-        # Ordering by severity (critical > warning > suggestion), confidence descending, freshness descending
+        # Ordering by severity (critical > warning > suggestion), confidence descending, freshness descending  # noqa: E501
         # Let's order by severity mapping and confidence.
-        # We will sort it in python for complex severity ordering or use simple order_by in sql first
-        stmt = stmt.order_by(EngineeringInsight.confidence.desc(), EngineeringInsight.created_at.desc())
+        # We will sort it in python for complex severity ordering or use simple order_by in sql first  # noqa: E501
+        stmt = stmt.order_by(EngineeringInsight.confidence.desc(), EngineeringInsight.created_at.desc())  # noqa: E501
         res = await db.execute(stmt)
         insights = list(res.scalars().all())
 
@@ -202,7 +202,7 @@ class InsightService:
         insight_id: UUID,
         project_id: UUID,
         organization_id: UUID
-    ) -> Optional[EngineeringInsight]:
+    ) -> EngineeringInsight | None:
         """Gets a single insight by ID with validation checks."""
         stmt = select(EngineeringInsight).where(
             EngineeringInsight.id == insight_id,
@@ -217,7 +217,7 @@ class InsightService:
         db: AsyncSession,
         project_id: UUID,
         organization_id: UUID
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generates statistical breakdown of active insights in the project."""
         stmt = select(EngineeringInsight).where(
             EngineeringInsight.project_id == project_id,

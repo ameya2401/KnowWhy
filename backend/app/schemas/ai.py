@@ -1,19 +1,19 @@
 from datetime import datetime
-from typing import List
 from uuid import UUID
+
 from pydantic import BaseModel, Field
 
 
 class AIQueryRequest(BaseModel):
     project_id: UUID
     q: str = Field(..., min_length=1, description="The user question to process")
-    provider: str | None = Field(default=None, description="Force a specific LLM provider (openai, anthropic, gemini)")
+    provider: str | None = Field(default=None, description="Force a specific LLM provider (openai, anthropic, gemini)")  # noqa: E501
 
 
 class AIExplainRequest(BaseModel):
     project_id: UUID
     concept: str = Field(..., min_length=1, description="The concept or entity name to explain")
-    provider: str | None = Field(default=None, description="Force a specific LLM provider (openai, anthropic, gemini)")
+    provider: str | None = Field(default=None, description="Force a specific LLM provider (openai, anthropic, gemini)")  # noqa: E501
 
 
 class AICitation(BaseModel):
@@ -26,10 +26,10 @@ class AICitation(BaseModel):
 
 class AIQueryResponse(BaseModel):
     answer: str
-    confidence_score: float = Field(..., ge=0.0, le=1.0, description="Estimated confidence based on evidence agreement")
-    sources: List[AICitation]
-    related_knowledge: List[UUID] = Field(default_factory=list, description="IDs of related knowledge items")
-    follow_up_suggestions: List[str] = Field(default_factory=list, description="Suggestions for further investigation")
+    confidence_score: float = Field(..., ge=0.0, le=1.0, description="Estimated confidence based on evidence agreement")  # noqa: E501
+    sources: list[AICitation]
+    related_knowledge: list[UUID] = Field(default_factory=list, description="IDs of related knowledge items")  # noqa: E501
+    follow_up_suggestions: list[str] = Field(default_factory=list, description="Suggestions for further investigation")  # noqa: E501
 
 
 class LLMProviderInfo(BaseModel):
@@ -40,7 +40,7 @@ class LLMProviderInfo(BaseModel):
 
 
 class AIProvidersResponse(BaseModel):
-    providers: List[LLMProviderInfo]
+    providers: list[LLMProviderInfo]
     active_provider: str
 
 
@@ -98,7 +98,7 @@ class AIConversationResponse(BaseModel):
     streaming_on: bool
     created_at: datetime
     updated_at: datetime
-    messages: List[AIMessageResponse] = Field(default_factory=list)
+    messages: list[AIMessageResponse] = Field(default_factory=list)
 
     class Config:
         from_attributes = True

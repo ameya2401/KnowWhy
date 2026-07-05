@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from datetime import datetime, UTC, timedelta
-from typing import List, Dict, Any
+from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.models.knowledge import KnowledgeItem, KnowledgeRelationship
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models.knowledge import KnowledgeItem
 
 
 class InsightRule(ABC):
@@ -14,7 +15,7 @@ class InsightRule(ABC):
     @abstractmethod
     async def analyze(
         self, db: AsyncSession, project_id: UUID, organization_id: UUID
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Analyzes knowledge items and returns lists of potential insights."""
         pass
 
@@ -24,7 +25,7 @@ class DocumentationGapRule(InsightRule):
 
     async def analyze(
         self, db: AsyncSession, project_id: UUID, organization_id: UUID
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # Fetch commits and PRs
         stmt_code = select(KnowledgeItem).where(
             KnowledgeItem.project_id == project_id,
@@ -72,12 +73,12 @@ class DocumentationGapRule(InsightRule):
                         "title": f"Missing Documentation for '{keyword.capitalize()}' Feature",
                         "description": (
                             f"Recent code changes reference '{keyword}', but there are no "
-                            f"corresponding Notion pages or Google Drive files found documenting this feature."
+                            f"corresponding Notion pages or Google Drive files found documenting this feature."  # noqa: E501
                         ),
                         "evidence_items": matching_code[:3],
                         "suggested_actions": [
-                            f"Create a design specification page in Notion for the {keyword.capitalize()} module.",
-                            f"Add architecture guidelines explaining how {keyword.capitalize()} is integrated.",
+                            f"Create a design specification page in Notion for the {keyword.capitalize()} module.",  # noqa: E501
+                            f"Add architecture guidelines explaining how {keyword.capitalize()} is integrated.",  # noqa: E501
                         ],
                     }
                 )
@@ -90,7 +91,7 @@ class StaleKnowledgeRule(InsightRule):
 
     async def analyze(
         self, db: AsyncSession, project_id: UUID, organization_id: UUID
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # Find docs updated more than 30 days ago
         cutoff = datetime.now(UTC) - timedelta(days=30)
         stmt = select(KnowledgeItem).where(
@@ -113,7 +114,7 @@ class StaleKnowledgeRule(InsightRule):
                         "title": f"Stale Documentation: '{item.title}'",
                         "description": (
                             f"The document '{item.title}' was last updated on "
-                            f"{item.updated_time.strftime('%Y-%m-%d')}. It may contain outdated design patterns or APIs."
+                            f"{item.updated_time.strftime('%Y-%m-%d')}. It may contain outdated design patterns or APIs."  # noqa: E501
                         ),
                         "evidence_items": [item],
                         "suggested_actions": [
@@ -130,7 +131,7 @@ class ArchitectureDriftRule(InsightRule):
 
     async def analyze(
         self, db: AsyncSession, project_id: UUID, organization_id: UUID
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # Fetch architectural records (e.g. containing "decision", "architecture", "adr" in title)
         stmt_adr = select(KnowledgeItem).where(
             KnowledgeItem.project_id == project_id,
@@ -170,12 +171,12 @@ class ArchitectureDriftRule(InsightRule):
                             "title": "Architecture Drift: PostgreSQL DB Mandate Contradicted",
                             "description": (
                                 f"Architectural decision '{adr.title}' specifies PostgreSQL, "
-                                f"but recent code modifications reference alternate storage solutions (e.g., MySQL/MongoDB)."
+                                f"but recent code modifications reference alternate storage solutions (e.g., MySQL/MongoDB)."  # noqa: E501
                             ),
                             "evidence_items": [adr] + drift_commits[:2],
                             "suggested_actions": [
-                                "Confirm whether MySQL/MongoDB usage aligns with current architecture guidelines.",
-                                "Update the architectural decision record if the project has officially migrated databases.",
+                                "Confirm whether MySQL/MongoDB usage aligns with current architecture guidelines.",  # noqa: E501
+                                "Update the architectural decision record if the project has officially migrated databases.",  # noqa: E501
                             ],
                         }
                     )
@@ -194,12 +195,12 @@ class ArchitectureDriftRule(InsightRule):
                             "title": "Architecture Drift: MySQL DB Mandate Contradicted",
                             "description": (
                                 f"Architectural decision '{adr.title}' specifies MySQL, "
-                                f"but recent code modifications reference alternate storage solutions (e.g., Postgres/MongoDB)."
+                                f"but recent code modifications reference alternate storage solutions (e.g., Postgres/MongoDB)."  # noqa: E501
                             ),
                             "evidence_items": [adr] + drift_commits[:2],
                             "suggested_actions": [
-                                "Confirm whether PostgreSQL/MongoDB usage aligns with current architecture guidelines.",
-                                "Update the architectural decision record if the project has officially migrated databases.",
+                                "Confirm whether PostgreSQL/MongoDB usage aligns with current architecture guidelines.",  # noqa: E501
+                                "Update the architectural decision record if the project has officially migrated databases.",  # noqa: E501
                             ],
                         }
                     )
@@ -211,7 +212,7 @@ class DuplicateKnowledgeRule(InsightRule):
 
     async def analyze(
         self, db: AsyncSession, project_id: UUID, organization_id: UUID
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # Fetch doc pages
         stmt = select(KnowledgeItem).where(
             KnowledgeItem.project_id == project_id,
@@ -244,8 +245,8 @@ class DuplicateKnowledgeRule(InsightRule):
                             "confidence": 0.80,
                             "title": f"Duplicate Documentation Found: '{d1.title}' & '{d2.title}'",
                             "description": (
-                                f"The documents '{d1.title}' and '{d2.title}' share highly similar titles "
-                                f"and likely cover overlapping technical domains. Consolidating them will improve search indexing quality."
+                                f"The documents '{d1.title}' and '{d2.title}' share highly similar titles "  # noqa: E501
+                                f"and likely cover overlapping technical domains. Consolidating them will improve search indexing quality."  # noqa: E501
                             ),
                             "evidence_items": [d1, d2],
                             "suggested_actions": [
@@ -262,7 +263,7 @@ class ProjectHealthRule(InsightRule):
 
     async def analyze(
         self, db: AsyncSession, project_id: UUID, organization_id: UUID
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # Fetch PRs and Issues
         stmt = select(KnowledgeItem).where(
             KnowledgeItem.project_id == project_id,
@@ -314,7 +315,7 @@ class ProjectHealthRule(InsightRule):
                     "confidence": 0.90,
                     "title": f"Stale Pull Requests Pending Review ({len(stale_prs)})",
                     "description": (
-                        f"There are {len(stale_prs)} open pull requests that haven't been updated for over a week. "
+                        f"There are {len(stale_prs)} open pull requests that haven't been updated for over a week. "  # noqa: E501
                         f"Stale PRs delay features and increase merge conflict risks."
                     ),
                     "evidence_items": stale_prs[:3],
@@ -329,11 +330,11 @@ class ProjectHealthRule(InsightRule):
 
 
 class KnowledgeCoverageRule(InsightRule):
-    """Detects areas with low knowledge coverage (e.g. connected GitHub repo but zero documentation pages)."""
+    """Detects areas with low knowledge coverage (e.g. connected GitHub repo but zero documentation pages)."""  # noqa: E501
 
     async def analyze(
         self, db: AsyncSession, project_id: UUID, organization_id: UUID
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         # Count code vs docs
         stmt_code = select(KnowledgeItem).where(
             KnowledgeItem.project_id == project_id,
@@ -380,7 +381,7 @@ class KnowledgeCoverageRule(InsightRule):
                     "title": "Low Documentation Coverage",
                     "description": (
                         f"This project has active code integration ({code_count} commits/PRs), "
-                        f"but only {doc_count} documentation pages connected. Increasing document coverage helps AI assistant accuracy."
+                        f"but only {doc_count} documentation pages connected. Increasing document coverage helps AI assistant accuracy."  # noqa: E501
                     ),
                     "evidence_items": [],
                     "suggested_actions": [

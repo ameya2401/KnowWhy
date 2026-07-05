@@ -1,9 +1,9 @@
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_database_session
 from app.dependencies.auth import get_current_user
@@ -12,9 +12,9 @@ from app.models.user import User
 from app.projects.permissions import has_project_role_at_least
 from app.repositories.projects import ProjectMemberRepository
 from app.schemas.insight import (
-    EngineeringInsightRead,
     EngineeringInsightAnalyzeRequest,
-    EngineeringInsightStatistics
+    EngineeringInsightRead,
+    EngineeringInsightStatistics,
 )
 from app.services.insight import InsightService
 
@@ -56,11 +56,11 @@ async def analyze_project_insights(
     payload: EngineeringInsightAnalyzeRequest,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_database_session)],
-    provider_override: Optional[str] = None
+    provider_override: str | None = None
 ):
     """Triggers analysis for a project, generates, and persists engineering insights."""
     # Require at least CONTRIBUTOR/MAINTAINER to trigger analysis
-    project = await require_project_membership(current_user, payload.project_id, db, ProjectRole.CONTRIBUTOR)
+    project = await require_project_membership(current_user, payload.project_id, db, ProjectRole.CONTRIBUTOR)  # noqa: E501
 
     insights = await InsightService.analyze_project_insights(
         db=db,
@@ -76,9 +76,9 @@ async def list_insights(
     project_id: UUID,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_database_session)],
-    status: Optional[str] = None,
-    severity: Optional[str] = None,
-    insight_type: Optional[str] = None,
+    status: str | None = None,
+    severity: str | None = None,
+    insight_type: str | None = None,
 ):
     """Lists engineering insights for a project."""
     project = await require_project_membership(current_user, project_id, db, ProjectRole.VIEWER)

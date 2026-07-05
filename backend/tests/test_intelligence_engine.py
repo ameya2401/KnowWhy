@@ -1,5 +1,6 @@
-from datetime import datetime, UTC
-from uuid import uuid4, UUID
+from datetime import UTC, datetime
+from uuid import uuid4
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -8,8 +9,14 @@ from app.database.session import get_database_session
 from app.dependencies.auth import get_current_user
 from app.main import create_app
 from app.models.user import AuthProvider, User
-from app.services.ai import QueryProcessor, ContextBuilder, PromptBuilder, CitationEngine, AIIntelligenceService
-from app.services.llm_providers import get_llm_provider, MockLLMProvider, OpenAIProvider
+from app.services.ai import (
+    AIIntelligenceService,
+    CitationEngine,
+    ContextBuilder,
+    PromptBuilder,
+    QueryProcessor,
+)
+from app.services.llm_providers import MockLLMProvider, OpenAIProvider, get_llm_provider
 
 
 @pytest.fixture
@@ -46,11 +53,11 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
 def test_query_intent_analysis():
     """Verify that user query intent is detected correctly based on keyword rules."""
-    assert QueryProcessor.analyze_intent("Give me the chronological history of updates") == "timeline"
-    assert QueryProcessor.analyze_intent("What is the difference between Redis and Memcached?") == "comparison"
-    assert QueryProcessor.analyze_intent("Why did we adopt auth0 instead of self-hosted OAuth?") == "decision"
+    assert QueryProcessor.analyze_intent("Give me the chronological history of updates") == "timeline"  # noqa: E501
+    assert QueryProcessor.analyze_intent("What is the difference between Redis and Memcached?") == "comparison"  # noqa: E501
+    assert QueryProcessor.analyze_intent("Why did we adopt auth0 instead of self-hosted OAuth?") == "decision"  # noqa: E501
     assert QueryProcessor.analyze_intent("What is authentication?") == "explanation"
-    assert QueryProcessor.analyze_intent("Can you summarize the meeting details?") == "summarization"
+    assert QueryProcessor.analyze_intent("Can you summarize the meeting details?") == "summarization"  # noqa: E501
     assert QueryProcessor.analyze_intent("List all project files") == "search"
 
 
@@ -86,7 +93,7 @@ def test_context_builder_token_budget():
 
 
 def test_prompt_builder():
-    """Verify PromptBuilder constructs valid templates containing instructions, query, and context."""
+    """Verify PromptBuilder constructs valid templates containing instructions, query, and context."""  # noqa: E501
     class DummyItem:
         title = "Doc A"
         source = "github"
@@ -149,8 +156,8 @@ async def test_mock_llm_generation():
 
 def test_ai_query_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch):
     """Verify project members can access RAG query route and receive valid citations."""
-    async def mock_execute_rag(self, project_id, user_id, query, provider_override=None, is_explain=False):
-        from app.schemas.ai import AIQueryResponse, AICitation
+    async def mock_execute_rag(self, project_id, user_id, query, provider_override=None, is_explain=False):  # noqa: E501
+        from app.schemas.ai import AICitation, AIQueryResponse
         return AIQueryResponse(
             answer="This is a test RAG response.",
             confidence_score=0.9,
@@ -184,7 +191,7 @@ def test_ai_query_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch):
 
 def test_ai_explain_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch):
     """Verify RAG explanation endpoint returns structured output."""
-    async def mock_execute_rag(self, project_id, user_id, query, provider_override=None, is_explain=False):
+    async def mock_execute_rag(self, project_id, user_id, query, provider_override=None, is_explain=False):  # noqa: E501
         from app.schemas.ai import AIQueryResponse
         return AIQueryResponse(
             answer="OAuth2 details here.",
@@ -375,7 +382,7 @@ def test_chat_streaming_endpoint(client: TestClient, monkeypatch: pytest.MonkeyP
     assert "text/event-stream" in res.headers["content-type"]
     
     # Read stream chunks
-    lines = [line if isinstance(line, str) else line.decode("utf-8") for line in res.iter_lines() if line]
+    lines = [line if isinstance(line, str) else line.decode("utf-8") for line in res.iter_lines() if line]  # noqa: E501
     assert len(lines) == 3
     assert "Hello" in lines[0]
     assert "world" in lines[1]

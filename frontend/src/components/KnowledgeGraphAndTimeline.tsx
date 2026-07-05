@@ -7,19 +7,14 @@ import {
   ZoomIn,
   ZoomOut,
   RefreshCw,
-  GitCommit,
-  GitPullRequest,
   Info,
   Clock,
   Compass,
-  FileText,
   User,
-  Settings,
   HelpCircle,
   Database,
   ArrowRight,
-  Maximize2,
-  BookOpen
+  Maximize2
 } from "lucide-react";
 import { graphApi } from "../services/graphApi";
 import { GraphNode, GraphEdge, TimelineEvent } from "../types/graph";
@@ -88,7 +83,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
   // Detailed Node Inspector
   const [inspectorData, setInspectorData] = useState<{
     node: GraphNode;
-    relationships: any[];
+    relationships: unknown[];
   } | null>(null);
   const [inspectorLoading, setInspectorLoading] = useState(false);
 
@@ -134,7 +129,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
 
       setNodes(simNodes);
       setEdges(simEdges);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError("Failed to load Knowledge Graph data. Please verify your integrations or try syncing.");
     } finally {
@@ -192,7 +187,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
         for (let j = i + 1; j < n; j++) {
           const v = nodes[j];
           let dx = v.x - u.x;
-          let dy = v.y - u.y;
+          const dy = v.y - u.y;
           if (dx === 0) dx = 0.1; // avoid divide by zero
           const distSq = dx * dx + dy * dy;
           const dist = Math.sqrt(distSq);
