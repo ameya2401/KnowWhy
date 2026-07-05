@@ -1,5 +1,99 @@
 # KnowWhy Changelog
 
+## 2026-07-05 - M17 Engineering Intelligence
+
+### Features Added
+
+- Created SQLAlchemy model `EngineeringInsight` representing structured project intelligence.
+- Built a Strategy pattern rules engine implementing 6 concrete analysis heuristic strategies: DocumentationGap, StaleKnowledge, ArchitectureDrift, DuplicateKnowledge, ProjectHealth, and KnowledgeCoverage.
+- Built `InsightService` to execute all heuristics, synthesize details into LLM prompts, trigger provider responses, and save/upsert results.
+- Implemented secure FastAPI REST routes `/intelligence/analyze`, `/intelligence/insights`, `/intelligence/insights/{id}`, and `/intelligence/statistics` protected with tenant organization and project memberships.
+- Wrote pytest test coverage in `tests/test_intelligence_insights.py` verifying heuristics, service analysis, and api controllers.
+- Created React dashboard `EngineeringIntelligence.tsx` displaying KPI metrics, severities/type filters, list view, and detail panel for evidence and checklist recommendations.
+- Integrated the dashboard into `ProjectDetailPage.tsx` tab panel.
+
+### Files Added
+
+- Backend: `app/models/insight.py`, `app/services/insight_rules.py`, `app/services/insight.py`, `app/api/routes/insight.py`, `tests/test_intelligence_insights.py`, `alembic/versions/20260705_0012_create_insights_table.py`.
+- Frontend: `src/components/EngineeringIntelligence.tsx`.
+
+### Files Modified
+
+- Backend: `app/database/base.py`, `app/api/router.py`.
+- Frontend: `src/pages/ProjectDetailPage.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
+## 2026-07-05 - M16 Knowledge Graph and Timeline Visualizer
+
+### Features Added
+
+- Created Canvas2D-based node-link interactive physics-simulated graph in `KnowledgeGraphAndTimeline.tsx`.
+- Implemented viewport navigation support (zoom via controls and scrollwheel, panning via canvas drag, node drag physics, and selection focus centering).
+- Supported sharp canvas rendering on high-DPI retina screens via device pixel ratio scaling.
+- Integrated dual visual states: selecting nodes highlighting active connections, displaying detail inspectors, and scrolling chronological lists to matching cards.
+- Integrated a timeline list panel on the right sidebar showing chronological items with entity type badges, sync identifiers, title summaries, and selection indicators.
+- Hooked the component into `ProjectDetailPage.tsx` under a new tab "Graph & Timeline".
+
+### Files Added
+
+- Frontend: `src/components/KnowledgeGraphAndTimeline.tsx`.
+
+### Files Modified
+
+- Frontend: `src/pages/ProjectDetailPage.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
+## 2026-07-05 - M15 KnowWhy AI Assistant
+
+### Features Added
+
+- Created database models for conversations and messages with Alembic migrations.
+- Implemented SSE token streaming generators supporting OpenAI, Anthropic, Gemini, and Mock providers.
+- Exposed routes `/ai/chat`, `/ai/conversations`, `/ai/conversations/{id}`, and `/ai/models` on the FastAPI backend.
+- Created premium React conversational interface (`AIChatAssistant.tsx`) containing a search-filterable sidebar, follow-up suggestion chips, confidence badges, speed latency telemetry, citation links, and configurations settings drawer.
+- Hooked the component into `ProjectDetailPage.tsx` under the new "AI Assistant" tab.
+
+### Files Added
+
+- Backend: `app/models/ai_chat.py`, `alembic/versions/20260705_0011_create_ai_chat_tables.py`.
+- Frontend: `src/components/AIChatAssistant.tsx`.
+
+### Files Modified
+
+- Backend: `app/services/llm_providers.py`, `app/services/ai.py`, `app/api/routes/ai.py`, `tests/test_intelligence_engine.py`.
+- Frontend: `src/types/ai.ts`, `src/services/aiApi.ts`, `src/pages/ProjectDetailPage.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
+## 2026-07-05 - M14 AI Intelligence Engine
+
+### Features Added
+
+- Created an AI Intelligence Engine layer with pluggable provider system (OpenAI, Anthropic Claude, Google Gemini, and Simulated Mock).
+- Implemented RAG pipeline including:
+  - `QueryProcessor`: Intent parser identifying query patterns (timeline, comparison, decision, explanation, search) using regex rules.
+  - `ContextBuilder`: Filters and retrieves normal knowledge items up to a custom token budget (e.g. 100/4000 tokens) with duplicate item deduplication.
+  - `PromptBuilder`: Compiles prompt templates binding custom instructions, system roles, user inputs, and retrieved document contexts.
+  - `CitationEngine`: Extracts structured citations (title, source type, URL, update timestamp) to prove grounding.
+- Added FastAPI endpoints:
+  - `POST /ai/query`: Runs the full RAG query pipeline returning answers, confidence factors, and citation references.
+  - `POST /ai/explain`: Runs concept explanation generation mapping definitions and summaries.
+  - `GET /ai/providers`: Lists available/active AI providers.
+  - `GET /ai/statistics`: Monitors global request volume, latency, tokens consumed, and confidence scores.
+- Built interactive frontend developer AI Debug Dashboard (`AIDebugDashboard.tsx`), integrated under the "Intelligence Engine" tab in the Project Details page.
+- Interactive sandbox supports switching active/override providers, configuring api key states, executing query/explanation sandboxes, and inspecting latency timers, confidence meters, and grounding lists.
+- Passed full backend pytest suite (58 passed) and frontend ESLint, typecheck, and Vite production builds.
+
+### Files Added
+
+- Backend: `app/api/routes/ai.py`, `app/schemas/ai.py`, `app/services/ai.py`, `app/services/llm_providers.py`, `tests/test_intelligence_engine.py`.
+- Frontend: `src/types/ai.ts`, `src/services/aiApi.ts`, `src/components/AIDebugDashboard.tsx`.
+
+### Files Modified
+
+- Backend: `app/api/router.py`.
+- Frontend: `src/pages/ProjectDetailPage.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
 ## 2026-07-05 - M13 Hybrid Search Engine
 
 ### Features Added

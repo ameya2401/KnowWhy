@@ -1,10 +1,10 @@
 # KnowWhy Implementation Context
 
-Last Updated: 2026-07-02
+Last Updated: 2026-07-05
 
 ## Current Implementation State
 
-Milestone M05 Projects is implemented.
+Milestone M16 Knowledge Graph and Timeline Visualizer is implemented.
 
 KnowWhy currently contains:
 
@@ -106,4 +106,34 @@ KnowWhy currently contains:
   - Frontend search analytics dashboard showing index stats, processing latency, cache hit rate, and average similarities, with reindexing trigger button.
   - Pytest coverage verifying hybrid retrieval performance, fusion, deduplication, and organization/project access isolation.
 
+- **Milestone M14 AI Intelligence Engine**:
+  - Backend LLM services supporting custom instruction construction, context window budgeting, duplicate removal, query intent analysis, and structured citations.
+  - Pluggable provider system (OpenAI, Anthropic, Google Gemini, and Simulated Mock) selectable dynamically.
+  - REST API routes `/ai/query`, `/ai/explain`, `/ai/providers`, and `/ai/statistics` under project membership control.
+  - Unit/integration pytest suite validating intent categorization, budget boundaries, mock provider outputs, and API routes.
+  - Frontend developer-focused "Intelligence Engine" dashboard tab within Project Details Page displaying active/simulated providers, key configurations, RAG sandbox interface (Q&A and Concept Explanation modes), and telemetry metrics (latency, confidence score, source count, full citation list, and follow-up suggestion links).
 
+- **Milestone M15 KnowWhy AI Assistant**:
+  - Backend database schema implementation for `ai_conversations` and `ai_messages` tables tracking settings and message metadata.
+  - Backend real-time Server-Sent Events (SSE) streaming yielding chunks dynamically via HTTPX-based adapters (OpenAI, Anthropic, Gemini, Mock).
+  - Backend RAG query services managing conversational logs, history retention, token-limiting, context grounding, and keyword search filters.
+  - Backend REST API routes `/ai/chat`, `/ai/conversations`, `/ai/conversations/{id}`, and `/ai/models` fully tested and verified.
+  - Frontend TypeScript type interfaces and service client `chatStream` generator wrapper for streaming body reader.
+  - Frontend premium conversational console (`AIChatAssistant.tsx`) rendering message threads, suggested follow-up chips, grounded confidence badges, speed telemetry, expandable citation viewer cards, config settings drawer, and historical logs sidebar panel.
+
+- **Milestone M16 Knowledge Graph & Timeline**:
+  - Implemented Canvas2D node-link physics-simulated graph component `KnowledgeGraphAndTimeline.tsx`.
+  - Implemented viewport navigation support (zoom via buttons/scrollwheel, panning via canvas drag, node drag physics, and selection focus centering).
+  - Implemented device pixel ratio scaling keeping drawing sharp on high-DPI screens.
+  - Integrated dual interactive states: node selection highlights neighboring connections, displays entity detail inspector side panels, and scrolls the timeline feed to focus the matching card.
+  - Integrated vertical chronological timeline panel showing entity type badges, sync identifiers, and detail inspector links.
+  - Integrated the component inside `ProjectDetailPage.tsx` under a new tab "Graph & Timeline".
+
+- **Milestone M17 Engineering Intelligence**:
+  - Created `EngineeringInsight` SQLAlchemy database model and alembic migrations table schema.
+  - Built strategy-based Insight Rule Engine implementing 6 concrete analysis heuristic strategies: DocumentationGap, StaleKnowledge, ArchitectureDrift, DuplicateKnowledge, ProjectHealth, and KnowledgeCoverage.
+  - Built `InsightService` logic executing heuristic strategies, synthesizing logs into prompt contexts, and calling LLM providers to perform AI refinement and priority ordering.
+  - Exposed secure FastAPI REST API endpoints (`/intelligence/analyze`, `/intelligence/insights`, `/intelligence/insights/{id}`, `/intelligence/statistics`) under strict tenant organization and project membership validation.
+  - Wrote comprehensive backend tests in `tests/test_intelligence_insights.py` verifying all 6 heuristics individually, service analyzer upserts, and API endpoint routing.
+  - Created React component `EngineeringIntelligence.tsx` featuring KPI stats, filter drop-downs, listing panel, and evidence/action detailed inspector.
+  - Integrated the dashboard into `ProjectDetailPage.tsx` as a new tab panel.

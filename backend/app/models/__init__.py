@@ -1,3 +1,5 @@
+from app.models.ai_chat import AIConversation, AIMessage
+from app.models.insight import EngineeringInsight
 from app.models.integration import (
     Commit,
     DriveFile,
@@ -51,4 +53,7 @@ __all__ = [
     "KnowledgeRelationship",
     "KnowledgeSyncLog",
     "KnowledgeChunk",
+    "AIConversation",
+    "AIMessage",
+    "EngineeringInsight",
 ]

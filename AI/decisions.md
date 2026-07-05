@@ -194,6 +194,59 @@ Reason: Merges lexical precision with semantic context, handles duplicate result
 
 Files affected: `backend/app/api/routes/search.py`, `backend/app/services/search.py`, `frontend/src/pages/SearchPage.tsx`
 
+## DEC-016: AI Intelligence Engine and Developer Debug Dashboard
 
+Context: M14 requires building the final AI Intelligence Engine layer containing custom system instruction generation, context token budgeting, query intent categorization, citation mapping, and multi-provider swapping, and displaying these in an AI Debug Dashboard for developers.
 
+Decision:
+1. Implement a pipeline including `QueryProcessor` (intent keyword parser), `ContextBuilder` (deduplicating items and fitting within custom token budgets), `PromptBuilder` (formatting RAG prompts), and `CitationEngine` (mapping cited files/sources).
+2. Design a pluggable `LLMProvider` interface with active provider settings, supporting real OpenAI/Anthropic/Gemini API verification and simulated fallback.
+3. Build a dedicated "Intelligence Engine" dashboard tab within Project Details Page containing configuration controls, API key indicators, dual-mode RAG sandbox tester (Q&A/Explain), and performance telemetry panels (latency timers, confidence values, source lists).
 
+Reason: Provides full developer visibility into RAG pipeline operations, prompt limits, token consumption, and response performance without the complexity of chat UI integration.
+
+Files affected: `backend/app/services/ai.py`, `backend/app/api/routes/ai.py`, `frontend/src/components/AIDebugDashboard.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`
+
+## DEC-017: Conversational AI Assistant Integration and Real-Time Token Streaming
+
+Context: M15 requires a premium, interactive, real-time conversational AI chat interface with settings side panels, conversation logs, suggested queries, streaming SSE response chunks, confidence telemetry, and citation explorer widgets.
+
+Decision:
+1. Implement a conversational data schema `ai_conversations` and `ai_messages` linked to projects and users, managing custom model configurations (provider, temperature, streaming selection).
+2. Build an async generator `chatStream` in the frontend using the ReadableStream API reader on the `fetch` response body to decode Server-Sent Events (SSE) with `data: ` packet blocks.
+3. Construct a dual-panel dashboard UI `AIChatAssistant.tsx` featuring search-filterable history log sidebar, configurations control dropdowns, micro-animated message feeds, confidence meters, response timers, follow-up suggestion chips, and citation links.
+
+Reason: Retains secure multi-tenant project isolation boundaries, avoids layout blockage by decoding chunk events in real-time, and exposes grounded evidence links directly inside conversational contexts.
+
+Files affected: `backend/app/models/ai_chat.py`, `backend/app/services/ai.py`, `backend/app/api/routes/ai.py`, `frontend/src/types/ai.ts`, `frontend/src/services/aiApi.ts`, `frontend/src/components/AIChatAssistant.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`
+
+## DEC-018: Knowledge Graph and Interactive Timeline Visualizer
+
+Context: M16 requires a dual interactive interface visualizing the project's knowledge base. It needs an interactive node-link graph rendering connected sources (commits, PRs, Notion pages, files) with full canvas controls (zoom, pan, drag, custom colors) alongside a chronological timeline list with badges and direct relationship traversal.
+
+Decision:
+1. Implement `KnowledgeGraphAndTimeline.tsx` containing the canvas rendering pipeline and HTML/CSS layout.
+2. Build an HTML5 Canvas node-link visualizer using 2D physics simulation (repulsion, attraction, friction) calculated in a React `requestAnimationFrame` loop.
+3. Design interactive mouse event handlers to support node dragging, graph panning (right click / drag), zoom centering, and detail hover states.
+4. Scale canvas dimensions dynamically with high-DPI device pixel ratio tracking to keep drawing extremely sharp.
+5. Couple visual states: selecting a node in the graph centers the view, updates details sidebar inspectors, highlights linked neighbor edges, and scrolls the timeline feed to highlight the matching card.
+6. List all knowledge items in the chronological vertical timeline panel with badge classifications and detail inspector shortcuts.
+
+Reason: By bypassing heavy external visualization libraries (e.g. D3, cytoscape) in favor of a clean, optimized Canvas2D custom simulation loop, we achieve absolute styling flexibility matching our design system tokens, maintain extremely smooth rendering performance, and avoid bundle bloat.
+
+Files affected: `frontend/src/components/KnowledgeGraphAndTimeline.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`
+
+## DEC-019: Engineering Intelligence and Heuristic Insight Strategy Pattern
+
+Context: M17 requires building the "Engineering Intelligence" module which aggregates project health, documentation coverage, architectural decisions, and duplicate knowledge assets, synthesizes these findings using LLMs, and presents them in an interactive developer dashboard.
+
+Decision:
+1. Create `EngineeringInsight` SQLAlchemy database model mapping to the `engineering_insights` table to persist structured insight records.
+2. Implement a Strategy pattern rule engine with a base `InsightRule` class and 6 concrete heuristic strategy rule classes: DocumentationGapRule, StaleKnowledgeRule, ArchitectureDriftRule, DuplicateKnowledgeRule, ProjectHealthRule, and KnowledgeCoverageRule.
+3. Build `InsightService.analyze_project_insights` to run all rules, compile findings into an AI prompt context, invoke the active LLM provider for refinement and severity/confidence weighting, and save/upsert the results.
+4. Expose secure REST API routes under project membership and tenant organization checks.
+5. Build React dashboard component `EngineeringIntelligence.tsx` displaying KPI metrics, filters (severity, status, type), and a detail inspector for justifications, evidence, and suggested checklist actions.
+
+Reason: The Strategy pattern isolates rules logic for easier expansion. LLM-based refinement turns dry alerts into actionable engineering guides. Project membership checks prevent cross-tenant data leaks.
+
+Files affected: `backend/app/models/insight.py`, `backend/app/services/insight_rules.py`, `backend/app/services/insight.py`, `backend/app/api/routes/insight.py`, `frontend/src/components/EngineeringIntelligence.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`

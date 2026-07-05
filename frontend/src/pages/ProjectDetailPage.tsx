@@ -12,6 +12,9 @@ import {
   Link2,
   Database,
   Cpu,
+  Brain,
+  MessageSquare,
+  GitBranch,
 } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
@@ -30,6 +33,10 @@ import type { Project, ProjectMember, ProjectRole } from "@/projects/types";
 import { ProjectIntegrations } from "@/components/ProjectIntegrations";
 import { KnowledgeBrowser } from "@/components/KnowledgeBrowser";
 import { EmbeddingControls } from "@/components/EmbeddingControls";
+import { AIDebugDashboard } from "@/components/AIDebugDashboard";
+import { AIChatAssistant } from "@/components/AIChatAssistant";
+import { KnowledgeGraphAndTimeline } from "@/components/KnowledgeGraphAndTimeline";
+import { EngineeringIntelligence } from "@/components/EngineeringIntelligence";
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -38,7 +45,15 @@ export function ProjectDetailPage() {
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "members" | "integrations" | "knowledge" | "embeddings"
+    | "overview"
+    | "members"
+    | "integrations"
+    | "knowledge"
+    | "embeddings"
+    | "assistant"
+    | "ai"
+    | "graph_timeline"
+    | "intelligence"
   >("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -266,6 +281,46 @@ export function ProjectDetailPage() {
           >
             <Cpu className="size-4" /> Semantic Indexing
           </button>
+          <button
+            onClick={() => setActiveTab("assistant")}
+            className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === "assistant"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <MessageSquare className="size-4" /> AI Assistant
+          </button>
+          <button
+            onClick={() => setActiveTab("ai")}
+            className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === "ai"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Brain className="size-4" /> Intelligence Engine
+          </button>
+          <button
+            onClick={() => setActiveTab("intelligence")}
+            className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === "intelligence"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Shield className="size-4" /> Engineering Intelligence
+          </button>
+          <button
+            onClick={() => setActiveTab("graph_timeline")}
+            className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === "graph_timeline"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <GitBranch className="size-4" /> Graph & Timeline
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -477,6 +532,34 @@ export function ProjectDetailPage() {
             accessToken={accessToken}
             isMaintainer={isMaintainer}
           />
+        )}
+
+        {activeTab === "assistant" && projectId && accessToken && (
+          <AIChatAssistant
+            projectId={projectId}
+            accessToken={accessToken}
+            isMaintainer={isMaintainer}
+          />
+        )}
+
+        {activeTab === "ai" && projectId && accessToken && (
+          <AIDebugDashboard
+            projectId={projectId}
+            accessToken={accessToken}
+            isMaintainer={isMaintainer}
+          />
+        )}
+
+        {activeTab === "intelligence" && projectId && accessToken && (
+          <EngineeringIntelligence
+            projectId={projectId}
+            accessToken={accessToken}
+            isMaintainer={isMaintainer}
+          />
+        )}
+
+        {activeTab === "graph_timeline" && projectId && (
+          <KnowledgeGraphAndTimeline projectId={projectId} />
         )}
       </div>
     </DashboardLayout>

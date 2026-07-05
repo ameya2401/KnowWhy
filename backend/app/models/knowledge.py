@@ -122,6 +122,7 @@ class KnowledgeRelationship(BaseModel):
         Text, nullable=False
     )  # "contains", "fixes", "references", "mentions"
     confidence: Mapped[float] = mapped_column(Float, default=1.0, nullable=False)
+    metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     source_item: Mapped[KnowledgeItem] = relationship(
         "KnowledgeItem",
