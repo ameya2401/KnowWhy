@@ -9,7 +9,12 @@ from app.models.integration import (
     NotionPage,
     PullRequest,
 )
-from app.models.knowledge import KnowledgeItem, KnowledgeRelationship, KnowledgeSyncLog
+from app.models.knowledge import (
+    KnowledgeChunk,
+    KnowledgeItem,
+    KnowledgeRelationship,
+    KnowledgeSyncLog,
+)
 from app.models.organization import (
     Organization,
     OrganizationInvitation,
@@ -45,4 +50,5 @@ __all__ = [
     "KnowledgeItem",
     "KnowledgeRelationship",
     "KnowledgeSyncLog",
+    "KnowledgeChunk",
 ]

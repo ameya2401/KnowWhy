@@ -1,5 +1,77 @@
 # KnowWhy Changelog
 
+## 2026-07-05 - M13 Hybrid Search Engine
+
+### Features Added
+
+- Created a Hybrid Search Engine combining keyword-based lexical matches and pgvector-based semantic vector matches.
+- Implemented Reciprocal Rank Fusion (RRF) algorithm to deduplicate and rank fused search results.
+- Implemented weighted re-ranking dynamically incorporating lexical score, semantic similarity, source type metadata, and document update timestamps.
+- Added FastAPI endpoints:
+  - `GET /search/hybrid`: Performs filtered hybrid retrieval with complete match explanation metrics.
+  - `GET /search/explain/{item_id}`: Retrieves search explanation details (scores, rank, fields, reasons).
+  - `GET /search/statistics`: Retrieves retrieval diagnostic metrics (total vectors, latency, cache rate, average similarity).
+  - `POST /search/reindex`: Triggers async indexing for the project.
+- Integrated Dual Search Mode selector in the frontend (`SearchPage.tsx`), permitting seamless transition between Standard Keyword and AI Hybrid modes.
+- Added Match Confidence percentages and Score Relevance badges to search items.
+- Built interactive Search Explanation breakdown card in the Entity Details drawer showing fusion weight statistics and reason bullets.
+- Built Search Diagnostics analytics panel showing index size, query latency, cache status, and average similarity along with re-indexing trigger buttons.
+- Passed full backend pytest suite (49 passed) and frontend ESLint, typecheck, and Vite production builds.
+
+### Files Added
+
+- Frontend: `src/types/search.ts`, `src/services/searchApi.ts`.
+
+### Files Modified
+
+- Backend: `app/api/routes/search.py`, `app/schemas/search.py`, `app/services/search.py`.
+- Frontend: `src/pages/SearchPage.tsx`, `src/components/EmbeddingControls.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
+## 2026-07-04 - M12 Semantic Indexing & Controls
+
+### Features Added
+
+- Created `knowledge_chunks` database schema storing text chunks, token count, character index, metadata, and 1536-dimensional L2 normalized embeddings.
+- Implemented `ChunkingEngine` and `EmbeddingService` to parse text and map mock embeddings.
+- Designed `EmbeddingQueueService` and `ProjectQueueState` managing asynchronous background indexing workers (start, pause, resume, reindex, status, and statistics).
+- Exposed REST API endpoints under `/embeddings` for start, pause, resume, reindex, status, and statistics.
+- Added frontend API service wrapper (`embeddingsApi.ts`) and TypeScript types (`embeddings.ts`).
+- Integrated a premium, responsive "Semantic Indexing" control room tab in `ProjectDetailPage.tsx` offering progress monitoring, queue details, and database diagnostics.
+- Added backend pytest suite (46 tests total) validating both the embedding pipeline services and API route handlers.
+
+### Files Added
+
+- Backend: `app/api/routes/embeddings.py`, `tests/test_embeddings_api.py`.
+- Frontend: `src/types/embeddings.ts`, `src/services/embeddingsApi.ts`, `src/components/EmbeddingControls.tsx`.
+
+### Files Modified
+
+- Backend: `app/api/router.py`, `app/database/base.py`, `app/models/knowledge.py`, `app/services/embeddings.py`, `app/services/embedding_queue.py`.
+- Frontend: `src/pages/ProjectDetailPage.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
+## 2026-07-04 - M11 Frontend Search Interface
+
+### Features Added
+
+- Created advanced search page `SearchPage.tsx` supporting scoped keyword queries across unified knowledge store items.
+- Built autocomplete suggestions box and local cache recent queries search history list.
+- Implemented sidebar panel containing advanced filters (sources, types, authors, tag pills, sorting, and date ranges) dynamically compiled from the backend API.
+- Implemented match term highlighting dynamically styling keywords within titles and description extracts.
+- Built interactive side details drawer presenting full parameters, code body/descriptions, raw JSON metadata, and navigable link graphs.
+- Registered `/search` route in routing configuration page.
+- Added global search bar into dashboard layout header, supporting `/` keydown shortcut listener for focused activation.
+
+### Files Added
+
+- Frontend: `src/pages/SearchPage.tsx`.
+
+### Files Modified
+
+- Frontend: `src/routes/router.tsx`, `src/layouts/DashboardLayout.tsx`.
+- Documentation: `AI/context.md`, `AI/progress.md`, `AI/decisions.md`, `AI/changelog.md`.
+
 ## 2026-07-03 - M10 KnowWhy Knowledge Engine
 
 ### Features Added

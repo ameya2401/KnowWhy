@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PostgresUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -64,6 +65,33 @@ class KnowledgeItem(BaseModel):
         foreign_keys="[KnowledgeRelationship.target_item_id]",
         back_populates="target_item",
         cascade="all, delete-orphan",
+    )
+    chunks: Mapped[list["KnowledgeChunk"]] = relationship(
+        "KnowledgeChunk",
+        back_populates="knowledge_item",
+        cascade="all, delete-orphan",
+    )
+
+
+class KnowledgeChunk(BaseModel):
+    __tablename__ = "knowledge_chunks"
+
+    knowledge_item_id: Mapped[UUID] = mapped_column(
+        PostgresUUID(as_uuid=True),
+        ForeignKey("knowledge_items.id", ondelete="CASCADE"),
+        index=True,
+        nullable=False,
+    )
+    chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    token_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    embedding: Mapped[list[float]] = mapped_column(Vector(1536), nullable=False)
+    metadata_json: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    source: Mapped[str] = mapped_column(Text, nullable=False)  # "github", "notion", "google_drive"
+
+    knowledge_item: Mapped[KnowledgeItem] = relationship(
+        "KnowledgeItem",
+        back_populates="chunks",
     )
 
 

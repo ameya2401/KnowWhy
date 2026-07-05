@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     auth_cookie_secure: bool = Field(default=False, alias="AUTH_COOKIE_SECURE")
     frontend_url: str = Field(default="http://localhost:5173", alias="FRONTEND_URL")
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
+    embedding_provider: str = Field(default="openai", alias="EMBEDDING_PROVIDER")
+    embedding_model: str = Field(default="text-embedding-3-small", alias="EMBEDDING_MODEL")
     github_client_id: str = Field(default="", alias="GITHUB_CLIENT_ID")
     github_client_secret: str = Field(default="", alias="GITHUB_CLIENT_SECRET")
     google_client_id: str = Field(default="", alias="GOOGLE_CLIENT_ID")

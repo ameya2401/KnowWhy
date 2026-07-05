@@ -149,5 +149,51 @@ Reason: Decouples the application's search and AI layers from integration-specif
 
 Files affected: `backend/app/models/knowledge.py`, `backend/app/repositories/knowledge.py`, `backend/app/services/knowledge.py`, `backend/app/api/routes/knowledge.py`, `frontend/src/types/knowledge.ts`, `frontend/src/services/knowledgeApi.ts`, `frontend/src/components/KnowledgeBrowser.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`
 
+## DEC-013: Frontend Search Interface with Autocomplete and Highlighting
+
+Context: M11 requires a search engine page with advanced filters, autocomplete queries, match highlights, score metrics, and details/relationships drawer.
+
+Decision:
+1. Implement `SearchPage.tsx` under protected `/search` routing.
+2. Build an autocomplete dropdown displaying prefix recommendations and cached recent search history.
+3. Design a side filter bar dynamically rendering available sources, entity types, authors, and tag pills queried from the backend, along with sorting and date inputs.
+4. Highlight keyword match occurrences within titles and descriptions using dynamically rendered `<mark>` splits.
+5. Reuse side drawer panels allowing traversal of graph relationship links directly.
+6. Install a global header search bar in `DashboardLayout.tsx` and hook keydown `/` shortcut handlers.
+
+Reason: Increases discoverability of index items, speeds up query iterations with local filter refinement, and maintains layout consistency with standard design design-system properties.
+
+Files affected: `frontend/src/pages/SearchPage.tsx`, `frontend/src/routes/router.tsx`, `frontend/src/layouts/DashboardLayout.tsx`
+
+## DEC-014: Semantic Chunking, Asynchronous Indexing State Machine, and Indexing Control Panel
+
+Context: M12 requires a background embedding pipeline to parse knowledge items, generate vector chunks, compute embedding matrices, track execution state (start, pause, resume, reindex), and report queue metrics in the UI.
+
+Decision:
+1. Create a `knowledge_chunks` database model containing text segments, token counters, character index boundaries, and 1536-dimensional L2 normalized embeddings.
+2. Implement a background state machine `EmbeddingQueueService` managing `ProjectQueueState` instances. Use Python `asyncio.create_task` to run queue workers in the background, permitting clean cancellation (pause) and resuming.
+3. Expose REST API routes under `/embeddings` for start, pause, resume, reindex, status, and statistics.
+4. Integrate a "Semantic Indexing" tab in the frontend Project Details Page, featuring control room buttons, progress bars, queue sizes, and vector DB metrics.
+
+Reason: Decouples heavy vector computation from client request-response cycles, provides precise control over background processes, and offers immediate visual diagnostic status.
+
+Files affected: `backend/app/models/knowledge.py`, `backend/app/services/embeddings.py`, `backend/app/services/embedding_queue.py`, `backend/app/api/routes/embeddings.py`, `frontend/src/components/EmbeddingControls.tsx`, `frontend/src/pages/ProjectDetailPage.tsx`
+
+## DEC-015: Hybrid Search Engine and Rank Fusion (RRF)
+
+Context: Neither lexical search nor semantic vector search alone yields comprehensive organizational search results. Lexical matches technical keywords perfectly, while semantic matches general meaning. M13 requires a unified Hybrid Retrieval Engine combining both.
+
+Decision:
+1. Create a `SearchService` method `hybrid_search` combining keyword-based lexical results and pgvector-based semantic results.
+2. Implement Reciprocal Rank Fusion (RRF) as the default rank fusion technique, computing RRF scores to merge results without duplicates.
+3. Apply a custom weighted re-ranking formula considering lexical scores, semantic similarities, source reliability, and document updated recency.
+4. Expose REST endpoints under `/search`: `GET /hybrid` (search), `GET /explain/{item_id}` (explanation), and `GET /statistics` (diagnostics).
+5. Build a premium UI with a toggle switch, search explanation panel, and diagnostics view in the frontend Search tab.
+
+Reason: Merges lexical precision with semantic context, handles duplicate result filters, details search explainability, and satisfies strict permission-aware project/organization isolation.
+
+Files affected: `backend/app/api/routes/search.py`, `backend/app/services/search.py`, `frontend/src/pages/SearchPage.tsx`
+
+
 
 

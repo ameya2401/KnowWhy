@@ -15,6 +15,7 @@ import { GitHubCallbackPage } from "@/pages/GitHubCallbackPage";
 import { NotionCallbackPage } from "@/pages/NotionCallbackPage";
 import { GoogleDriveCallbackPage } from "@/pages/GoogleDriveCallbackPage";
 import { ActivityPage } from "@/pages/ActivityPage";
+import { SearchPage } from "@/pages/SearchPage";
 
 export const router = createBrowserRouter([
   {
@@ -24,6 +25,14 @@ export const router = createBrowserRouter([
       {
         path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/search",
+        element: (
+          <ProtectedRoute>
+            <SearchPage />
+          </ProtectedRoute>
+        ),
       },
       {
         index: true,

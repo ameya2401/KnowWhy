@@ -81,3 +81,29 @@ KnowWhy currently contains:
   - Frontend TypeScript definitions and API client wrapper (`knowledgeApi.ts`).
   - Frontend "Knowledge Base" tab in Project Details Page providing list/timeline toggle views, status filtering, search bar, and an interactive side drawer for entity details and relationship navigation.
 
+- **Milestone M11 Frontend Search Interface**:
+  - Frontend advanced search engine page (`SearchPage.tsx`) containing keyword inputs, suggestions, and history list.
+  - Filters sidebar supporting source selections, entity types, authors, tag pills, date ranges, and sorting methods.
+  - Main search results feed displaying relevance scores, titles, details, matching highlighting, and authors.
+  - Interactive details drawer side panel with navigable relationship graph linkage traversal and original document links.
+  - Global accessible header search bar in `DashboardLayout.tsx` with `/` hotkey activation shortcut.
+
+- **Milestone M12 Semantic Indexing & Controls**:
+  - `knowledge_chunks` table in database schema storing text chunks, token count, character index, metadata, and 1536-dimensional L2 normalized embeddings.
+  - Backend `ChunkingEngine` and `EmbeddingService` supporting text parsing, overlap logic, and mock vector generation (OpenAI `text-embedding-3-small` shape).
+  - Background `EmbeddingQueueService` managing indexing queue workers (idle, running, paused, completed, failed states) with automatic retry logic and cancellation.
+  - Backend REST API routes under `/embeddings` for start, pause, resume, reindex, status, and statistics.
+  - Frontend TypeScript definitions (`embeddings.ts`) and API client wrapper (`embeddingsApi.ts`).
+  - Frontend "Semantic Indexing" tab in Project Details Page providing pipeline controls (Start, Pause, Resume, Reindex), progress bars, queue sizes, and vector DB diagnostics.
+  - Comprehensive unit/integration pytest coverage for embedding services and API routes.
+
+- **Milestone M13 Hybrid Search Engine**:
+  - Backend Hybrid Search service combining lexical keyword search and semantic embedding vector search using Reciprocal Rank Fusion (RRF) and custom re-ranking weights.
+  - Search explanation engine reporting lexical score, semantic similarity, final list rank, matching fields, and specific match reasons.
+  - API endpoints `/search/hybrid`, `/search/explain/{item_id}`, and `/search/statistics` under project visibility isolation checks.
+  - Frontend UI search toggle permitting choice between Standard and AI Hybrid search.
+  - Frontend search explanation card embedded in the side details drawer displaying detailed fusion metrics and scoring analysis.
+  - Frontend search analytics dashboard showing index stats, processing latency, cache hit rate, and average similarities, with reindexing trigger button.
+  - Pytest coverage verifying hybrid retrieval performance, fusion, deduplication, and organization/project access isolation.
+
+
