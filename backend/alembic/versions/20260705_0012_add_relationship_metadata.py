@@ -18,10 +18,7 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.add_column(
-        "knowledge_relationships",
-        sa.Column("metadata_json", sa.JSON(), nullable=True)
-    )
+    op.add_column("knowledge_relationships", sa.Column("metadata_json", sa.JSON(), nullable=True))
 
 
 def downgrade() -> None:

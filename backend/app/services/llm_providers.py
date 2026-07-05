@@ -43,7 +43,12 @@ class MockLLMProvider(LLMProvider):
 
         snippet_lines = []
         for line in context_section.split("\n"):
-            if "title:" in line.lower() or "source:" in line.lower() or "content:" in line.lower() or "description:" in line.lower():  # noqa: E501
+            if (
+                "title:" in line.lower()
+                or "source:" in line.lower()
+                or "content:" in line.lower()
+                or "description:" in line.lower()
+            ):  # noqa: E501
                 snippet_lines.append(line.strip())
 
         if snippet_lines:
@@ -134,7 +139,9 @@ class OpenAIProvider(LLMProvider):
                     logger.warning(
                         "OpenAI API failed (HTTP %s): %s", response.status_code, response.text
                     )
-                    return await self.mock_provider.generate_response(prompt, system_prompt, temperature)  # noqa: E501
+                    return await self.mock_provider.generate_response(
+                        prompt, system_prompt, temperature
+                    )  # noqa: E501
         except Exception as e:
             logger.exception("Error calling OpenAI API: %s", e)
             return await self.mock_provider.generate_response(prompt, system_prompt, temperature)
@@ -143,7 +150,9 @@ class OpenAIProvider(LLMProvider):
         self, prompt: str, system_prompt: str | None = None, temperature: float = 0.2
     ) -> AsyncGenerator[dict[str, Any]]:
         if not self.api_key:
-            async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+            async for chunk in self.mock_provider.generate_stream(
+                prompt, system_prompt, temperature
+            ):  # noqa: E501
                 yield chunk
             return
 
@@ -175,6 +184,7 @@ class OpenAIProvider(LLMProvider):
                                 continue
                             if line.startswith("data: "):
                                 import json
+
                                 try:
                                     data = json.loads(line[6:])
                                     choice = data["choices"][0]
@@ -184,12 +194,22 @@ class OpenAIProvider(LLMProvider):
                                         yield {"text": text, "done": False}
                                 except Exception:
                                     pass
-                        yield {"text": "", "done": True, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}  # noqa: E501
+                        yield {
+                            "text": "",
+                            "done": True,
+                            "prompt_tokens": 0,
+                            "completion_tokens": 0,
+                            "total_tokens": 0,
+                        }  # noqa: E501
                     else:
-                        async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+                        async for chunk in self.mock_provider.generate_stream(
+                            prompt, system_prompt, temperature
+                        ):  # noqa: E501
                             yield chunk
         except Exception:
-            async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+            async for chunk in self.mock_provider.generate_stream(
+                prompt, system_prompt, temperature
+            ):  # noqa: E501
                 yield chunk
 
 
@@ -236,13 +256,16 @@ class AnthropicProvider(LLMProvider):
                         "text": content,
                         "prompt_tokens": usage.get("input_tokens", 0),
                         "completion_tokens": usage.get("output_tokens", 0),
-                        "total_tokens": usage.get("input_tokens", 0) + usage.get("output_tokens", 0),  # noqa: E501
+                        "total_tokens": usage.get("input_tokens", 0)
+                        + usage.get("output_tokens", 0),  # noqa: E501
                     }
                 else:
                     logger.warning(
                         "Anthropic API failed (HTTP %s): %s", response.status_code, response.text
                     )
-                    return await self.mock_provider.generate_response(prompt, system_prompt, temperature)  # noqa: E501
+                    return await self.mock_provider.generate_response(
+                        prompt, system_prompt, temperature
+                    )  # noqa: E501
         except Exception as e:
             logger.exception("Error calling Anthropic API: %s", e)
             return await self.mock_provider.generate_response(prompt, system_prompt, temperature)
@@ -251,7 +274,9 @@ class AnthropicProvider(LLMProvider):
         self, prompt: str, system_prompt: str | None = None, temperature: float = 0.2
     ) -> AsyncGenerator[dict[str, Any]]:
         if not self.api_key:
-            async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+            async for chunk in self.mock_provider.generate_stream(
+                prompt, system_prompt, temperature
+            ):  # noqa: E501
                 yield chunk
             return
 
@@ -284,6 +309,7 @@ class AnthropicProvider(LLMProvider):
                                 continue
                             if line.startswith("data: "):
                                 import json
+
                                 try:
                                     data = json.loads(line[6:])
                                     if data.get("type") == "content_block_delta":
@@ -293,12 +319,22 @@ class AnthropicProvider(LLMProvider):
                                             yield {"text": text, "done": False}
                                 except Exception:
                                     pass
-                        yield {"text": "", "done": True, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}  # noqa: E501
+                        yield {
+                            "text": "",
+                            "done": True,
+                            "prompt_tokens": 0,
+                            "completion_tokens": 0,
+                            "total_tokens": 0,
+                        }  # noqa: E501
                     else:
-                        async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+                        async for chunk in self.mock_provider.generate_stream(
+                            prompt, system_prompt, temperature
+                        ):  # noqa: E501
                             yield chunk
         except Exception:
-            async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+            async for chunk in self.mock_provider.generate_stream(
+                prompt, system_prompt, temperature
+            ):  # noqa: E501
                 yield chunk
 
 
@@ -320,8 +356,15 @@ class GeminiProvider(LLMProvider):
         try:
             contents = []
             if system_prompt:
-                contents.append({"role": "user", "parts": [{"text": f"System Context:\n{system_prompt}"}]})  # noqa: E501
-                contents.append({"role": "model", "parts": [{"text": "Understood. I will conform to those instructions."}]})  # noqa: E501
+                contents.append(
+                    {"role": "user", "parts": [{"text": f"System Context:\n{system_prompt}"}]}
+                )  # noqa: E501
+                contents.append(
+                    {
+                        "role": "model",
+                        "parts": [{"text": "Understood. I will conform to those instructions."}],
+                    }
+                )  # noqa: E501
 
             contents.append({"role": "user", "parts": [{"text": prompt}]})
 
@@ -334,7 +377,7 @@ class GeminiProvider(LLMProvider):
                         "contents": contents,
                         "generationConfig": {
                             "temperature": temperature,
-                        }
+                        },
                     },
                 )
                 if response.status_code == 200:
@@ -344,7 +387,9 @@ class GeminiProvider(LLMProvider):
                         text = candidates[0]["content"]["parts"][0]["text"]
                         usage = data.get("usageMetadata", {})
                         prompt_tokens = usage.get("promptTokenCount", len(prompt.split()) // 3)
-                        completion_tokens = usage.get("candidatesTokenCount", len(text.split()) // 3)  # noqa: E501
+                        completion_tokens = usage.get(
+                            "candidatesTokenCount", len(text.split()) // 3
+                        )  # noqa: E501
                         return {
                             "text": text,
                             "prompt_tokens": prompt_tokens,
@@ -357,7 +402,9 @@ class GeminiProvider(LLMProvider):
                     logger.warning(
                         "Gemini API failed (HTTP %s): %s", response.status_code, response.text
                     )
-                    return await self.mock_provider.generate_response(prompt, system_prompt, temperature)  # noqa: E501
+                    return await self.mock_provider.generate_response(
+                        prompt, system_prompt, temperature
+                    )  # noqa: E501
         except Exception as e:
             logger.exception("Error calling Gemini API: %s", e)
             return await self.mock_provider.generate_response(prompt, system_prompt, temperature)
@@ -366,15 +413,24 @@ class GeminiProvider(LLMProvider):
         self, prompt: str, system_prompt: str | None = None, temperature: float = 0.2
     ) -> AsyncGenerator[dict[str, Any]]:
         if not self.api_key:
-            async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+            async for chunk in self.mock_provider.generate_stream(
+                prompt, system_prompt, temperature
+            ):  # noqa: E501
                 yield chunk
             return
 
         try:
             contents = []
             if system_prompt:
-                contents.append({"role": "user", "parts": [{"text": f"System Context:\n{system_prompt}"}]})  # noqa: E501
-                contents.append({"role": "model", "parts": [{"text": "Understood. I will conform to those instructions."}]})  # noqa: E501
+                contents.append(
+                    {"role": "user", "parts": [{"text": f"System Context:\n{system_prompt}"}]}
+                )  # noqa: E501
+                contents.append(
+                    {
+                        "role": "model",
+                        "parts": [{"text": "Understood. I will conform to those instructions."}],
+                    }
+                )  # noqa: E501
 
             contents.append({"role": "user", "parts": [{"text": prompt}]})
 
@@ -388,7 +444,7 @@ class GeminiProvider(LLMProvider):
                         "contents": contents,
                         "generationConfig": {
                             "temperature": temperature,
-                        }
+                        },
                     },
                 ) as response:
                     if response.status_code == 200:
@@ -399,6 +455,7 @@ class GeminiProvider(LLMProvider):
                             # Gemini returns a JSON array or objects per chunk
                             # For safety, let's parse as JSON if it looks like it
                             import json
+
                             try:
                                 # Sometimes lines start with `[` or `,` in streaming array formats
                                 if line.startswith("["):
@@ -415,12 +472,22 @@ class GeminiProvider(LLMProvider):
                                         yield {"text": text, "done": False}
                             except Exception:
                                 pass
-                        yield {"text": "", "done": True, "prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0}  # noqa: E501
+                        yield {
+                            "text": "",
+                            "done": True,
+                            "prompt_tokens": 0,
+                            "completion_tokens": 0,
+                            "total_tokens": 0,
+                        }  # noqa: E501
                     else:
-                        async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+                        async for chunk in self.mock_provider.generate_stream(
+                            prompt, system_prompt, temperature
+                        ):  # noqa: E501
                             yield chunk
         except Exception:
-            async for chunk in self.mock_provider.generate_stream(prompt, system_prompt, temperature):  # noqa: E501
+            async for chunk in self.mock_provider.generate_stream(
+                prompt, system_prompt, temperature
+            ):  # noqa: E501
                 yield chunk
 
 

@@ -75,7 +75,7 @@ def test_get_graph(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
                     type="user",
                     title="Test Member",
                     subtitle="test@example.com",
-                )
+                ),
             ],
             edges=[
                 GraphEdge(
@@ -85,7 +85,7 @@ def test_get_graph(client: TestClient, monkeypatch: pytest.MonkeyPatch) -> None:
                     type="contains",
                     confidence=1.0,
                 )
-            ]
+            ],
         )
 
     monkeypatch.setattr(GraphService, "get_project_graph", mock_get_project_graph)
@@ -123,7 +123,7 @@ def test_get_entity_detail(client: TestClient, monkeypatch: pytest.MonkeyPatch) 
                     direction="incoming",
                     confidence=1.0,
                 )
-            ]
+            ],
         )
 
     monkeypatch.setattr(GraphService, "get_entity_detail", mock_get_entity_detail)
@@ -196,6 +196,7 @@ def test_get_relationships_by_node(client: TestClient, monkeypatch: pytest.Monke
 
     # Mock get_item_by_id in KnowledgeService
     from app.services.knowledge import KnowledgeService
+
     class DummyItem:
         def __init__(self, nid, pid):
             self.id = nid

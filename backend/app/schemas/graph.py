@@ -12,10 +12,7 @@ class GraphNode(BaseModel):
     author: str | None = None
     metadata_json: dict | None = Field(default=None, alias="metadata")
 
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
+    model_config = {"populate_by_name": True, "from_attributes": True}
 
 
 class GraphEdge(BaseModel):
@@ -26,10 +23,7 @@ class GraphEdge(BaseModel):
     confidence: float = 1.0
     metadata_json: dict | None = Field(default=None, alias="metadata")
 
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
+    model_config = {"populate_by_name": True, "from_attributes": True}
 
 
 class GraphResponse(BaseModel):
@@ -50,9 +44,7 @@ class EntityRelationshipDetail(BaseModel):
     confidence: float = 1.0
     metadata_json: dict | None = Field(default=None, alias="metadata")
 
-    model_config = {
-        "populate_by_name": True
-    }
+    model_config = {"populate_by_name": True}
 
 
 class EntityDetailResponse(BaseModel):
@@ -70,10 +62,7 @@ class TimelineEvent(BaseModel):
     url: str | None = None
     metadata_json: dict | None = Field(default=None, alias="metadata")
 
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
+    model_config = {"populate_by_name": True, "from_attributes": True}
 
 
 class TimelineResponse(BaseModel):

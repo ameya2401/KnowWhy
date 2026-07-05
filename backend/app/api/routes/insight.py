@@ -45,9 +45,7 @@ async def require_project_membership(
     res = await db.execute(stmt)
     project = res.scalars().first()
     if not project:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found."
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
     return project
 
 
@@ -56,17 +54,19 @@ async def analyze_project_insights(
     payload: EngineeringInsightAnalyzeRequest,
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_database_session)],
-    provider_override: str | None = None
+    provider_override: str | None = None,
 ):
     """Triggers analysis for a project, generates, and persists engineering insights."""
     # Require at least CONTRIBUTOR/MAINTAINER to trigger analysis
-    project = await require_project_membership(current_user, payload.project_id, db, ProjectRole.CONTRIBUTOR)  # noqa: E501
+    project = await require_project_membership(
+        current_user, payload.project_id, db, ProjectRole.CONTRIBUTOR
+    )  # noqa: E501
 
     insights = await InsightService.analyze_project_insights(
         db=db,
         project_id=project.id,
         organization_id=project.organization_id,
-        provider_override=provider_override
+        provider_override=provider_override,
     )
     return insights
 
@@ -89,7 +89,7 @@ async def list_insights(
         organization_id=project.organization_id,
         status=status,
         severity=severity,
-        insight_type=insight_type
+        insight_type=insight_type,
     )
     return insights
 
@@ -105,10 +105,7 @@ async def get_insight(
     project = await require_project_membership(current_user, project_id, db, ProjectRole.VIEWER)
 
     insight = await InsightService.get_insight_by_id(
-        db=db,
-        insight_id=id,
-        project_id=project.id,
-        organization_id=project.organization_id
+        db=db, insight_id=id, project_id=project.id, organization_id=project.organization_id
     )
 
     if not insight:
@@ -128,8 +125,6 @@ async def get_statistics(
     project = await require_project_membership(current_user, project_id, db, ProjectRole.VIEWER)
 
     stats = await InsightService.get_insight_statistics(
-        db=db,
-        project_id=project.id,
-        organization_id=project.organization_id
+        db=db, project_id=project.id, organization_id=project.organization_id
     )
     return stats

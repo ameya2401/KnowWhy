@@ -1,29 +1,10 @@
 import React, { useState, useEffect } from "react";
-import {
-  Cpu,
-  Brain,
-  Activity,
-  AlertCircle,
-  FileText,
-  Clock,
-  Flame,
-  Send,
-  Zap,
-} from "lucide-react";
+import { Cpu, Brain, Activity, AlertCircle, FileText, Clock, Flame, Send, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import {
-  queryAI,
-  explainAI,
-  getAIProviders,
-  getAIStatistics,
-} from "@/services/aiApi";
-import {
-  LLMProviderInfo,
-  AIQueryResponse,
-  AIStatisticsResponse,
-} from "@/types/ai";
+import { queryAI, explainAI, getAIProviders, getAIStatistics } from "@/services/aiApi";
+import { LLMProviderInfo, AIQueryResponse, AIStatisticsResponse } from "@/types/ai";
 
 interface AIDebugDashboardProps {
   projectId: string;
@@ -31,10 +12,7 @@ interface AIDebugDashboardProps {
   isMaintainer: boolean;
 }
 
-export function AIDebugDashboard({
-  projectId,
-  accessToken,
-}: AIDebugDashboardProps) {
+export function AIDebugDashboard({ projectId, accessToken }: AIDebugDashboardProps) {
   const [providers, setProviders] = useState<LLMProviderInfo[]>([]);
   const [activeProvider, setActiveProvider] = useState<string>("openai");
   const [selectedProvider, setSelectedProvider] = useState<string>("");
@@ -111,9 +89,7 @@ export function AIDebugDashboard({
             <div className="text-2xl font-bold capitalize">
               {selectedProvider || activeProvider}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Active Provider: {activeProvider}
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Active Provider: {activeProvider}</p>
           </CardContent>
         </Card>
 
@@ -123,12 +99,8 @@ export function AIDebugDashboard({
             <Activity className="size-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              {statistics?.total_requests ?? 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Accumulated sessions
-            </p>
+            <div className="text-2xl font-bold">{statistics?.total_requests ?? 0}</div>
+            <p className="text-xs text-muted-foreground mt-1">Accumulated sessions</p>
           </CardContent>
         </Card>
 
@@ -143,9 +115,7 @@ export function AIDebugDashboard({
                 ? `${Math.round(statistics.average_latency_ms)} ms`
                 : "0 ms"}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Context + LLM overhead
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Context + LLM overhead</p>
           </CardContent>
         </Card>
 
@@ -160,9 +130,7 @@ export function AIDebugDashboard({
                 ? `${Math.round(statistics.average_confidence * 100)}%`
                 : "0%"}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Evidence agreement factor
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Evidence agreement factor</p>
           </CardContent>
         </Card>
       </div>
@@ -226,7 +194,8 @@ export function AIDebugDashboard({
             <CardHeader>
               <CardTitle>RAG Sandbox Engine</CardTitle>
               <CardDescription>
-                Execute context retrieval, intent parsing, and prompt reasoning without chat overhead.
+                Execute context retrieval, intent parsing, and prompt reasoning without chat
+                overhead.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -348,7 +317,10 @@ export function AIDebugDashboard({
                       </h4>
                       <div className="space-y-2">
                         {aiResponse.sources.map((src, idx) => (
-                          <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs border border-border p-2 rounded-md bg-background/50">
+                          <div
+                            key={idx}
+                            className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs border border-border p-2 rounded-md bg-background/50"
+                          >
                             <div>
                               <span className="font-semibold text-foreground">{src.title}</span>
                               <span className="text-muted-foreground ml-2">({src.source})</span>

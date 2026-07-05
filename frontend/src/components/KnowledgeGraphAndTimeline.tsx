@@ -14,7 +14,7 @@ import {
   HelpCircle,
   Database,
   ArrowRight,
-  Maximize2
+  Maximize2,
 } from "lucide-react";
 import { graphApi } from "../services/graphApi";
 import { GraphNode, GraphEdge, TimelineEvent } from "../types/graph";
@@ -23,17 +23,37 @@ import { GraphNode, GraphEdge, TimelineEvent } from "../types/graph";
 const NODE_COLORS: Record<string, { bg: string; border: string; glow: string; text: string }> = {
   project: { bg: "#f97316", border: "#fdba74", glow: "rgba(249, 115, 22, 0.4)", text: "#ffedd5" },
   user: { bg: "#06b6d4", border: "#67e8f9", glow: "rgba(6, 182, 212, 0.4)", text: "#ecfeff" },
-  integration: { bg: "#8b5cf6", border: "#c084fc", glow: "rgba(139, 92, 246, 0.4)", text: "#f5f3ff" },
-  repository: { bg: "#3b82f6", border: "#93c5fd", glow: "rgba(59, 130, 246, 0.4)", text: "#eff6ff" },
+  integration: {
+    bg: "#8b5cf6",
+    border: "#c084fc",
+    glow: "rgba(139, 92, 246, 0.4)",
+    text: "#f5f3ff",
+  },
+  repository: {
+    bg: "#3b82f6",
+    border: "#93c5fd",
+    glow: "rgba(59, 130, 246, 0.4)",
+    text: "#eff6ff",
+  },
   commit: { bg: "#0ea5e9", border: "#7dd3fc", glow: "rgba(14, 165, 233, 0.3)", text: "#f0f9ff" },
-  pull_request: { bg: "#a855f7", border: "#d8b4fe", glow: "rgba(168, 85, 247, 0.3)", text: "#faf5ff" },
+  pull_request: {
+    bg: "#a855f7",
+    border: "#d8b4fe",
+    glow: "rgba(168, 85, 247, 0.3)",
+    text: "#faf5ff",
+  },
   issue: { bg: "#ef4444", border: "#fca5a5", glow: "rgba(239, 68, 68, 0.3)", text: "#fef2f2" },
-  notion_page: { bg: "#eab308", border: "#fde047", glow: "rgba(234, 179, 8, 0.3)", text: "#fefce8" },
+  notion_page: {
+    bg: "#eab308",
+    border: "#fde047",
+    glow: "rgba(234, 179, 8, 0.3)",
+    text: "#fefce8",
+  },
   document: { bg: "#10b981", border: "#6ee7b7", glow: "rgba(16, 185, 129, 0.3)", text: "#ecfdf5" },
   folder: { bg: "#0f766e", border: "#2dd4bf", glow: "rgba(15, 118, 110, 0.3)", text: "#f0fdfa" },
   decision: { bg: "#f43f5e", border: "#fda4af", glow: "rgba(244, 63, 94, 0.4)", text: "#fff1f2" },
   meeting: { bg: "#e11d48", border: "#fda4af", glow: "rgba(225, 29, 72, 0.4)", text: "#fff1f2" },
-  default: { bg: "#6b7280", border: "#d1d5db", glow: "rgba(107, 114, 128, 0.3)", text: "#f9fafb" }
+  default: { bg: "#6b7280", border: "#d1d5db", glow: "rgba(107, 114, 128, 0.3)", text: "#f9fafb" },
 };
 
 interface SimNode extends GraphNode {
@@ -55,13 +75,18 @@ interface KnowledgeGraphAndTimelineProps {
   projectId: string;
 }
 
-export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps> = ({ projectId }) => {
+export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps> = ({
+  projectId,
+}) => {
   const [activeTab, setActiveTab] = useState<"graph" | "timeline">("graph");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Raw API Data
-  const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] }>({ nodes: [], edges: [] });
+  const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; edges: GraphEdge[] }>({
+    nodes: [],
+    edges: [],
+  });
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
 
   // Graph State & Interaction
@@ -72,7 +97,17 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTypeFilters, setSelectedTypeFilters] = useState<string[]>([
-    "project", "user", "integration", "repository", "commit", "pull_request", "issue", "notion_page", "document", "decision", "meeting"
+    "project",
+    "user",
+    "integration",
+    "repository",
+    "commit",
+    "pull_request",
+    "issue",
+    "notion_page",
+    "document",
+    "decision",
+    "meeting",
   ]);
 
   // Timeline Filters
@@ -121,7 +156,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
           y: 300 + Math.sin(angle) * dist,
           vx: 0,
           vy: 0,
-          radius
+          radius,
         };
       });
 
@@ -131,7 +166,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
       setEdges(simEdges);
     } catch (err: unknown) {
       console.error(err);
-      setError("Failed to load Knowledge Graph data. Please verify your integrations or try syncing.");
+      setError(
+        "Failed to load Knowledge Graph data. Please verify your integrations or try syncing.",
+      );
     } finally {
       setLoading(false);
     }
@@ -162,7 +199,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
         if (localNode) {
           setInspectorData({
             node: localNode,
-            relationships: []
+            relationships: [],
           });
         }
       } finally {
@@ -198,8 +235,14 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
             const fx = (dx / dist) * force;
             const fy = (dy / dist) * force;
 
-            if (!u.fx) { u.vx -= fx; u.vy -= fy; }
-            if (!v.fx) { v.vx += fx; v.vy += fy; }
+            if (!u.fx) {
+              u.vx -= fx;
+              u.vy -= fy;
+            }
+            if (!v.fx) {
+              v.vx += fx;
+              v.vy += fy;
+            }
           }
         }
       }
@@ -226,8 +269,14 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
           const fx = (dx / dist) * force;
           const fy = (dy / dist) * force;
 
-          if (!sourceNode.fx) { sourceNode.vx += fx; sourceNode.vy += fy; }
-          if (!targetNode.fx) { targetNode.vx -= fx; targetNode.vy -= fy; }
+          if (!sourceNode.fx) {
+            sourceNode.vx += fx;
+            sourceNode.vy += fy;
+          }
+          if (!targetNode.fx) {
+            targetNode.vx -= fx;
+            targetNode.vy -= fy;
+          }
         }
       });
 
@@ -355,7 +404,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
           edges.some(
             (e) =>
               (e.source === selectedNodeId && e.target === node.id) ||
-              (e.target === selectedNodeId && e.source === node.id)
+              (e.target === selectedNodeId && e.source === node.id),
           );
 
         const isUnrelatedSelectedState = selectedNodeId && !isSelected && !isRelatedNeighbor;
@@ -401,7 +450,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
           ctx.fillText(
             node.title.length > 20 ? node.title.slice(0, 18) + "..." : node.title,
             node.x,
-            node.y + node.radius + 12
+            node.y + node.radius + 12,
           );
 
           // Subtitle / Type label
@@ -463,7 +512,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
     // Convert screen coordinates to simulation coordinates accounting for pan & zoom
     return {
       x: (mouseX - transformRef.current.x) / transformRef.current.k,
-      y: (mouseY - transformRef.current.y) / transformRef.current.k
+      y: (mouseY - transformRef.current.y) / transformRef.current.k,
     };
   };
 
@@ -539,7 +588,8 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
     const mouseY = e.clientY - rect.top;
 
     const zoomFactor = 1.1;
-    const nextScale = e.deltaY < 0 ? transformRef.current.k * zoomFactor : transformRef.current.k / zoomFactor;
+    const nextScale =
+      e.deltaY < 0 ? transformRef.current.k * zoomFactor : transformRef.current.k / zoomFactor;
 
     // Constrain zoom
     const k = Math.max(0.15, Math.min(nextScale, 4));
@@ -575,7 +625,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
     if (!searchQuery.trim()) return;
 
     const matchNode = nodes.find(
-      (n) => n.title.toLowerCase().includes(searchQuery.toLowerCase()) && selectedTypeFilters.includes(n.type)
+      (n) =>
+        n.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        selectedTypeFilters.includes(n.type),
     );
 
     if (matchNode) {
@@ -629,7 +681,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
         <div className="flex items-center space-x-6">
           <div className="flex items-center space-x-2">
             <Database className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-base font-semibold tracking-wide text-slate-200">Knowledge Intelligence</h2>
+            <h2 className="text-base font-semibold tracking-wide text-slate-200">
+              Knowledge Intelligence
+            </h2>
           </div>
           <div className="flex bg-[#0f172a] p-1 rounded-lg border border-slate-800">
             <button
@@ -697,7 +751,10 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full bg-[#0f172a] border border-slate-800 rounded-lg py-2 pl-3 pr-8 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/80 focus:ring-1 focus:ring-indigo-500/30"
                   />
-                  <button type="submit" className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-200">
+                  <button
+                    type="submit"
+                    className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-200"
+                  >
                     <Search className="w-3.5 h-3.5" />
                   </button>
                 </form>
@@ -728,9 +785,14 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                           />
                           <span
                             className="w-2.5 h-2.5 rounded-full"
-                            style={{ backgroundColor: colors.bg, border: `1px solid ${colors.border}` }}
+                            style={{
+                              backgroundColor: colors.bg,
+                              border: `1px solid ${colors.border}`,
+                            }}
                           />
-                          <span className="capitalize text-slate-300">{type.replace("_", " ")}</span>
+                          <span className="capitalize text-slate-300">
+                            {type.replace("_", " ")}
+                          </span>
                         </div>
                         <span className="text-[10px] text-slate-500 font-mono bg-slate-900/60 px-1.5 py-0.5 rounded-md border border-slate-800/50">
                           {count}
@@ -790,7 +852,8 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                 </div>
 
                 <div className="absolute left-4 top-4 bg-[#0a0f1d]/85 px-3 py-1.5 rounded-lg border border-slate-800/60 text-[10px] text-slate-400 font-mono pointer-events-none select-none glassmorphism">
-                  Zoom: {Math.round(zoomScale * 100)}% | Active Nodes: {nodes.filter((n) => selectedTypeFilters.includes(n.type)).length}
+                  Zoom: {Math.round(zoomScale * 100)}% | Active Nodes:{" "}
+                  {nodes.filter((n) => selectedTypeFilters.includes(n.type)).length}
                 </div>
               </div>
             </div>
@@ -800,7 +863,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
               {/* Left filter side panel */}
               <div className="w-64 bg-[#0a0f1d]/90 border-r border-slate-800/80 p-4 flex flex-col space-y-5 select-none glassmorphism">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Search Timeline</label>
+                  <label className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+                    Search Timeline
+                  </label>
                   <div className="relative">
                     <input
                       type="text"
@@ -814,7 +879,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Entity Type</label>
+                  <label className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+                    Entity Type
+                  </label>
                   <select
                     value={timelineTypeFilter}
                     onChange={(e) => setTimelineTypeFilter(e.target.value)}
@@ -831,7 +898,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">Source Provider</label>
+                  <label className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase">
+                    Source Provider
+                  </label>
                   <select
                     value={timelineSourceFilter}
                     onChange={(e) => setTimelineSourceFilter(e.target.value)}
@@ -849,7 +918,10 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                     <Clock className="w-3.5 h-3.5 text-indigo-400" />
                     <span className="font-semibold text-slate-400">Timeline Metrics</span>
                   </div>
-                  <p>Displaying {filteredTimelineEvents.length} total events matching active criteria.</p>
+                  <p>
+                    Displaying {filteredTimelineEvents.length} total events matching active
+                    criteria.
+                  </p>
                 </div>
               </div>
 
@@ -883,7 +955,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                             style={{
                               backgroundColor: colors.bg,
                               borderColor: isSelected ? "#fff" : colors.border,
-                              boxShadow: `0 0 8px ${colors.glow}`
+                              boxShadow: `0 0 8px ${colors.glow}`,
                             }}
                           />
 
@@ -895,7 +967,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                                 style={{
                                   backgroundColor: `${colors.bg}22`,
                                   color: colors.border,
-                                  border: `1px solid ${colors.bg}44`
+                                  border: `1px solid ${colors.bg}44`,
                                 }}
                               >
                                 {event.type.replace("_", " ")}
@@ -909,7 +981,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                                 month: "short",
                                 day: "numeric",
                                 hour: "2-digit",
-                                minute: "2-digit"
+                                minute: "2-digit",
                               })}
                             </span>
                           </div>
@@ -950,7 +1022,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
           {/* ==================== RIGHT ENTITY INSPECTOR PANEL ==================== */}
           <div
             className={`w-80 bg-[#0a0f1d]/95 border-l border-slate-800/80 flex flex-col shadow-2xl transition-all duration-350 z-20 glassmorphism ${
-              selectedNodeId ? "translate-x-0" : "translate-x-full absolute right-0 top-0 bottom-0 pointer-events-none"
+              selectedNodeId
+                ? "translate-x-0"
+                : "translate-x-full absolute right-0 top-0 bottom-0 pointer-events-none"
             }`}
           >
             {selectedNodeId && (
@@ -959,7 +1033,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                 <div className="flex items-center justify-between px-4 py-3 bg-slate-900/60 border-b border-slate-800/50">
                   <div className="flex items-center space-x-2">
                     <Info className="w-4 h-4 text-indigo-400" />
-                    <span className="text-xs font-semibold tracking-wider text-slate-300 uppercase">Entity Properties</span>
+                    <span className="text-xs font-semibold tracking-wider text-slate-300 uppercase">
+                      Entity Properties
+                    </span>
                   </div>
                   <button
                     onClick={() => setSelectedNodeId(null)}
@@ -983,8 +1059,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                           className="px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider font-mono"
                           style={{
                             backgroundColor: `${(NODE_COLORS[inspectorData.node.type] || NODE_COLORS.default).bg}22`,
-                            color: (NODE_COLORS[inspectorData.node.type] || NODE_COLORS.default).border,
-                            border: `1px solid ${(NODE_COLORS[inspectorData.node.type] || NODE_COLORS.default).bg}44`
+                            color: (NODE_COLORS[inspectorData.node.type] || NODE_COLORS.default)
+                              .border,
+                            border: `1px solid ${(NODE_COLORS[inspectorData.node.type] || NODE_COLORS.default).bg}44`,
                           }}
                         >
                           {inspectorData.node.type.replace("_", " ")}
@@ -995,7 +1072,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                           </span>
                         )}
                       </div>
-                      <h3 className="text-sm font-bold text-slate-100">{inspectorData.node.title}</h3>
+                      <h3 className="text-sm font-bold text-slate-100">
+                        {inspectorData.node.title}
+                      </h3>
                     </div>
 
                     {/* Metadata attributes list */}
@@ -1003,14 +1082,18 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                       {inspectorData.node.author && (
                         <div className="flex justify-between">
                           <span className="text-slate-550">Author:</span>
-                          <span className="text-slate-300 font-medium">{inspectorData.node.author}</span>
+                          <span className="text-slate-300 font-medium">
+                            {inspectorData.node.author}
+                          </span>
                         </div>
                       )}
                       {inspectorData.node.metadata?.created_time && (
                         <div className="flex justify-between">
                           <span className="text-slate-550">Created:</span>
                           <span className="text-slate-300 font-mono text-[10px]">
-                            {new Date(inspectorData.node.metadata.created_time).toLocaleDateString()}
+                            {new Date(
+                              inspectorData.node.metadata.created_time,
+                            ).toLocaleDateString()}
                           </span>
                         </div>
                       )}
@@ -1018,7 +1101,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                         <div className="flex justify-between">
                           <span className="text-slate-550">Updated:</span>
                           <span className="text-slate-300 font-mono text-[10px]">
-                            {new Date(inspectorData.node.metadata.updated_time).toLocaleDateString()}
+                            {new Date(
+                              inspectorData.node.metadata.updated_time,
+                            ).toLocaleDateString()}
                           </span>
                         </div>
                       )}
@@ -1041,7 +1126,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                     {/* Description Text */}
                     {inspectorData.node.metadata?.description && (
                       <div className="space-y-1">
-                        <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Description</h4>
+                        <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Description
+                        </h4>
                         <div className="text-xs text-slate-300 leading-relaxed bg-slate-900/10 p-2.5 rounded-lg border border-slate-850/60 max-h-24 overflow-y-auto scrollbar-thin">
                           {inspectorData.node.metadata.description}
                         </div>
@@ -1051,7 +1138,9 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                     {/* Content Detail (e.g. Commit content / notions body) */}
                     {inspectorData.node.metadata?.content && (
                       <div className="space-y-1">
-                        <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Indexed Content</h4>
+                        <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                          Indexed Content
+                        </h4>
                         <pre className="text-[10px] font-mono text-slate-400 p-2.5 bg-slate-950/60 rounded-lg border border-slate-900 overflow-x-auto max-h-36 overflow-y-auto scrollbar-thin leading-normal">
                           {inspectorData.node.metadata.content}
                         </pre>
@@ -1060,9 +1149,13 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
 
                     {/* Relationships List */}
                     <div className="space-y-2">
-                      <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Graph Neighbors</h4>
+                      <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                        Graph Neighbors
+                      </h4>
                       {inspectorData.relationships.length === 0 ? (
-                        <p className="text-[10px] text-slate-550 italic">No directional relationships mapped.</p>
+                        <p className="text-[10px] text-slate-550 italic">
+                          No directional relationships mapped.
+                        </p>
                       ) : (
                         <div className="space-y-1.5">
                           {inspectorData.relationships.map((rel, idx) => {

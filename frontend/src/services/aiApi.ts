@@ -13,7 +13,7 @@ export async function queryAI(
   accessToken: string,
   projectId: string,
   q: string,
-  provider?: string
+  provider?: string,
 ): Promise<AIQueryResponse> {
   const response = await fetch(`${API_BASE}/ai/query`, {
     method: "POST",
@@ -35,7 +35,7 @@ export async function explainAI(
   accessToken: string,
   projectId: string,
   concept: string,
-  provider?: string
+  provider?: string,
 ): Promise<AIQueryResponse> {
   const response = await fetch(`${API_BASE}/ai/explain`, {
     method: "POST",
@@ -98,7 +98,7 @@ export async function getAIModels(accessToken: string): Promise<AIModelInfo[]> {
 export async function getConversations(
   accessToken: string,
   projectId: string,
-  q?: string
+  q?: string,
 ): Promise<AIConversation[]> {
   const url = new URL(`${API_BASE}/ai/conversations`);
   url.searchParams.append("project_id", projectId);
@@ -121,7 +121,7 @@ export async function getConversations(
 
 export async function getConversation(
   accessToken: string,
-  conversationId: string
+  conversationId: string,
 ): Promise<AIConversation> {
   const response = await fetch(`${API_BASE}/ai/conversations/${conversationId}`, {
     headers: {
@@ -138,7 +138,7 @@ export async function getConversation(
 
 export async function deleteConversation(
   accessToken: string,
-  conversationId: string
+  conversationId: string,
 ): Promise<boolean> {
   const response = await fetch(`${API_BASE}/ai/conversations/${conversationId}`, {
     method: "DELETE",
@@ -157,8 +157,18 @@ export async function deleteConversation(
 
 export async function* chatStream(
   accessToken: string,
-  request: AIChatRequest
-): AsyncGenerator<{ token?: string; done?: boolean; conversation_id?: string; metadata?: Record<string, unknown>; error?: string }, void, unknown> {
+  request: AIChatRequest,
+): AsyncGenerator<
+  {
+    token?: string;
+    done?: boolean;
+    conversation_id?: string;
+    metadata?: Record<string, unknown>;
+    error?: string;
+  },
+  void,
+  unknown
+> {
   const response = await fetch(`${API_BASE}/ai/chat`, {
     method: "POST",
     headers: {

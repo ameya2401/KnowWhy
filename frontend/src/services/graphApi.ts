@@ -3,7 +3,12 @@ import { GraphResponse, EntityDetailResponse, TimelineResponse } from "../types/
 import { KnowledgeRelationship } from "../types/knowledge";
 
 export const graphApi = {
-  getGraph: async (projectId: string, limit = 500, offset = 0, entityTypes?: string[]): Promise<GraphResponse> => {
+  getGraph: async (
+    projectId: string,
+    limit = 500,
+    offset = 0,
+    entityTypes?: string[],
+  ): Promise<GraphResponse> => {
     const params = new URLSearchParams({
       project_id: projectId,
       limit: String(limit),
@@ -18,7 +23,7 @@ export const graphApi = {
 
   getEntityDetail: async (entityId: string, projectId: string): Promise<EntityDetailResponse> => {
     const response = await apiClient.get<EntityDetailResponse>(
-      `/graph/entity/${entityId}?project_id=${projectId}`
+      `/graph/entity/${entityId}?project_id=${projectId}`,
     );
     return response.data;
   },
@@ -33,7 +38,7 @@ export const graphApi = {
       endDate?: string;
       limit?: number;
       offset?: number;
-    }
+    },
   ): Promise<TimelineResponse> => {
     const params = new URLSearchParams({
       project_id: projectId,
@@ -59,7 +64,7 @@ export const graphApi = {
       endDate?: string;
       limit?: number;
       offset?: number;
-    }
+    },
   ): Promise<TimelineResponse> => {
     const params = new URLSearchParams({
       ...(filters?.limit !== undefined && { limit: String(filters.limit) }),
@@ -71,14 +76,17 @@ export const graphApi = {
       ...(filters?.endDate && { end_date: filters.endDate }),
     });
     const response = await apiClient.get<TimelineResponse>(
-      `/timeline/project/${projectId}?${params.toString()}`
+      `/timeline/project/${projectId}?${params.toString()}`,
     );
     return response.data;
   },
 
-  getNodeRelationships: async (nodeId: string, projectId: string): Promise<KnowledgeRelationship[]> => {
+  getNodeRelationships: async (
+    nodeId: string,
+    projectId: string,
+  ): Promise<KnowledgeRelationship[]> => {
     const response = await apiClient.get<KnowledgeRelationship[]>(
-      `/relationships/${nodeId}?project_id=${projectId}`
+      `/relationships/${nodeId}?project_id=${projectId}`,
     );
     return response.data;
   },

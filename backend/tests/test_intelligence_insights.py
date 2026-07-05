@@ -31,7 +31,6 @@ class MockExecuteResult:
     def scalars(self):
         return self
 
-
     def first(self):
         return self.scalar_values[0] if self.scalar_values else None
 
@@ -57,7 +56,7 @@ async def test_documentation_gap_rule():
         description="Integrate security authentication",
         created_time=datetime.now(UTC),
         updated_time=datetime.now(UTC),
-        status="active"
+        status="active",
     )
     doc_page = KnowledgeItem(
         id=uuid4(),
@@ -70,13 +69,10 @@ async def test_documentation_gap_rule():
         description="General guide",
         created_time=datetime.now(UTC),
         updated_time=datetime.now(UTC),
-        status="active"
+        status="active",
     )
 
-    db.execute.side_effect = [
-        MockExecuteResult([commit]),
-        MockExecuteResult([doc_page])
-    ]
+    db.execute.side_effect = [MockExecuteResult([commit]), MockExecuteResult([doc_page])]
 
     rule = DocumentationGapRule()
     insights = await rule.analyze(db, project_id, org_id)
@@ -105,7 +101,7 @@ async def test_stale_knowledge_rule():
         description="General guide",
         created_time=datetime.now(UTC) - timedelta(days=50),
         updated_time=datetime.now(UTC) - timedelta(days=40),
-        status="active"
+        status="active",
     )
 
     db.execute.return_value = MockExecuteResult([doc_page])
@@ -137,7 +133,7 @@ async def test_architecture_drift_rule():
         content="postgresql details",
         created_time=datetime.now(UTC),
         updated_time=datetime.now(UTC),
-        status="active"
+        status="active",
     )
     commit = KnowledgeItem(
         id=uuid4(),
@@ -150,13 +146,10 @@ async def test_architecture_drift_rule():
         description="Configure mysql",
         created_time=datetime.now(UTC),
         updated_time=datetime.now(UTC),
-        status="active"
+        status="active",
     )
 
-    db.execute.side_effect = [
-        MockExecuteResult([adr]),
-        MockExecuteResult([commit])
-    ]
+    db.execute.side_effect = [MockExecuteResult([adr]), MockExecuteResult([commit])]
 
     rule = ArchitectureDriftRule()
     insights = await rule.analyze(db, project_id, org_id)
@@ -183,7 +176,7 @@ async def test_duplicate_knowledge_rule():
         title="API Reference Guide",
         created_time=datetime.now(UTC),
         updated_time=datetime.now(UTC),
-        status="active"
+        status="active",
     )
     doc2 = KnowledgeItem(
         id=uuid4(),
@@ -195,7 +188,7 @@ async def test_duplicate_knowledge_rule():
         title="API Reference Guide",
         created_time=datetime.now(UTC),
         updated_time=datetime.now(UTC),
-        status="active"
+        status="active",
     )
 
     db.execute.return_value = MockExecuteResult([doc1, doc2])
@@ -227,7 +220,7 @@ async def test_project_health_rule():
             metadata_json={"state": "open"},
             created_time=datetime.now(UTC),
             updated_time=datetime.now(UTC),
-            status="active"
+            status="active",
         )
         for i in range(7)
     ]
@@ -260,15 +253,12 @@ async def test_knowledge_coverage_rule():
             title=f"Commit #{i}",
             created_time=datetime.now(UTC),
             updated_time=datetime.now(UTC),
-            status="active"
+            status="active",
         )
         for i in range(12)
     ]
 
-    db.execute.side_effect = [
-        MockExecuteResult(commits),
-        MockExecuteResult([])
-    ]
+    db.execute.side_effect = [MockExecuteResult(commits), MockExecuteResult([])]
 
     rule = KnowledgeCoverageRule()
     insights = await rule.analyze(db, project_id, org_id)
@@ -306,6 +296,7 @@ def test_client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
         class MockProject:
             id = uuid4()
             organization_id = uuid4()
+
         return MockProject()
 
     monkeypatch.setattr(insight_router, "require_project_membership", mock_require_membership)
@@ -331,7 +322,7 @@ def test_api_analyze(test_client: TestClient, monkeypatch: pytest.MonkeyPatch):
                 suggested_actions=["Verify details"],
                 status="active",
                 created_at=datetime.now(UTC),
-                updated_at=datetime.now(UTC)
+                updated_at=datetime.now(UTC),
             )
         ]
 
@@ -363,7 +354,7 @@ def test_api_list_insights(test_client: TestClient, monkeypatch: pytest.MonkeyPa
                 suggested_actions=[],
                 status="active",
                 created_at=datetime.now(UTC),
-                updated_at=datetime.now(UTC)
+                updated_at=datetime.now(UTC),
             )
         ]
 
@@ -390,9 +381,9 @@ def test_api_get_statistics(test_client: TestClient, monkeypatch: pytest.MonkeyP
                 "architecture_drift": 0,
                 "duplicate_knowledge": 0,
                 "project_health": 1,
-                "knowledge_coverage": 0
+                "knowledge_coverage": 0,
             },
-            "average_confidence": 0.95
+            "average_confidence": 0.95,
         }
 
     monkeypatch.setattr(InsightService, "get_insight_statistics", mock_stats)

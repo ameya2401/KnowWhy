@@ -53,11 +53,21 @@ def client(monkeypatch: pytest.MonkeyPatch) -> TestClient:
 
 def test_query_intent_analysis():
     """Verify that user query intent is detected correctly based on keyword rules."""
-    assert QueryProcessor.analyze_intent("Give me the chronological history of updates") == "timeline"  # noqa: E501
-    assert QueryProcessor.analyze_intent("What is the difference between Redis and Memcached?") == "comparison"  # noqa: E501
-    assert QueryProcessor.analyze_intent("Why did we adopt auth0 instead of self-hosted OAuth?") == "decision"  # noqa: E501
+    assert (
+        QueryProcessor.analyze_intent("Give me the chronological history of updates") == "timeline"
+    )  # noqa: E501
+    assert (
+        QueryProcessor.analyze_intent("What is the difference between Redis and Memcached?")
+        == "comparison"
+    )  # noqa: E501
+    assert (
+        QueryProcessor.analyze_intent("Why did we adopt auth0 instead of self-hosted OAuth?")
+        == "decision"
+    )  # noqa: E501
     assert QueryProcessor.analyze_intent("What is authentication?") == "explanation"
-    assert QueryProcessor.analyze_intent("Can you summarize the meeting details?") == "summarization"  # noqa: E501
+    assert (
+        QueryProcessor.analyze_intent("Can you summarize the meeting details?") == "summarization"
+    )  # noqa: E501
     assert QueryProcessor.analyze_intent("List all project files") == "search"
 
 
@@ -94,6 +104,7 @@ def test_context_builder_token_budget():
 
 def test_prompt_builder():
     """Verify PromptBuilder constructs valid templates containing instructions, query, and context."""  # noqa: E501
+
     class DummyItem:
         title = "Doc A"
         source = "github"
@@ -116,6 +127,7 @@ def test_prompt_builder():
 def test_citation_engine():
     """Verify that CitationEngine builds structured citation metrics."""
     item_id = uuid4()
+
     class DummyItem:
         id = item_id
         title = "Doc A"
@@ -156,8 +168,12 @@ async def test_mock_llm_generation():
 
 def test_ai_query_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch):
     """Verify project members can access RAG query route and receive valid citations."""
-    async def mock_execute_rag(self, project_id, user_id, query, provider_override=None, is_explain=False):  # noqa: E501
+
+    async def mock_execute_rag(
+        self, project_id, user_id, query, provider_override=None, is_explain=False
+    ):  # noqa: E501
         from app.schemas.ai import AICitation, AIQueryResponse
+
         return AIQueryResponse(
             answer="This is a test RAG response.",
             confidence_score=0.9,
@@ -191,8 +207,12 @@ def test_ai_query_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch):
 
 def test_ai_explain_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch):
     """Verify RAG explanation endpoint returns structured output."""
-    async def mock_execute_rag(self, project_id, user_id, query, provider_override=None, is_explain=False):  # noqa: E501
+
+    async def mock_execute_rag(
+        self, project_id, user_id, query, provider_override=None, is_explain=False
+    ):  # noqa: E501
         from app.schemas.ai import AIQueryResponse
+
         return AIQueryResponse(
             answer="OAuth2 details here.",
             confidence_score=0.85,
@@ -246,10 +266,10 @@ def test_ai_models_endpoint(client: TestClient):
 def test_chat_conversations_api(client: TestClient, monkeypatch: pytest.MonkeyPatch):
     """Verify creating, listing, getting, and deleting conversations via API."""
     project_id = uuid4()
-    
+
     # Mock services in AIIntelligenceService
     conversations_db = []
-    
+
     class DummyConversation:
         def __init__(self, **kwargs):
             self.id = uuid4()
@@ -265,7 +285,7 @@ def test_chat_conversations_api(client: TestClient, monkeypatch: pytest.MonkeyPa
             self.created_at = datetime.now(UTC)
             self.updated_at = datetime.now(UTC)
             self.messages = []
-            
+
     async def mock_create_conversation(self, **kwargs):
         c = DummyConversation(**kwargs)
         conversations_db.append(c)
@@ -325,7 +345,7 @@ def test_chat_conversations_api(client: TestClient, monkeypatch: pytest.MonkeyPa
 def test_chat_non_streaming_endpoint(client: TestClient, monkeypatch: pytest.MonkeyPatch):
     """Verify chat non-streaming RAG response."""
     project_id = uuid4()
-    
+
     async def mock_execute_chat(self, request, user_id):
         return {
             "streaming": False,
@@ -338,10 +358,10 @@ def test_chat_non_streaming_endpoint(client: TestClient, monkeypatch: pytest.Mon
                 "metadata": {
                     "confidence_score": 0.95,
                     "sources": [],
-                }
-            }
+                },
+            },
         }
-        
+
     monkeypatch.setattr(AIIntelligenceService, "execute_chat", mock_execute_chat)
 
     payload = {
@@ -361,10 +381,10 @@ def test_chat_streaming_endpoint(client: TestClient, monkeypatch: pytest.MonkeyP
 
     async def mock_execute_chat(self, request, user_id):
         async def mock_gen():
-            yield "data: {\"token\": \"Hello\"}\n\n"
-            yield "data: {\"token\": \" world\"}\n\n"
-            yield "data: {\"done\": true, \"metadata\": {}}\n\n"
-            
+            yield 'data: {"token": "Hello"}\n\n'
+            yield 'data: {"token": " world"}\n\n'
+            yield 'data: {"done": true, "metadata": {}}\n\n'
+
         return {
             "streaming": True,
             "generator": mock_gen,
@@ -380,11 +400,12 @@ def test_chat_streaming_endpoint(client: TestClient, monkeypatch: pytest.MonkeyP
     res = client.post("/ai/chat", json=payload)
     assert res.status_code == 200
     assert "text/event-stream" in res.headers["content-type"]
-    
+
     # Read stream chunks
-    lines = [line if isinstance(line, str) else line.decode("utf-8") for line in res.iter_lines() if line]  # noqa: E501
+    lines = [
+        line if isinstance(line, str) else line.decode("utf-8") for line in res.iter_lines() if line
+    ]  # noqa: E501
     assert len(lines) == 3
     assert "Hello" in lines[0]
     assert "world" in lines[1]
     assert "done" in lines[2]
-

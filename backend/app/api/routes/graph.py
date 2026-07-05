@@ -142,6 +142,7 @@ async def get_relationships_by_node(
     await require_project_membership(current_user, project_id, db, ProjectRole.VIEWER)
     # Check if item exists and belongs to the project
     from app.services.knowledge import KnowledgeService
+
     k_service = KnowledgeService(db)
     item = await k_service.get_item_by_id(id)
     if not item or item.project_id != project_id:

@@ -24,12 +24,7 @@ import {
   deleteConversation,
   chatStream,
 } from "@/services/aiApi";
-import {
-  AIConversation,
-  AIMessage,
-  AIModelInfo,
-  AIChatRequest,
-} from "@/types/ai";
+import { AIConversation, AIMessage, AIModelInfo, AIChatRequest } from "@/types/ai";
 
 interface AIChatAssistantProps {
   projectId: string;
@@ -37,16 +32,13 @@ interface AIChatAssistantProps {
   isMaintainer: boolean;
 }
 
-export function AIChatAssistant({
-  projectId,
-  accessToken,
-}: AIChatAssistantProps) {
+export function AIChatAssistant({ projectId, accessToken }: AIChatAssistantProps) {
   // Conversations list & active chat
   const [conversations, setConversations] = useState<AIConversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<AIConversation | null>(null);
   const [conversationsSearch, setConversationsSearch] = useState("");
   const [models, setModels] = useState<AIModelInfo[]>([]);
-  
+
   // Settings & configs
   const [selectedProvider, setSelectedProvider] = useState<string>("openai");
   const [selectedModel, setSelectedModel] = useState<string>("gpt-4o-mini");
@@ -55,16 +47,16 @@ export function AIChatAssistant({
   const [citationMode, setCitationMode] = useState<string>("grounded");
   const [streamingOn, setStreamingOn] = useState<boolean>(true);
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  
+
   // Chat stream state
   const [inputMessage, setInputMessage] = useState("");
   const [streamingResponseText, setStreamingResponseText] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Panel state
   const [expandedCitationMessageId, setExpandedCitationMessageId] = useState<string | null>(null);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Load conversations and models on init
@@ -267,7 +259,7 @@ export function AIChatAssistant({
         setActiveConversation(null);
       } else if (activeConversation) {
         setActiveConversation((prev) =>
-          prev ? { ...prev, messages: prev.messages.slice(0, -1) } : null
+          prev ? { ...prev, messages: prev.messages.slice(0, -1) } : null,
         );
       }
     } finally {
@@ -278,13 +270,29 @@ export function AIChatAssistant({
   const getSourceIcon = (source: string) => {
     switch (source.toLowerCase()) {
       case "github":
-        return <span className="px-1.5 py-0.5 rounded bg-gray-900 text-white font-mono text-[10px]">GitHub</span>;
+        return (
+          <span className="px-1.5 py-0.5 rounded bg-gray-900 text-white font-mono text-[10px]">
+            GitHub
+          </span>
+        );
       case "notion":
-        return <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 ring-1 ring-amber-800/10 text-[10px]">Notion</span>;
+        return (
+          <span className="px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 ring-1 ring-amber-800/10 text-[10px]">
+            Notion
+          </span>
+        );
       case "google_drive":
-        return <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 ring-1 ring-blue-800/10 text-[10px]">GDrive</span>;
+        return (
+          <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 ring-1 ring-blue-800/10 text-[10px]">
+            GDrive
+          </span>
+        );
       default:
-        return <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 ring-1 ring-emerald-800/10 text-[10px]">Local</span>;
+        return (
+          <span className="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 ring-1 ring-emerald-800/10 text-[10px]">
+            Local
+          </span>
+        );
     }
   };
 
@@ -375,7 +383,6 @@ export function AIChatAssistant({
 
       {/* CHAT DISPLAY PANEL */}
       <div className="flex flex-col h-full overflow-hidden bg-background relative">
-        
         {/* Settings view */}
         {showSettings && (
           <div className="absolute inset-x-0 top-0 bg-background/95 backdrop-blur border-b border-border z-10 p-4 shadow-sm animate-in slide-in-from-top duration-200">
@@ -474,7 +481,8 @@ export function AIChatAssistant({
                   Welcome to KnowWhy Chat
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  Query organizational context files, Notion wiki docs, files from Google Drive, and Git repository data directly.
+                  Query organizational context files, Notion wiki docs, files from Google Drive, and
+                  Git repository data directly.
                 </p>
               </div>
 
@@ -548,7 +556,7 @@ export function AIChatAssistant({
                           <button
                             onClick={() =>
                               setExpandedCitationMessageId(
-                                expandedCitationMessageId === m.id ? null : m.id
+                                expandedCitationMessageId === m.id ? null : m.id,
                               )
                             }
                             className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-muted-foreground hover:bg-slate-100/50 transition-colors"
@@ -640,7 +648,10 @@ export function AIChatAssistant({
 
         {/* Input area */}
         <div className="p-4 border-t border-border bg-slate-50/50">
-          <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto relative flex items-center">
+          <form
+            onSubmit={handleSendMessage}
+            className="max-w-3xl mx-auto relative flex items-center"
+          >
             <input
               type="text"
               value={inputMessage}

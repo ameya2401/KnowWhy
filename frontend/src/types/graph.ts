@@ -1,6 +1,18 @@
 export interface GraphNode {
   id: string;
-  type: "project" | "user" | "repository" | "commit" | "pull_request" | "issue" | "document" | "notion_page" | "decision" | "meeting" | "integration" | string;
+  type:
+    | "project"
+    | "user"
+    | "repository"
+    | "commit"
+    | "pull_request"
+    | "issue"
+    | "document"
+    | "notion_page"
+    | "decision"
+    | "meeting"
+    | "integration"
+    | string;
   title: string;
   subtitle?: string;
   url?: string | null;
@@ -43,7 +55,15 @@ export interface EntityDetailResponse {
 
 export interface TimelineEvent {
   id: string;
-  type: "commit" | "pull_request" | "issue" | "notion_page" | "document" | "ai_conversation" | "milestone" | string;
+  type:
+    | "commit"
+    | "pull_request"
+    | "issue"
+    | "notion_page"
+    | "document"
+    | "ai_conversation"
+    | "milestone"
+    | string;
   title: string;
   description?: string | null;
   time: string;

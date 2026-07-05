@@ -11,20 +11,16 @@ import {
   CheckSquare,
   Square,
   Shield,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import {
-  analyzeProjectInsights,
-  listInsights,
-  getInsightStatistics
-} from "@/services/insightApi";
+import { analyzeProjectInsights, listInsights, getInsightStatistics } from "@/services/insightApi";
 import type {
   EngineeringInsight,
   EngineeringInsightStatistics,
-  EvidenceItem
+  EvidenceItem,
 } from "@/types/insight";
 
 interface EngineeringIntelligenceProps {
@@ -36,13 +32,13 @@ interface EngineeringIntelligenceProps {
 export function EngineeringIntelligence({
   projectId,
   accessToken,
-  isMaintainer
+  isMaintainer,
 }: EngineeringIntelligenceProps) {
   // Data States
   const [insights, setInsights] = useState<EngineeringInsight[]>([]);
   const [statistics, setStatistics] = useState<EngineeringInsightStatistics | null>(null);
   const [selectedInsight, setSelectedInsight] = useState<EngineeringInsight | null>(null);
-  
+
   // Loading & Error States
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
@@ -54,7 +50,9 @@ export function EngineeringIntelligence({
   const [statusFilter, setStatusFilter] = useState<string>("active");
 
   // Local simulated state for suggested action checkboxes
-  const [completedActions, setCompletedActions] = useState<Record<string, Record<number, boolean>>>({});
+  const [completedActions, setCompletedActions] = useState<Record<string, Record<number, boolean>>>(
+    {},
+  );
 
   const loadData = async () => {
     setLoading(true);
@@ -63,7 +61,7 @@ export function EngineeringIntelligence({
       const insightsData = await listInsights(accessToken, projectId, {
         status: statusFilter === "all" ? undefined : statusFilter,
         severity: severityFilter === "all" ? undefined : severityFilter,
-        insight_type: typeFilter === "all" ? undefined : typeFilter
+        insight_type: typeFilter === "all" ? undefined : typeFilter,
       });
       const statsData = await getInsightStatistics(accessToken, projectId);
 
@@ -78,7 +76,10 @@ export function EngineeringIntelligence({
       }
     } catch (err: unknown) {
       console.error("Failed to load insights data", err);
-      setError((err as Error)?.message || "Failed to load Engineering Intelligence insights. Please ensure backend services are running.");
+      setError(
+        (err as Error)?.message ||
+          "Failed to load Engineering Intelligence insights. Please ensure backend services are running.",
+      );
     } finally {
       setLoading(false);
     }
@@ -99,7 +100,9 @@ export function EngineeringIntelligence({
       await loadData();
     } catch (err: unknown) {
       console.error("Analysis failed", err);
-      setError((err as Error)?.message || "Analysis failed. Verify LLM configuration and database state.");
+      setError(
+        (err as Error)?.message || "Analysis failed. Verify LLM configuration and database state.",
+      );
     } finally {
       setAnalyzing(false);
     }
@@ -112,8 +115,8 @@ export function EngineeringIntelligence({
         ...prev,
         [insightId]: {
           ...insightActions,
-          [actionIndex]: !insightActions[actionIndex]
-        }
+          [actionIndex]: !insightActions[actionIndex],
+        },
       };
     });
   };
@@ -134,16 +137,16 @@ export function EngineeringIntelligence({
   const getSeverityBadge = (severity: string) => {
     const colorClass = getSeverityColor(severity);
     return (
-      <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${colorClass} uppercase tracking-wider`}>
+      <span
+        className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${colorClass} uppercase tracking-wider`}
+      >
         {severity}
       </span>
     );
   };
 
   const getInsightTypeLabel = (type: string) => {
-    return type
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+    return type.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
   };
 
   const getEvidenceIcon = (type: string) => {
@@ -169,7 +172,8 @@ export function EngineeringIntelligence({
         <div>
           <h2 className="text-xl font-bold tracking-tight">Engineering Intelligence</h2>
           <p className="text-sm text-muted-foreground">
-            AI-refined insights and heuristic scans analyzing knowledge gaps, design drift, and documentation coverage.
+            AI-refined insights and heuristic scans analyzing knowledge gaps, design drift, and
+            documentation coverage.
           </p>
         </div>
         {isMaintainer && (
@@ -222,7 +226,9 @@ export function EngineeringIntelligence({
             <CardTitle className="text-3xl font-bold tracking-tight">
               <span className="text-amber-500">{statistics?.severity_breakdown.warning ?? 0}</span>
               <span className="text-muted-foreground mx-1.5">/</span>
-              <span className="text-blue-500">{statistics?.severity_breakdown.suggestion ?? 0}</span>
+              <span className="text-blue-500">
+                {statistics?.severity_breakdown.suggestion ?? 0}
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
@@ -316,12 +322,12 @@ export function EngineeringIntelligence({
           <Shield className="size-10 text-muted-foreground opacity-50 mb-3" />
           <h4 className="font-semibold text-sm">No Engineering Insights Found</h4>
           <p className="text-xs text-muted-foreground max-w-sm mt-1">
-            There are currently no active insights matching your filters. Try triggers a manual scan or modifying filters.
+            There are currently no active insights matching your filters. Try triggers a manual scan
+            or modifying filters.
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-6 h-[580px]">
-          
           {/* LEFT COLUMN: INSIGHTS LISTING */}
           <div className="border border-border rounded-xl bg-card overflow-hidden flex flex-col h-full shadow-xs">
             <div className="p-3 border-b border-border bg-slate-50/50">
@@ -349,7 +355,9 @@ export function EngineeringIntelligence({
                           {getInsightTypeLabel(insight.insight_type)}
                         </span>
                       </div>
-                      <h4 className={`text-xs font-semibold leading-tight truncate ${isSelected ? "text-indigo-600" : "text-foreground"}`}>
+                      <h4
+                        className={`text-xs font-semibold leading-tight truncate ${isSelected ? "text-indigo-600" : "text-foreground"}`}
+                      >
                         {insight.title}
                       </h4>
                       <p className="text-[11px] text-muted-foreground line-clamp-2">
@@ -367,7 +375,6 @@ export function EngineeringIntelligence({
           <div className="border border-border rounded-xl bg-card overflow-hidden flex flex-col h-full shadow-xs">
             {selectedInsight ? (
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                
                 {/* Inspector Header */}
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-border pb-4">
                   <div className="space-y-1">
@@ -386,7 +393,9 @@ export function EngineeringIntelligence({
                         Discovered: {new Date(selectedInsight.created_at).toLocaleDateString()}
                       </span>
                       <span>•</span>
-                      <span>Confidence Score: {(selectedInsight.confidence * 100).toFixed(0)}%</span>
+                      <span>
+                        Confidence Score: {(selectedInsight.confidence * 100).toFixed(0)}%
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -408,7 +417,10 @@ export function EngineeringIntelligence({
                     AI Reasoning & Risk Impact
                   </div>
                   <p className="text-[11px] text-indigo-900/80 leading-relaxed">
-                    This insight was refined using the KnowWhy Intelligence Engine. The logic detected a structural alignment issue or potential information asymmetry within repository integrations. Addressing this helps limit design decay and saves engineer onboarding hours.
+                    This insight was refined using the KnowWhy Intelligence Engine. The logic
+                    detected a structural alignment issue or potential information asymmetry within
+                    repository integrations. Addressing this helps limit design decay and saves
+                    engineer onboarding hours.
                   </p>
                 </div>
 
@@ -454,7 +466,8 @@ export function EngineeringIntelligence({
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Action Plan
                   </h4>
-                  {selectedInsight.suggested_actions && selectedInsight.suggested_actions.length > 0 ? (
+                  {selectedInsight.suggested_actions &&
+                  selectedInsight.suggested_actions.length > 0 ? (
                     <div className="space-y-2">
                       {selectedInsight.suggested_actions.map((action, idx) => {
                         const isDone = completedActions[selectedInsight.id]?.[idx] || false;
@@ -486,19 +499,18 @@ export function EngineeringIntelligence({
                     </div>
                   )}
                 </div>
-
               </div>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
                 <Info className="size-8 text-muted-foreground opacity-60 mb-2" />
                 <h4 className="font-semibold text-sm">No Insight Selected</h4>
                 <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                  Select an insight from the left panel to inspect its supporting evidence and action checklists.
+                  Select an insight from the left panel to inspect its supporting evidence and
+                  action checklists.
                 </p>
               </div>
             )}
           </div>
-
         </div>
       )}
     </div>

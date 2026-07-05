@@ -126,7 +126,7 @@ async def chat_with_assistant(
                 "Cache-Control": "no-cache",
                 "Connection": "keep-alive",
                 "X-Accel-Buffering": "no",
-            }
+            },
         )
     return result
 
@@ -182,11 +182,30 @@ async def list_models(
 ):
     """Lists supported model versions and token configurations for settings customization."""
     return [
-        AIModelInfo(provider="openai", model_id="gpt-4o-mini", name="GPT-4o Mini", max_tokens=128000),  # noqa: E501
+        AIModelInfo(
+            provider="openai", model_id="gpt-4o-mini", name="GPT-4o Mini", max_tokens=128000
+        ),  # noqa: E501
         AIModelInfo(provider="openai", model_id="gpt-4o", name="GPT-4o", max_tokens=128000),
-        AIModelInfo(provider="anthropic", model_id="claude-3-5-sonnet-20241022", name="Claude 3.5 Sonnet", max_tokens=200000),  # noqa: E501
-        AIModelInfo(provider="anthropic", model_id="claude-3-5-haiku-20241022", name="Claude 3.5 Haiku", max_tokens=200000),  # noqa: E501
-        AIModelInfo(provider="gemini", model_id="gemini-1.5-flash", name="Gemini 1.5 Flash", max_tokens=1000000),  # noqa: E501
-        AIModelInfo(provider="gemini", model_id="gemini-1.5-pro", name="Gemini 1.5 Pro", max_tokens=2000000),  # noqa: E501
+        AIModelInfo(
+            provider="anthropic",
+            model_id="claude-3-5-sonnet-20241022",
+            name="Claude 3.5 Sonnet",
+            max_tokens=200000,
+        ),  # noqa: E501
+        AIModelInfo(
+            provider="anthropic",
+            model_id="claude-3-5-haiku-20241022",
+            name="Claude 3.5 Haiku",
+            max_tokens=200000,
+        ),  # noqa: E501
+        AIModelInfo(
+            provider="gemini",
+            model_id="gemini-1.5-flash",
+            name="Gemini 1.5 Flash",
+            max_tokens=1000000,
+        ),  # noqa: E501
+        AIModelInfo(
+            provider="gemini", model_id="gemini-1.5-pro", name="Gemini 1.5 Pro", max_tokens=2000000
+        ),  # noqa: E501
         AIModelInfo(provider="mock", model_id="mock", name="Simulated Mock Model", max_tokens=4000),
     ]

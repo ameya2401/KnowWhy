@@ -35,7 +35,7 @@ class GraphService:
     ) -> GraphResponse:
         """
         Builds and returns the knowledge graph for a project.
-        Fetches the Project itself, User members, Integrations, connected Repos, 
+        Fetches the Project itself, User members, Integrations, connected Repos,
         KnowledgeItems, and KnowledgeRelationships, connecting them with explicit and implicit edges.
         """  # noqa: E501
         nodes = []
@@ -157,7 +157,9 @@ class GraphService:
                             )
                         )
                     # Edge: Integration -> contains -> Repository
-                    if not entity_types or ("integration" in entity_types and "repository" in entity_types):  # noqa: E501
+                    if not entity_types or (
+                        "integration" in entity_types and "repository" in entity_types
+                    ):  # noqa: E501
                         edges.append(
                             GraphEdge(
                                 id=f"edge-int-repo-{repo.id}",
@@ -177,7 +179,9 @@ class GraphService:
         )
         if entity_types:
             # Map entity types back to what's stored in knowledge items
-            kb_types = [t for t in entity_types if t not in ["project", "user", "integration", "repository"]]  # noqa: E501
+            kb_types = [
+                t for t in entity_types if t not in ["project", "user", "integration", "repository"]
+            ]  # noqa: E501
             if kb_types:
                 items_stmt = items_stmt.where(KnowledgeItem.entity_type.in_(kb_types))
             else:
@@ -409,7 +413,9 @@ class GraphService:
                 user_stmt = (
                     select(User)
                     .join(ProjectMember, ProjectMember.user_id == User.id)
-                    .where(and_(ProjectMember.project_id == project_id, User.id == UUID(user_id_str)))  # noqa: E501
+                    .where(
+                        and_(ProjectMember.project_id == project_id, User.id == UUID(user_id_str))
+                    )  # noqa: E501
                 )
                 user_res = await self.session.execute(user_stmt)
                 user = user_res.scalar_one_or_none()
@@ -481,7 +487,9 @@ class GraphService:
             items_stmt = items_stmt.where(KnowledgeItem.created_time <= end_date)
 
         # Order by created_time descending
-        items_stmt = items_stmt.order_by(KnowledgeItem.created_time.desc()).limit(limit).offset(offset)  # noqa: E501
+        items_stmt = (
+            items_stmt.order_by(KnowledgeItem.created_time.desc()).limit(limit).offset(offset)
+        )  # noqa: E501
         items_res = await self.session.execute(items_stmt)
         items = items_res.scalars().all()
 

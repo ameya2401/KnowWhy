@@ -102,7 +102,9 @@ class PromptBuilder:
         for idx, item in enumerate(context_items):
             title = item.title if hasattr(item, "title") else item.get("title", "")
             source = item.source if hasattr(item, "source") else item.get("source", "")
-            entity_type = item.entity_type if hasattr(item, "entity_type") else item.get("entity_type", "")  # noqa: E501
+            entity_type = (
+                item.entity_type if hasattr(item, "entity_type") else item.get("entity_type", "")
+            )  # noqa: E501
             content = item.content if hasattr(item, "content") else item.get("content", "")
 
             context_str += (
@@ -112,13 +114,21 @@ class PromptBuilder:
 
         intent_instructions = ""
         if intent == "timeline":
-            intent_instructions = "Please list key milestones or updates chronologically with dates."  # noqa: E501
+            intent_instructions = (
+                "Please list key milestones or updates chronologically with dates."  # noqa: E501
+            )
         elif intent == "comparison":
-            intent_instructions = "Please draw comparisons, highlighting key pros, cons, and differences."  # noqa: E501
+            intent_instructions = (
+                "Please draw comparisons, highlighting key pros, cons, and differences."  # noqa: E501
+            )
         elif intent == "decision":
-            intent_instructions = "Focus specifically on why decisions were taken, the rationale, and who decided."  # noqa: E501
+            intent_instructions = (
+                "Focus specifically on why decisions were taken, the rationale, and who decided."  # noqa: E501
+            )
         elif intent == "summarization":
-            intent_instructions = "Provide a concise summary highlighting the most critical aspects."  # noqa: E501
+            intent_instructions = (
+                "Provide a concise summary highlighting the most critical aspects."  # noqa: E501
+            )
 
         prompt = (
             f"Retrieved Organizational Context:\n"
@@ -143,7 +153,9 @@ class CitationEngine:
             title = item.title if hasattr(item, "title") else item.get("title", "")
             source = item.source if hasattr(item, "source") else item.get("source", "")
             url = item.url if hasattr(item, "url") else item.get("url")
-            updated_at = item.updated_time if hasattr(item, "updated_time") else item.get("updated_time")  # noqa: E501
+            updated_at = (
+                item.updated_time if hasattr(item, "updated_time") else item.get("updated_time")
+            )  # noqa: E501
             if isinstance(updated_at, str):
                 updated_at = datetime.fromisoformat(updated_at)
             elif not updated_at:
@@ -209,12 +221,16 @@ class AIIntelligenceService:
         )
         if q:
             # Include keyword search in both conversation title and message content
-            query = query.outerjoin(AIConversation.messages).where(
-                or_(
-                    AIConversation.title.ilike(f"%{q}%"),
-                    AIMessage.content.ilike(f"%{q}%"),
+            query = (
+                query.outerjoin(AIConversation.messages)
+                .where(
+                    or_(
+                        AIConversation.title.ilike(f"%{q}%"),
+                        AIMessage.content.ilike(f"%{q}%"),
+                    )
                 )
-            ).distinct()
+                .distinct()
+            )
 
         query = query.order_by(AIConversation.updated_at.desc())
         result = await self.db.execute(query)
@@ -238,7 +254,9 @@ class AIIntelligenceService:
         await self.db.commit()
         return True
 
-    async def update_conversation_title(self, conversation_id: UUID, user_id: UUID, title: str) -> AIConversation | None:  # noqa: E501
+    async def update_conversation_title(
+        self, conversation_id: UUID, user_id: UUID, title: str
+    ) -> AIConversation | None:  # noqa: E501
         conv = await self.get_conversation(conversation_id, user_id)
         if not conv:
             return None
@@ -295,9 +313,7 @@ class AIIntelligenceService:
             item_dict = r.get("item")
             score = r.get("score", 0.0)
             if item_dict:
-                adapted_results.append(
-                    SearchResultAdapter(item_dict, score)
-                )
+                adapted_results.append(SearchResultAdapter(item_dict, score))
 
         selected_context_items, related_ids = self.context_builder.select_context(adapted_results)
 
@@ -318,7 +334,13 @@ class AIIntelligenceService:
         base_confidence = 0.5
         if citations:
             base_confidence = min(0.95, 0.5 + (len(citations) * 0.1))
-        uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]  # noqa: E501
+        uncertainty_terms = [
+            "don't know",
+            "do not know",
+            "no information",
+            "not mentioned",
+            "insufficient",
+        ]  # noqa: E501
         if any(term in answer.lower() for term in uncertainty_terms):
             base_confidence = max(0.1, base_confidence - 0.4)
 
@@ -433,13 +455,16 @@ class AIIntelligenceService:
         llm = get_llm_provider(provider)
 
         temp = request.temperature if request.temperature is not None else conv.temperature
-        streaming_on = request.streaming_on if request.streaming_on is not None else conv.streaming_on  # noqa: E501
+        streaming_on = (
+            request.streaming_on if request.streaming_on is not None else conv.streaming_on
+        )  # noqa: E501
 
         if streaming_on:
+
             async def event_generator() -> AsyncGenerator[str]:
                 start_time = time.perf_counter()
                 full_text = ""
-                
+
                 async for chunk in llm.generate_stream(prompt, system_prompt, temp):
                     if not chunk.get("done", False):
                         token = chunk.get("text", "")
@@ -449,22 +474,32 @@ class AIIntelligenceService:
                         # End of stream! Calculate metrics and persist message
                         end_time = time.perf_counter()
                         latency_ms = (end_time - start_time) * 1000.0
-                        
+
                         base_confidence = 0.5
                         if citations:
                             base_confidence = min(0.95, 0.5 + (len(citations) * 0.1))
-                        uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]  # noqa: E501
+                        uncertainty_terms = [
+                            "don't know",
+                            "do not know",
+                            "no information",
+                            "not mentioned",
+                            "insufficient",
+                        ]  # noqa: E501
                         if any(term in full_text.lower() for term in uncertainty_terms):
                             base_confidence = max(0.1, base_confidence - 0.4)
 
                         follow_ups = []
                         if citations:
-                            follow_ups.append(f"Explain the architecture mentioned in {citations[0].title}")  # noqa: E501
+                            follow_ups.append(
+                                f"Explain the architecture mentioned in {citations[0].title}"
+                            )  # noqa: E501
                         follow_ups.append("Can you provide more details about this?")
 
                         metadata_json = {
                             "latency_ms": int(latency_ms),
-                            "llm_latency_ms": int(latency_ms * 0.9),  # LLM time is roughly 90% of total  # noqa: E501
+                            "llm_latency_ms": int(
+                                latency_ms * 0.9
+                            ),  # LLM time is roughly 90% of total  # noqa: E501
                             "confidence_score": base_confidence,
                             "sources": [
                                 {
@@ -506,7 +541,13 @@ class AIIntelligenceService:
             base_confidence = 0.5
             if citations:
                 base_confidence = min(0.95, 0.5 + (len(citations) * 0.1))
-            uncertainty_terms = ["don't know", "do not know", "no information", "not mentioned", "insufficient"]  # noqa: E501
+            uncertainty_terms = [
+                "don't know",
+                "do not know",
+                "no information",
+                "not mentioned",
+                "insufficient",
+            ]  # noqa: E501
             if any(term in answer.lower() for term in uncertainty_terms):
                 base_confidence = max(0.1, base_confidence - 0.4)
 
@@ -552,7 +593,7 @@ class AIIntelligenceService:
                     "content": assistant_msg.content,
                     "created_at": assistant_msg.created_at,
                     "metadata": assistant_msg.metadata_json,
-                }
+                },
             }
 
     @staticmethod
