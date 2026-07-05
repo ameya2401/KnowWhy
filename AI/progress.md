@@ -2,6 +2,76 @@
 
 ## Completed Milestones
 
+### M17 Engineering Intelligence
+
+- Status: Completed
+- Completion Date: 2026-07-05
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Created SQLAlchemy database schema model `EngineeringInsight` and alembic migration script.
+- Built Strategy pattern rules engine implementing 6 heuristic strategies: DocumentationGapRule, StaleKnowledgeRule, ArchitectureDriftRule, DuplicateKnowledgeRule, ProjectHealthRule, and KnowledgeCoverageRule.
+- Implemented `InsightService` executing rule scans, formatting output context, calling dynamic LLM provider endpoints for refined insight generation, and saving/updating records.
+- Implemented secure FastAPI controller endpoints `/intelligence/analyze`, `/intelligence/insights`, `/intelligence/insights/{id}`, and `/intelligence/statistics` protected with tenant organization and project membership validation.
+- Wrote pytest suite in `tests/test_intelligence_insights.py` asserting heuristic conditions, synthesis operations, and api routes.
+- Created premium React interface component `EngineeringIntelligence.tsx` with KPI dashboards, severity/type filters, listing, detail inspector detailing justifications, supporting evidence references, and checklist actions.
+- Integrated the dashboard into `ProjectDetailPage.tsx` tab panel.
+
+### M16 Knowledge Graph and Timeline Visualizer
+
+- Status: Completed
+- Completion Date: 2026-07-05
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Implemented Canvas2D-based node-link interactive physics-simulated graph in `KnowledgeGraphAndTimeline.tsx`.
+- Implemented custom viewport navigation support including zoom (+/- buttons and scrollwheel), panning (canvas drag), node drag physics calculation, and selection focus centering.
+- Supported sharp canvas rendering on high-DPI retina screens via device pixel ratio scaling.
+- Integrated dual visual states: selecting nodes highlighting active connections, displaying detail inspectors, and scrolling chronological lists to matching cards.
+- Integrated a timeline list panel on the right sidebar showing chronological items with entity type badges, sync identifiers, title summaries, and selection indicators.
+- Hooked the component into `ProjectDetailPage.tsx` under a new tab "Graph & Timeline".
+- Checked that all code compiles clean and builds cleanly for production.
+
+### M15 KnowWhy AI Assistant
+
+- Status: Completed
+- Completion Date: 2026-07-05
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend database schema implementation for `ai_conversations` and `ai_messages` tables tracking settings and message metadata.
+- Backend real-time Server-Sent Events (SSE) streaming yielding chunks dynamically via HTTPX-based adapters (OpenAI, Anthropic, Gemini, Mock).
+- Backend RAG query services managing conversational logs, history retention, token-limiting, context grounding, and keyword search filters.
+- Backend REST API routes `/ai/chat`, `/ai/conversations`, `/ai/conversations/{id}`, and `/ai/models` fully tested and verified.
+- Frontend TypeScript type interfaces and service client `chatStream` generator wrapper for streaming body reader.
+- Frontend premium conversational console (`AIChatAssistant.tsx`) rendering message threads, suggested follow-up chips, grounded confidence badges, speed telemetry, expandable citation viewer cards, config settings drawer, and historical logs sidebar panel.
+- All code compilation tests, ESLint lint rules, and Vite production builds passing cleanly.
+
+### M14 AI Intelligence Engine
+
+- Status: Completed
+- Completion Date: 2026-07-05
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend AI Intelligence services including intent classification (timeline, comparison, decision, explanation, search), context builder (respecting token budget & duplicates removal), prompt compiler, citation extractor, and pluggable multi-provider adapter framework (OpenAI, Anthropic, Google Gemini, Mock).
+- Backend REST API endpoints under `/ai` including query Q&A, concepts explanation, active providers listing, and analytics statistics.
+- Interactive, responsive frontend developer AI Debug Dashboard (`AIDebugDashboard.tsx`) providing real-time provider control, system key status indicators, RAG sandbox inputs, response latency timers, confidence meters, sources links list, and recommended suggestions.
+- Unit/integration pytest suite verifying intent matching rules, prompt variables, citation dictionary values, mock generator structures, and FastAPI client routing responses.
+- All code compilation tests, ESLint lint rules, and Vite production builds passing cleanly.
+
 ### M13 Hybrid Search Engine
 
 - Status: Completed

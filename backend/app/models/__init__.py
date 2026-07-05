@@ -25,6 +25,9 @@ from app.models.project import Project, ProjectMember, ProjectRole, ProjectStatu
 from app.models.user import AuthProvider, User
 from app.models.user_session import UserSession
 
+from app.models.ai_chat import AIConversation, AIMessage
+from app.models.insight import EngineeringInsight
+
 __all__ = [
     "AuthProvider",
     "Organization",
@@ -51,4 +54,8 @@ __all__ = [
     "KnowledgeRelationship",
     "KnowledgeSyncLog",
     "KnowledgeChunk",
+    "AIConversation",
+    "AIMessage",
+    "EngineeringInsight",
 ]
+

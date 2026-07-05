@@ -14,6 +14,8 @@ from app.models import (  # noqa: F401
     project,
     user,
     user_session,
+    insight,
+    ai_chat,
 )
 
 config = context.config
