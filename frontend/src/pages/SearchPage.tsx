@@ -37,12 +37,14 @@ import {
   getSearchStatistics,
   triggerSearchReindex,
 } from "@/services/searchApi";
-import {
-  getKnowledgeItem,
-  getKnowledgeItemRelationships,
-} from "@/services/knowledgeApi";
+import { getKnowledgeItem, getKnowledgeItemRelationships } from "@/services/knowledgeApi";
 import type { KnowledgeItem, KnowledgeRelationship } from "@/types/knowledge";
-import type { SearchResult, HybridSearchResult, AvailableFilters, SearchStatisticsResponse } from "@/types/search";
+import type {
+  SearchResult,
+  HybridSearchResult,
+  AvailableFilters,
+  SearchStatisticsResponse,
+} from "@/types/search";
 
 export function SearchPage() {
   const { accessToken } = useAuth();
@@ -530,7 +532,8 @@ export function SearchPage() {
                       className="w-full accent-violet-600 h-1 bg-muted rounded-lg appearance-none cursor-pointer"
                     />
                     <p className="text-[9px] text-muted-foreground/75 leading-tight">
-                      Lower values show more results with lower similarity. Higher values require precise match.
+                      Lower values show more results with lower similarity. Higher values require
+                      precise match.
                     </p>
                   </div>
                 )}
@@ -616,7 +619,9 @@ export function SearchPage() {
                       }}
                       className="h-8 w-full rounded border border-input bg-background px-2 text-[11px] outline-none"
                     />
-                    <span className="text-[10px] text-muted-foreground/60 text-center block">to</span>
+                    <span className="text-[10px] text-muted-foreground/60 text-center block">
+                      to
+                    </span>
                     <input
                       type="date"
                       value={dateEnd}
@@ -670,20 +675,36 @@ export function SearchPage() {
               <CardContent className="space-y-3 text-[11px] pt-1">
                 <div className="grid grid-cols-2 gap-2">
                   <div className="bg-muted/40 p-2 rounded-md border border-border/40">
-                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Indexed Items</p>
-                    <p className="text-sm font-bold text-foreground">{stats?.total_indexed_documents ?? 0}</p>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                      Indexed Items
+                    </p>
+                    <p className="text-sm font-bold text-foreground">
+                      {stats?.total_indexed_documents ?? 0}
+                    </p>
                   </div>
                   <div className="bg-muted/40 p-2 rounded-md border border-border/40">
-                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Avg Latency</p>
-                    <p className="text-sm font-bold text-foreground">{(stats?.average_query_time_ms ?? 0).toFixed(1)} ms</p>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                      Avg Latency
+                    </p>
+                    <p className="text-sm font-bold text-foreground">
+                      {(stats?.average_query_time_ms ?? 0).toFixed(1)} ms
+                    </p>
                   </div>
                   <div className="bg-muted/40 p-2 rounded-md border border-border/40">
-                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Cache Hit Rate</p>
-                    <p className="text-sm font-bold text-foreground">{((stats?.cache_hit_rate ?? 0) * 100).toFixed(0)}%</p>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                      Cache Hit Rate
+                    </p>
+                    <p className="text-sm font-bold text-foreground">
+                      {((stats?.cache_hit_rate ?? 0) * 100).toFixed(0)}%
+                    </p>
                   </div>
                   <div className="bg-muted/40 p-2 rounded-md border border-border/40">
-                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Avg Similarity</p>
-                    <p className="text-sm font-bold text-foreground">{((stats?.average_similarity_score ?? 0) * 100).toFixed(0)}%</p>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">
+                      Avg Similarity
+                    </p>
+                    <p className="text-sm font-bold text-foreground">
+                      {((stats?.average_similarity_score ?? 0) * 100).toFixed(0)}%
+                    </p>
                   </div>
                 </div>
 
@@ -695,7 +716,9 @@ export function SearchPage() {
                   size="sm"
                   className="w-full text-xs font-medium h-8 mt-1 border-dashed hover:border-violet-500 hover:text-violet-600 transition-all flex items-center justify-center gap-1.5"
                 >
-                  <RefreshCw className={`size-3 ${isReindexing ? "animate-spin text-violet-500" : ""}`} />
+                  <RefreshCw
+                    className={`size-3 ${isReindexing ? "animate-spin text-violet-500" : ""}`}
+                  />
                   {isReindexing ? "Reindexing..." : "Re-index All"}
                 </Button>
               </CardContent>
@@ -715,7 +738,9 @@ export function SearchPage() {
             ) : results.length === 0 ? (
               <div className="flex h-64 flex-col items-center justify-center gap-2 border border-dashed rounded-lg bg-card">
                 <Database className="size-10 text-muted-foreground" />
-                <p className="text-sm font-medium text-muted-foreground">No search matches found.</p>
+                <p className="text-sm font-medium text-muted-foreground">
+                  No search matches found.
+                </p>
                 <p className="text-xs text-muted-foreground/75">
                   Try adjusting filters or typing a different query.
                 </p>
@@ -733,8 +758,10 @@ export function SearchPage() {
                   {results.map((res) => {
                     const item = res.item;
                     const score = res.score;
-                    const confidence = searchMode === "hybrid" ? (res as HybridSearchResult).confidence : undefined;
-                    const match_type = searchMode === "hybrid" ? (res as HybridSearchResult).match_type : undefined;
+                    const confidence =
+                      searchMode === "hybrid" ? (res as HybridSearchResult).confidence : undefined;
+                    const match_type =
+                      searchMode === "hybrid" ? (res as HybridSearchResult).match_type : undefined;
 
                     return (
                       <div
@@ -759,8 +786,8 @@ export function SearchPage() {
                                   match_type === "semantic"
                                     ? "bg-violet-50 text-violet-700 ring-1 ring-violet-700/10 dark:bg-violet-950/40 dark:text-violet-300"
                                     : match_type === "lexical"
-                                    ? "bg-blue-50 text-blue-700 ring-1 ring-blue-700/10 dark:bg-blue-950/40 dark:text-blue-300"
-                                    : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-700/10 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                      ? "bg-blue-50 text-blue-700 ring-1 ring-blue-700/10 dark:bg-blue-950/40 dark:text-blue-300"
+                                      : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-700/10 dark:bg-emerald-950/40 dark:text-emerald-300"
                                 }`}
                               >
                                 {match_type}
@@ -792,36 +819,36 @@ export function SearchPage() {
                           </div>
                         </div>
 
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {renderHighlightedText(item.description, q)}
-                      </p>
+                        <p className="text-xs text-muted-foreground line-clamp-2">
+                          {renderHighlightedText(item.description, q)}
+                        </p>
 
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-                        {item.author && (
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+                          {item.author && (
+                            <span className="flex items-center gap-1">
+                              <User className="size-3" /> {renderHighlightedText(item.author, q)}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1">
-                            <User className="size-3" /> {renderHighlightedText(item.author, q)}
+                            <Calendar className="size-3" />{" "}
+                            {new Date(item.updated_time).toLocaleDateString()}
                           </span>
-                        )}
-                        <span className="flex items-center gap-1">
-                          <Calendar className="size-3" />{" "}
-                          {new Date(item.updated_time).toLocaleDateString()}
-                        </span>
-                        {item.tags && item.tags.length > 0 && (
-                          <div className="flex gap-1">
-                            {item.tags.slice(0, 3).map((t: string) => (
-                              <span
-                                key={t}
-                                className="inline-flex items-center gap-0.5 rounded bg-secondary px-1 py-0.5 text-[10px] text-secondary-foreground font-semibold"
-                              >
-                                <Tag className="size-2" /> {renderHighlightedText(t, q)}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                          {item.tags && item.tags.length > 0 && (
+                            <div className="flex gap-1">
+                              {item.tags.slice(0, 3).map((t: string) => (
+                                <span
+                                  key={t}
+                                  className="inline-flex items-center gap-0.5 rounded bg-secondary px-1 py-0.5 text-[10px] text-secondary-foreground font-semibold"
+                                >
+                                  <Tag className="size-2" /> {renderHighlightedText(t, q)}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
                 </div>
 
                 {/* Pagination */}
@@ -918,7 +945,9 @@ export function SearchPage() {
                         {selectedItem.author && (
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Author:</span>
-                            <span className="font-medium text-foreground">{selectedItem.author}</span>
+                            <span className="font-medium text-foreground">
+                              {selectedItem.author}
+                            </span>
                           </div>
                         )}
                         <div className="flex justify-between">
@@ -965,60 +994,84 @@ export function SearchPage() {
                     )}
 
                     {/* Search Explanation Breakdown (Hybrid mode only) */}
-                    {searchMode === "hybrid" && selectedItemId && (() => {
-                      const currentRes = results.find((r) => r.item.id === selectedItemId) as HybridSearchResult | undefined;
-                      if (!currentRes || !currentRes.explanation) return null;
-                      const exp = currentRes.explanation;
-                      return (
-                        <div className="space-y-2 pt-3 border-t border-border">
-                          <h4 className="font-semibold text-muted-foreground uppercase tracking-wider text-[9px] flex items-center gap-1">
-                            <Sparkles className="size-3 text-violet-500" /> AI Retrieval Explanation
-                          </h4>
-                          <div className="space-y-2 bg-violet-50/30 dark:bg-violet-950/10 p-2.5 rounded-lg border border-violet-100 dark:border-violet-900/40">
-                            <div className="grid grid-cols-2 gap-2 text-[10px]">
-                              <div>
-                                <span className="text-muted-foreground block text-[9px]">Lexical Score</span>
-                                <span className="font-semibold text-foreground">{exp.lexical_score?.toFixed(1) ?? "0.0"}</span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground block text-[9px]">Semantic Similarity</span>
-                                <span className="font-semibold text-foreground">
-                                  {exp.semantic_score !== undefined ? `${(exp.semantic_score * 100).toFixed(0)}%` : "N/A"}
-                                </span>
-                              </div>
-                              <div>
-                                <span className="text-muted-foreground block text-[9px]">RRF Rank Score</span>
-                                <span className="font-semibold text-foreground">{exp.final_rank?.toFixed(4) ?? "N/A"}</span>
-                              </div>
-                            </div>
-                            
-                            {exp.matching_fields && exp.matching_fields.length > 0 && (
-                              <div className="pt-1.5 border-t border-border/40">
-                                <span className="text-muted-foreground text-[9px] block mb-1">Matching Fields</span>
-                                <div className="flex flex-wrap gap-1">
-                                  {exp.matching_fields.map((f: string) => (
-                                    <span key={f} className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-secondary uppercase text-foreground">
-                                      {f}
-                                    </span>
-                                  ))}
+                    {searchMode === "hybrid" &&
+                      selectedItemId &&
+                      (() => {
+                        const currentRes = results.find((r) => r.item.id === selectedItemId) as
+                          | HybridSearchResult
+                          | undefined;
+                        if (!currentRes || !currentRes.explanation) return null;
+                        const exp = currentRes.explanation;
+                        return (
+                          <div className="space-y-2 pt-3 border-t border-border">
+                            <h4 className="font-semibold text-muted-foreground uppercase tracking-wider text-[9px] flex items-center gap-1">
+                              <Sparkles className="size-3 text-violet-500" /> AI Retrieval
+                              Explanation
+                            </h4>
+                            <div className="space-y-2 bg-violet-50/30 dark:bg-violet-950/10 p-2.5 rounded-lg border border-violet-100 dark:border-violet-900/40">
+                              <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                <div>
+                                  <span className="text-muted-foreground block text-[9px]">
+                                    Lexical Score
+                                  </span>
+                                  <span className="font-semibold text-foreground">
+                                    {exp.lexical_score?.toFixed(1) ?? "0.0"}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground block text-[9px]">
+                                    Semantic Similarity
+                                  </span>
+                                  <span className="font-semibold text-foreground">
+                                    {exp.semantic_score !== undefined
+                                      ? `${(exp.semantic_score * 100).toFixed(0)}%`
+                                      : "N/A"}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-muted-foreground block text-[9px]">
+                                    RRF Rank Score
+                                  </span>
+                                  <span className="font-semibold text-foreground">
+                                    {exp.final_rank?.toFixed(4) ?? "N/A"}
+                                  </span>
                                 </div>
                               </div>
-                            )}
-                            
-                            {exp.reasons && exp.reasons.length > 0 && (
-                              <div className="pt-1.5 border-t border-border/40">
-                                <span className="text-muted-foreground text-[9px] block mb-1">Reasoning Breakdown</span>
-                                <ul className="list-disc pl-3.5 space-y-0.5 text-[10px] text-muted-foreground">
-                                  {exp.reasons.map((r: string, idx: number) => (
-                                    <li key={idx}>{r}</li>
-                                  ))}
-                                </ul>
-                              </div>
-                            )}
+
+                              {exp.matching_fields && exp.matching_fields.length > 0 && (
+                                <div className="pt-1.5 border-t border-border/40">
+                                  <span className="text-muted-foreground text-[9px] block mb-1">
+                                    Matching Fields
+                                  </span>
+                                  <div className="flex flex-wrap gap-1">
+                                    {exp.matching_fields.map((f: string) => (
+                                      <span
+                                        key={f}
+                                        className="text-[8px] font-bold px-1.5 py-0.5 rounded bg-secondary uppercase text-foreground"
+                                      >
+                                        {f}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {exp.reasons && exp.reasons.length > 0 && (
+                                <div className="pt-1.5 border-t border-border/40">
+                                  <span className="text-muted-foreground text-[9px] block mb-1">
+                                    Reasoning Breakdown
+                                  </span>
+                                  <ul className="list-disc pl-3.5 space-y-0.5 text-[10px] text-muted-foreground">
+                                    {exp.reasons.map((r: string, idx: number) => (
+                                      <li key={idx}>{r}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })()}
+                        );
+                      })()}
 
                     {/* Relationships Graph mapping */}
                     <div className="space-y-2 pt-3 border-t border-border">

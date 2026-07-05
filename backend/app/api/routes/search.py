@@ -11,13 +11,13 @@ from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.schemas.search import (
     AvailableFiltersResponse,
+    HybridSearchResponse,
     RecentSearchesResponse,
+    SearchExplanation,
     SearchResponse,
     SearchResultRead,
-    SuggestionsResponse,
-    HybridSearchResponse,
-    SearchExplanation,
     SearchStatisticsResponse,
+    SuggestionsResponse,
 )
 from app.services.search import SearchService
 
@@ -130,7 +130,7 @@ async def get_search_explanation(
     current_user: Annotated[User, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_database_session)],
 ):
-    """Explain why a specific knowledge item matched a query, returning lexical/semantic breakdown."""
+    """Explain why a specific knowledge item matched a query, returning lexical/semantic breakdown."""  # noqa: E501
     await require_project_membership(current_user, project_id, db)
     service = SearchService(db)
 
@@ -185,6 +185,7 @@ async def trigger_search_reindex(
     """Trigger background re-indexing of all documents for this project."""
     await require_project_membership(current_user, project_id, db)
     from app.services.embedding_queue import EmbeddingQueueService
+
     await EmbeddingQueueService.reindex_project(project_id)
     return {"status": "reindexing_started"}
 
@@ -233,4 +234,3 @@ async def get_available_filters(
         authors=filters["authors"],
         tags=filters["tags"],
     )
-

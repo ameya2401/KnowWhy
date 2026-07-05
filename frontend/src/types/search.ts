@@ -56,4 +56,3 @@ export interface SearchStatisticsResponse {
   cache_hit_rate: number;
   average_similarity_score: number;
 }
-

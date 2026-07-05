@@ -1,14 +1,15 @@
 from datetime import UTC, datetime
 from uuid import uuid4
+
 import pytest
 from fastapi.testclient import TestClient
 
-from app.dependencies.auth import get_current_user
+import app.api.routes.embeddings as embeddings_router
 from app.database.session import get_database_session
+from app.dependencies.auth import get_current_user
 from app.main import create_app
 from app.models.user import AuthProvider, User
 from app.services.embedding_queue import EmbeddingQueueService, ProjectQueueState
-import app.api.routes.embeddings as embeddings_router
 from app.services.embeddings import EmbeddingService
 
 

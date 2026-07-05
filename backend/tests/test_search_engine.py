@@ -7,8 +7,8 @@ import pytest
 from app.models.knowledge import KnowledgeItem
 from app.models.user import User
 from app.repositories.search import SearchRepository
-from app.services.search import SearchService
 from app.services.query_processor import QueryProcessor
+from app.services.search import SearchService
 from app.services.search_fusion import ReciprocalRankFusion, WeightedReRanker
 
 
@@ -163,14 +163,14 @@ def test_rrf_and_reranking():
         project_id=project_id,
         source="github",
         title="FastAPI adoption decision",
-        updated_time=datetime.now(UTC)
+        updated_time=datetime.now(UTC),
     )
     item2 = KnowledgeItem(
         id=uuid4(),
         project_id=project_id,
         source="notion",
         title="Postgres setup guide",
-        updated_time=datetime.now(UTC) - timedelta(days=5)
+        updated_time=datetime.now(UTC) - timedelta(days=5),
     )
 
     lexical_results = [(item1, 50.0)]
@@ -190,7 +190,7 @@ async def test_hybrid_search_service(mock_db_session, sample_user):
     service = SearchService(mock_db_session)
     project_id = uuid4()
 
-    service.embedding_service.provider.get_embeddings = AsyncMock(return_value=[[0.1]*1536])
+    service.embedding_service.provider.get_embeddings = AsyncMock(return_value=[[0.1] * 1536])
 
     item = KnowledgeItem(
         id=uuid4(),
@@ -205,22 +205,17 @@ async def test_hybrid_search_service(mock_db_session, sample_user):
         created_time=datetime.now(UTC),
         updated_time=datetime.now(UTC),
         tags=["database"],
-        status="active"
+        status="active",
     )
 
     service.search_repo.search = AsyncMock(return_value=([(item, 100.0)], 1))
     service.search_repo.semantic_search = AsyncMock(return_value=[(item, 0.9)])
 
     output = await service.hybrid_search(
-        project_id=project_id,
-        user_id=sample_user.id,
-        q="postgres setup",
-        limit=10,
-        offset=0
+        project_id=project_id, user_id=sample_user.id, q="postgres setup", limit=10, offset=0
     )
 
     assert output["total"] == 1
     assert output["results"][0]["item"]["title"] == "Postgres Setup Guide"
     assert output["results"][0]["match_type"] == "hybrid"
     assert output["results"][0]["explanation"]["semantic_score"] == 0.9
-

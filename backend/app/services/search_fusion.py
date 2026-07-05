@@ -1,6 +1,6 @@
 import abc
-from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from datetime import UTC, datetime
+
 from app.models.knowledge import KnowledgeItem
 
 
@@ -10,7 +10,7 @@ class FusionStrategy(abc.ABC):
         self,
         lexical_results: list[tuple[KnowledgeItem, float]],
         semantic_results: list[tuple[KnowledgeItem, float]],
-        **kwargs
+        **kwargs,
     ) -> list[tuple[KnowledgeItem, dict]]:
         """
         Combine lexical and semantic results.
@@ -28,12 +28,16 @@ class ReciprocalRankFusion(FusionStrategy):
         self,
         lexical_results: list[tuple[KnowledgeItem, float]],
         semantic_results: list[tuple[KnowledgeItem, float]],
-        **kwargs
+        **kwargs,
     ) -> list[tuple[KnowledgeItem, dict]]:
         # Map item ID -> (item, rank_in_lexical)
-        lexical_ranks = {item.id: (item, idx + 1, score) for idx, (item, score) in enumerate(lexical_results)}
+        lexical_ranks = {
+            item.id: (item, idx + 1, score) for idx, (item, score) in enumerate(lexical_results)
+        }
         # Map item ID -> (item, rank_in_semantic)
-        semantic_ranks = {item.id: (item, idx + 1, score) for idx, (item, score) in enumerate(semantic_results)}
+        semantic_ranks = {
+            item.id: (item, idx + 1, score) for idx, (item, score) in enumerate(semantic_results)
+        }
 
         all_item_ids = set(lexical_ranks.keys()) | set(semantic_ranks.keys())
         fused = []
@@ -58,16 +62,18 @@ class ReciprocalRankFusion(FusionStrategy):
                 semantic_rank = rank
                 semantic_score = score
 
-            fused.append((
-                item,
-                {
-                    "rrf_score": rrf_score,
-                    "lexical_rank": lexical_rank,
-                    "semantic_rank": semantic_rank,
-                    "lexical_score": lexical_score,
-                    "semantic_score": semantic_score,
-                }
-            ))
+            fused.append(
+                (
+                    item,
+                    {
+                        "rrf_score": rrf_score,
+                        "lexical_rank": lexical_rank,
+                        "semantic_rank": semantic_rank,
+                        "lexical_score": lexical_score,
+                        "semantic_score": semantic_score,
+                    },
+                )
+            )
 
         # Sort by RRF score descending
         fused.sort(key=lambda x: x[1]["rrf_score"], reverse=True)
@@ -81,22 +87,13 @@ class WeightedReRanker:
     - Source reliability bonus
     - Document freshness/recency bonus
     """
-    def __init__(
-        self,
-        weights: dict | None = None
-    ) -> None:
+
+    def __init__(self, weights: dict | None = None) -> None:
         # Default weights
-        self.weights = weights or {
-            "rrf": 0.4,
-            "semantic": 0.3,
-            "recency": 0.15,
-            "source": 0.15
-        }
+        self.weights = weights or {"rrf": 0.4, "semantic": 0.3, "recency": 0.15, "source": 0.15}
 
     def re_rank(
-        self,
-        fused_results: list[tuple[KnowledgeItem, dict]],
-        **kwargs
+        self, fused_results: list[tuple[KnowledgeItem, dict]], **kwargs
     ) -> list[tuple[KnowledgeItem, float, dict]]:
         """
         Applies weighted scoring to fused results.
@@ -108,13 +105,13 @@ class WeightedReRanker:
 
         for item, info in fused_results:
             # 1. RRF score component (normalized to roughly 0-1)
-            # RRF score max possible is 2 * (1 / (60 + 1)) = ~0.032. Let's normalize it to 0-1 by dividing by 0.033
+            # RRF score max possible is 2 * (1 / (60 + 1)) = ~0.032. Let's normalize it to 0-1 by dividing by 0.033  # noqa: E501
             norm_rrf = min(info["rrf_score"] / 0.033, 1.0)
 
             # 2. Semantic score component (already cosine similarity, typically 0-1)
             semantic_score = info["semantic_score"]
 
-            # 3. Recency score component (0 to 1 based on age, exponential decay or linear over 30 days)
+            # 3. Recency score component (0 to 1 based on age, exponential decay or linear over 30 days)  # noqa: E501
             age_days = (now - item.updated_time.replace(tzinfo=UTC)).days
             age_days = max(0, age_days)
             recency_score = max(0.0, 1.0 - (age_days / 30.0))  # 1.0 at day 0, 0.0 at day 30+
@@ -130,16 +127,16 @@ class WeightedReRanker:
 
             # Compute final weighted score
             final_score = (
-                self.weights.get("rrf", 0.4) * norm_rrf +
-                self.weights.get("semantic", 0.3) * semantic_score +
-                self.weights.get("recency", 0.15) * recency_score +
-                self.weights.get("source", 0.15) * source_score
+                self.weights.get("rrf", 0.4) * norm_rrf
+                + self.weights.get("semantic", 0.3) * semantic_score
+                + self.weights.get("recency", 0.15) * recency_score
+                + self.weights.get("source", 0.15) * source_score
             )
 
             # Build explainability reasons
             reasons = []
             matching_fields = []
-            
+
             if info["lexical_rank"]:
                 reasons.append(f"Keyword match (Lexical Rank: {info['lexical_rank']})")
                 matching_fields.append("title")
@@ -160,7 +157,7 @@ class WeightedReRanker:
                 "recency_score": recency_score,
                 "source_score": source_score,
                 "matching_fields": list(set(matching_fields)),
-                "reasons": reasons
+                "reasons": reasons,
             }
 
             re_ranked.append((item, final_score, explanation))

@@ -80,11 +80,11 @@ class SearchService:
         """
         Search using both keyword and semantic methods, merge via RRF, and re-rank with custom weights.
         Supports caching and tracks performance analytics.
-        """
+        """  # noqa: E501
         start_time = time.time()
         cache_key = None
         redis = None
-        
+
         # 1. Cache Lookup
         if q and q.strip():
             params = {
@@ -101,19 +101,19 @@ class SearchService:
                 "offset": offset,
                 "similarity_threshold": similarity_threshold,
                 "top_k": top_k,
-                "ranking_weights": ranking_weights
+                "ranking_weights": ranking_weights,
             }
             params_str = json.dumps(params, sort_keys=True)
             h = hashlib.sha256(params_str.encode("utf-8")).hexdigest()
             cache_key = f"knowwhy:search_cache:{h}"
-            
+
             try:
                 redis = create_redis_client()
                 cached_data = await redis.get(cache_key)
                 if cached_data:
                     await redis.incr("knowwhy:search_analytics:cache_hits")
                     await redis.incr("knowwhy:search_analytics:query_count")
-                    
+
                     data = json.loads(cached_data)
                     latency_ms = (time.time() - start_time) * 1000.0
                     await redis.incrbyfloat("knowwhy:search_analytics:total_latency_ms", latency_ms)
@@ -183,43 +183,40 @@ class SearchService:
             )
             results = []
             for item, score in items_tuples:
-                results.append({
-                    "item": {
-                        "id": str(item.id),
-                        "organization_id": str(item.organization_id),
-                        "project_id": str(item.project_id),
-                        "source": item.source,
-                        "source_entity_id": item.source_entity_id,
-                        "entity_type": item.entity_type,
-                        "title": item.title,
-                        "description": item.description,
-                        "content": item.content,
-                        "url": item.url,
-                        "author": item.author,
-                        "created_time": item.created_time.isoformat(),
-                        "updated_time": item.updated_time.isoformat(),
-                        "tags": item.tags,
-                        "status": item.status,
-                    },
-                    "score": score,
-                    "confidence": 0.5,
-                    "match_type": "lexical",
-                    "explanation": {
-                        "lexical_score": score,
-                        "semantic_score": 0.0,
-                        "rrf_score": 0.0,
-                        "recency_score": 1.0,
-                        "source_score": 0.5,
-                        "matching_fields": ["title"],
-                        "reasons": ["Default listing (recency ordered)"]
+                results.append(
+                    {
+                        "item": {
+                            "id": str(item.id),
+                            "organization_id": str(item.organization_id),
+                            "project_id": str(item.project_id),
+                            "source": item.source,
+                            "source_entity_id": item.source_entity_id,
+                            "entity_type": item.entity_type,
+                            "title": item.title,
+                            "description": item.description,
+                            "content": item.content,
+                            "url": item.url,
+                            "author": item.author,
+                            "created_time": item.created_time.isoformat(),
+                            "updated_time": item.updated_time.isoformat(),
+                            "tags": item.tags,
+                            "status": item.status,
+                        },
+                        "score": score,
+                        "confidence": 0.5,
+                        "match_type": "lexical",
+                        "explanation": {
+                            "lexical_score": score,
+                            "semantic_score": 0.0,
+                            "rrf_score": 0.0,
+                            "recency_score": 1.0,
+                            "source_score": 0.5,
+                            "matching_fields": ["title"],
+                            "reasons": ["Default listing (recency ordered)"],
+                        },
                     }
-                })
-            output = {
-                "results": results,
-                "total": total,
-                "limit": limit,
-                "offset": offset
-            }
+                )
+            output = {"results": results, "total": total, "limit": limit, "offset": offset}
             if q and q.strip():
                 await self._add_recent_search(user_id, project_id, q.strip())
             return output
@@ -250,44 +247,41 @@ class SearchService:
 
             confidence = min(max(score, 0.0), 1.0)
 
-            results.append({
-                "item": {
-                    "id": str(item.id),
-                    "organization_id": str(item.organization_id),
-                    "project_id": str(item.project_id),
-                    "source": item.source,
-                    "source_entity_id": item.source_entity_id,
-                    "entity_type": item.entity_type,
-                    "title": item.title,
-                    "description": item.description,
-                    "content": item.content,
-                    "url": item.url,
-                    "author": item.author,
-                    "created_time": item.created_time.isoformat(),
-                    "updated_time": item.updated_time.isoformat(),
-                    "tags": item.tags,
-                    "status": item.status,
-                },
-                "score": float(score),
-                "confidence": float(confidence),
-                "match_type": match_type,
-                "explanation": {
-                    "lexical_score": float(lex_score),
-                    "semantic_score": float(sem_score),
-                    "rrf_score": float(explain["rrf_score"]),
-                    "recency_score": float(explain["recency_score"]),
-                    "source_score": float(explain["source_score"]),
-                    "matching_fields": explain["matching_fields"],
-                    "reasons": explain["reasons"]
+            results.append(
+                {
+                    "item": {
+                        "id": str(item.id),
+                        "organization_id": str(item.organization_id),
+                        "project_id": str(item.project_id),
+                        "source": item.source,
+                        "source_entity_id": item.source_entity_id,
+                        "entity_type": item.entity_type,
+                        "title": item.title,
+                        "description": item.description,
+                        "content": item.content,
+                        "url": item.url,
+                        "author": item.author,
+                        "created_time": item.created_time.isoformat(),
+                        "updated_time": item.updated_time.isoformat(),
+                        "tags": item.tags,
+                        "status": item.status,
+                    },
+                    "score": float(score),
+                    "confidence": float(confidence),
+                    "match_type": match_type,
+                    "explanation": {
+                        "lexical_score": float(lex_score),
+                        "semantic_score": float(sem_score),
+                        "rrf_score": float(explain["rrf_score"]),
+                        "recency_score": float(explain["recency_score"]),
+                        "source_score": float(explain["source_score"]),
+                        "matching_fields": explain["matching_fields"],
+                        "reasons": explain["reasons"],
+                    },
                 }
-            })
+            )
 
-        output = {
-            "results": results,
-            "total": total,
-            "limit": limit,
-            "offset": offset
-        }
+        output = {"results": results, "total": total, "limit": limit, "offset": offset}
 
         # Save query to user search history
         if q and q.strip():
@@ -302,7 +296,9 @@ class SearchService:
             await redis.incr("knowwhy:search_analytics:cache_misses")
             await redis.incrbyfloat("knowwhy:search_analytics:total_latency_ms", latency_ms)
             if similarity_count > 0:
-                await redis.incrbyfloat("knowwhy:search_analytics:total_similarity", avg_similarity / similarity_count)
+                await redis.incrbyfloat(
+                    "knowwhy:search_analytics:total_similarity", avg_similarity / similarity_count
+                )
                 await redis.incr("knowwhy:search_analytics:similarity_count")
 
             if cache_key:
@@ -384,4 +380,3 @@ class SearchService:
             await redis.close()
         except Exception:
             pass
-

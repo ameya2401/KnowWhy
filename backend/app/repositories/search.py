@@ -13,7 +13,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.knowledge import KnowledgeItem, KnowledgeChunk
+from app.models.knowledge import KnowledgeChunk, KnowledgeItem
 
 
 class SearchRepository:
@@ -250,16 +250,20 @@ class SearchRepository:
         """
         # Cosine distance = embedding <=> query_embedding
         # Similarity = 1.0 - cosine_distance
-        
+
         # Check bind dialect to support SQLite fallback in tests
         bind = self.session.bind
         if bind and bind.dialect.name != "postgresql":
             # Fallback for sqlite / mock in unit tests
             # Let's just retrieve some knowledge items
-            stmt = select(KnowledgeItem).where(
-                KnowledgeItem.project_id == project_id,
-                KnowledgeItem.status == (status or "active")
-            ).limit(limit)
+            stmt = (
+                select(KnowledgeItem)
+                .where(
+                    KnowledgeItem.project_id == project_id,
+                    KnowledgeItem.status == (status or "active"),
+                )
+                .limit(limit)
+            )
             res = await self.session.execute(stmt)
             items = res.scalars().all()
             return [(item, 0.8) for item in items]
@@ -267,36 +271,35 @@ class SearchRepository:
         # PostgreSQL pgvector query
         cosine_dist_expr = KnowledgeChunk.embedding.cosine_distance(query_embedding)
         similarity_expr = (1.0 - cosine_dist_expr).label("similarity")
-        
+
         stmt = (
             select(KnowledgeItem, similarity_expr)
             .join(KnowledgeChunk, KnowledgeChunk.knowledge_item_id == KnowledgeItem.id)
             .where(
-                KnowledgeItem.project_id == project_id,
-                KnowledgeItem.status == (status or "active")
+                KnowledgeItem.project_id == project_id, KnowledgeItem.status == (status or "active")
             )
         )
-        
+
         if source:
             stmt = stmt.where(KnowledgeItem.source == source)
         if entity_type:
             stmt = stmt.where(KnowledgeItem.entity_type == entity_type)
         if author:
             stmt = stmt.where(KnowledgeItem.author.ilike(f"%{author}%"))
-            
+
         # Order by similarity score descending
         stmt = stmt.order_by(sa.desc("similarity")).limit(limit)
-        
+
         res = await self.session.execute(stmt)
         rows = res.all()
-        
+
         # Deduplicate chunks pointing to the same KnowledgeItem, retaining the highest similarity
         item_scores = {}
         for item, similarity in rows:
             if similarity >= similarity_threshold:
                 if item.id not in item_scores or similarity > item_scores[item.id][1]:
                     item_scores[item.id] = (item, float(similarity))
-                    
+
         sorted_results = list(item_scores.values())
         sorted_results.sort(key=lambda x: x[1], reverse=True)
         return sorted_results

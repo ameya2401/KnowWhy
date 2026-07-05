@@ -37,9 +37,9 @@ export function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "members" | "integrations" | "knowledge" | "embeddings">(
-    "overview",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "members" | "integrations" | "knowledge" | "embeddings"
+  >("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

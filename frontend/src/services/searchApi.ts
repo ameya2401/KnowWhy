@@ -113,4 +113,3 @@ export async function triggerSearchReindex(
   });
   return response.data;
 }
-
