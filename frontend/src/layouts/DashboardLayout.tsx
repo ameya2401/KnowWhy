@@ -47,6 +47,22 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     localStorage.setItem("knowwhy:theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.key === "/" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        document.activeElement?.tagName !== "TEXTAREA"
+      ) {
+        e.preventDefault();
+        const headerSearch = document.getElementById("header-search-bar");
+        headerSearch?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
@@ -54,6 +70,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   const navItems = [
     { label: "Dashboard", icon: LayoutDashboardLink, href: "/dashboard" },
     { label: "Projects", icon: Folder, href: "/projects" },
+    { label: "Search", icon: Search, href: "/search" },
     {
       label: "Integrations",
       icon: Link2,
@@ -65,7 +82,6 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
   const futureItems = [
     { label: "AI Chat", icon: Sparkles },
-    { label: "Search", icon: Search },
     { label: "Memory", icon: Database },
     { label: "Timeline", icon: Clock },
   ];
@@ -281,6 +297,27 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                 </div>
               )}
             </div>
+
+            {/* Global Search Bar */}
+            {activeProject && (
+              <div className="hidden md:flex flex-1 max-w-xs relative mx-4">
+                <Search className="absolute left-2.5 top-2.5 size-3.5 text-muted-foreground" />
+                <input
+                  id="header-search-bar"
+                  type="text"
+                  placeholder="Search knowledge... (/)"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const value = (e.target as HTMLInputElement).value;
+                      navigate(`/search?q=${encodeURIComponent(value)}`);
+                      (e.target as HTMLInputElement).value = "";
+                      (e.target as HTMLInputElement).blur();
+                    }
+                  }}
+                  className="h-9 w-full rounded-md border border-input bg-card pl-8 pr-3 text-xs outline-none focus:ring-1 focus:ring-primary shadow-sm"
+                />
+              </div>
+            )}
 
             {/* Header Right Actions */}
             <div className="flex items-center gap-2 shrink-0">

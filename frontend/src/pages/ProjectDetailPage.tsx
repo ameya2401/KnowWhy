@@ -11,6 +11,7 @@ import {
   Shield,
   Link2,
   Database,
+  Cpu,
 } from "lucide-react";
 
 import { useAuth } from "@/auth/AuthContext";
@@ -28,6 +29,7 @@ import {
 import type { Project, ProjectMember, ProjectRole } from "@/projects/types";
 import { ProjectIntegrations } from "@/components/ProjectIntegrations";
 import { KnowledgeBrowser } from "@/components/KnowledgeBrowser";
+import { EmbeddingControls } from "@/components/EmbeddingControls";
 
 export function ProjectDetailPage() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -35,9 +37,9 @@ export function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [members, setMembers] = useState<ProjectMember[]>([]);
-  const [activeTab, setActiveTab] = useState<"overview" | "members" | "integrations" | "knowledge">(
-    "overview",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "members" | "integrations" | "knowledge" | "embeddings"
+  >("overview");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -254,6 +256,16 @@ export function ProjectDetailPage() {
           >
             <Database className="size-4" /> Knowledge Base
           </button>
+          <button
+            onClick={() => setActiveTab("embeddings")}
+            className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeTab === "embeddings"
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            <Cpu className="size-4" /> Semantic Indexing
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -457,6 +469,14 @@ export function ProjectDetailPage() {
 
         {activeTab === "knowledge" && projectId && accessToken && (
           <KnowledgeBrowser projectId={projectId} accessToken={accessToken} />
+        )}
+
+        {activeTab === "embeddings" && projectId && accessToken && (
+          <EmbeddingControls
+            projectId={projectId}
+            accessToken={accessToken}
+            isMaintainer={isMaintainer}
+          />
         )}
       </div>
     </DashboardLayout>

@@ -2,6 +2,61 @@
 
 ## Completed Milestones
 
+### M13 Hybrid Search Engine
+
+- Status: Completed
+- Completion Date: 2026-07-05
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend hybrid search pipeline combining keyword (lexical) and embeddings (semantic) methods.
+- Implemented Reciprocal Rank Fusion (RRF) and dynamic scoring re-ranking based on custom/configurable weights.
+- Implemented `/search/hybrid`, `/search/explain/{item_id}`, and `/search/statistics` REST API routes with workspace & project member visibility protection.
+- Frontend search page toggle supporting dual keyword search and AI hybrid search modes.
+- Frontend search result list displaying matching confidence percentage metrics and score relevance indicators.
+- Frontend search explanation card inside side details drawer detailing rank, lexical score, similarity score, and list of matched fields and reason descriptions.
+- Frontend diagnostics analytics panel displaying search diagnostics (indexed size, latency, cache rate, average similarity) and active reindexing triggers.
+- Fully verified backend pytest suite covering retrieval deduplication, rank fusion correctness, search latency, and organization isolation.
+- Clean ESLint, typecheck, and Vite production builds.
+
+### M12 Semantic Indexing & Controls
+
+- Status: Completed
+- Completion Date: 2026-07-04
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Backend database schema implementation for `knowledge_chunks` storing text segments and 1536-dimensional L2 normalized embeddings.
+- Backend `ChunkingEngine` and `EmbeddingService` generating token-overlapping chunks and computing vectors.
+- Background asynchronous queue worker `EmbeddingQueueService` managing indexing (idle, running, paused, completed, failed states), polling progress, and failed retry logs.
+- FastAPI REST API controllers under `/embeddings` for start, pause, resume, reindex, status, and statistics.
+- Frontend API service wrapper (`embeddingsApi.ts`) and TypeScript types (`embeddings.ts`).
+- Frontend responsive, premium control dashboard (`EmbeddingControls.tsx`) embedded within Project Details Page tabs, supporting controls (Start, Pause, Resume, Reindex), progress bars, queue sizes, and vector DB diagnostics.
+- Pytest test coverage (46 tests total) validating both services and API controller routing.
+
+### M11 Frontend Search Interface
+
+- Status: Completed
+- Completion Date: 2026-07-04
+- Build Status: Passed
+- Test Status: Passed
+- Lint Status: Passed
+- Formatting Status: Passed
+
+Validation completed:
+- Frontend advanced search page (`SearchPage.tsx`) featuring keyword input, autocomplete suggestions, and recent searches history.
+- Advanced filters sidebar with source, type, author selectors, tag pills, date ranges, and sorting configuration options.
+- Results feed showcasing scores, highlighted match terms, titles, descriptions, and authors.
+- Detail drawer sidebar demonstrating complete properties, body texts, JSON metadata, and navigable graph relationships traversal.
+- Global header search bar with hotkey `/` listener for fast keyboard navigation.
+- All code compilation tests, ESLint lint rules, and Vite production builds passing cleanly.
+
 ### M10 KnowWhy Knowledge Engine
 
 - Status: Completed
