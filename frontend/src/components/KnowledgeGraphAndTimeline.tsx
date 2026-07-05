@@ -17,7 +17,7 @@ import {
   Maximize2,
 } from "lucide-react";
 import { graphApi } from "../services/graphApi";
-import { GraphNode, GraphEdge, TimelineEvent } from "../types/graph";
+import { GraphNode, GraphEdge, TimelineEvent, EntityRelationshipDetail } from "../types/graph";
 
 // Colors for node types
 const NODE_COLORS: Record<string, { bg: string; border: string; glow: string; text: string }> = {
@@ -118,7 +118,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
   // Detailed Node Inspector
   const [inspectorData, setInspectorData] = useState<{
     node: GraphNode;
-    relationships: unknown[];
+    relationships: EntityRelationshipDetail[];
   } | null>(null);
   const [inspectorLoading, setInspectorLoading] = useState(false);
 
@@ -1079,7 +1079,7 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
 
                     {/* Metadata attributes list */}
                     <div className="bg-slate-900/40 p-3 rounded-lg border border-slate-850 space-y-2.5 text-xs text-slate-400">
-                      {inspectorData.node.author && (
+                      {Boolean(inspectorData.node.author) && (
                         <div className="flex justify-between">
                           <span className="text-slate-550">Author:</span>
                           <span className="text-slate-300 font-medium">
@@ -1087,31 +1087,31 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                           </span>
                         </div>
                       )}
-                      {inspectorData.node.metadata?.created_time && (
+                      {Boolean(inspectorData.node.metadata?.created_time) && (
                         <div className="flex justify-between">
                           <span className="text-slate-550">Created:</span>
                           <span className="text-slate-300 font-mono text-[10px]">
                             {new Date(
-                              inspectorData.node.metadata.created_time,
+                              inspectorData.node.metadata!.created_time as string,
                             ).toLocaleDateString()}
                           </span>
                         </div>
                       )}
-                      {inspectorData.node.metadata?.updated_time && (
+                      {Boolean(inspectorData.node.metadata?.updated_time) && (
                         <div className="flex justify-between">
                           <span className="text-slate-550">Updated:</span>
                           <span className="text-slate-300 font-mono text-[10px]">
                             {new Date(
-                              inspectorData.node.metadata.updated_time,
+                              inspectorData.node.metadata!.updated_time as string,
                             ).toLocaleDateString()}
                           </span>
                         </div>
                       )}
-                      {inspectorData.node.url && (
+                      {Boolean(inspectorData.node.url) && (
                         <div className="flex justify-between items-center pt-1 border-t border-slate-950/40">
                           <span className="text-slate-550">Original Link:</span>
                           <a
-                            href={inspectorData.node.url}
+                            href={inspectorData.node.url || undefined}
                             target="_blank"
                             rel="noreferrer"
                             className="flex items-center space-x-1 text-indigo-400 hover:text-indigo-300"
@@ -1124,25 +1124,25 @@ export const KnowledgeGraphAndTimeline: React.FC<KnowledgeGraphAndTimelineProps>
                     </div>
 
                     {/* Description Text */}
-                    {inspectorData.node.metadata?.description && (
+                    {Boolean(inspectorData.node.metadata?.description) && (
                       <div className="space-y-1">
                         <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                           Description
                         </h4>
                         <div className="text-xs text-slate-300 leading-relaxed bg-slate-900/10 p-2.5 rounded-lg border border-slate-850/60 max-h-24 overflow-y-auto scrollbar-thin">
-                          {inspectorData.node.metadata.description}
+                          {String(inspectorData.node.metadata!.description)}
                         </div>
                       </div>
                     )}
 
                     {/* Content Detail (e.g. Commit content / notions body) */}
-                    {inspectorData.node.metadata?.content && (
+                    {Boolean(inspectorData.node.metadata?.content) && (
                       <div className="space-y-1">
                         <h4 className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                           Indexed Content
                         </h4>
                         <pre className="text-[10px] font-mono text-slate-400 p-2.5 bg-slate-950/60 rounded-lg border border-slate-900 overflow-x-auto max-h-36 overflow-y-auto scrollbar-thin leading-normal">
-                          {inspectorData.node.metadata.content}
+                          {String(inspectorData.node.metadata!.content)}
                         </pre>
                       </div>
                     )}
